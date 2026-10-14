@@ -2157,6 +2157,22 @@ body {
   color: var(--text-title);
 }
 
+/* Dialog Modal Reset: Eliminates browser native black border and padding */
+dialog.modal-dialog {
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
+  overflow: visible;
+  margin: auto;
+}
+
+dialog.modal-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
 /* Modal Add Employee */
 .ems-modal-card {
   max-width: 520px;

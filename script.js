@@ -1131,6 +1131,7 @@ function initDashboardPage() {
   const countBadge = document.getElementById('filter-result-count');
   const sidebarEmpCount = document.getElementById('sidebar-emp-count');
   const kpiTotalEmp = document.getElementById('kpi-total-emp');
+  const kpiTotalStaffVal = document.getElementById('kpi-total-staff-val');
 
   function saveEmployees() {
     localStorage.setItem('nexus_ems_employees', JSON.stringify(employees));
@@ -1209,6 +1210,7 @@ function initDashboardPage() {
     if (countBadge) countBadge.innerHTML = `Showing <strong>${filtered.length}</strong> of ${employees.length} employees`;
     if (sidebarEmpCount) sidebarEmpCount.textContent = employees.length;
     if (kpiTotalEmp) kpiTotalEmp.textContent = employees.length;
+    if (kpiTotalStaffVal) kpiTotalStaffVal.textContent = `${employees.length} Employees`;
     updateDashboardKpis();
   }
 
@@ -1440,11 +1442,15 @@ function initDashboardPage() {
     if (!hrAttendanceTableBody) return;
     hrAttendanceTableBody.innerHTML = '';
 
+    const displayEmployees = (authRole === 'MANAGER')
+      ? employees.filter(e => e.dept === (localStorage.getItem('auth_user_dept') || 'Engineering'))
+      : employees;
+
     if (hrStatCheckedin) {
-      hrStatCheckedin.textContent = `${employees.length} Staff`;
+      hrStatCheckedin.textContent = `${displayEmployees.length} Staff`;
     }
 
-    employees.forEach(emp => {
+    displayEmployees.forEach(emp => {
       const tr = document.createElement('tr');
       const isLate = emp.attendanceStatus === 'Late Arrival';
       const isDeficit = emp.overtime && emp.overtime.includes('Deficit');
@@ -1526,7 +1532,11 @@ function initDashboardPage() {
       }
     }
 
-    employees.forEach(emp => {
+    const displayAppraiseEmployees = (authRole === 'MANAGER')
+      ? employees.filter(e => e.dept === (localStorage.getItem('auth_user_dept') || 'Engineering'))
+      : employees;
+
+    displayAppraiseEmployees.forEach(emp => {
       const appr = calculateEmployeeAppraisal(emp);
       const tr = document.createElement('tr');
 
@@ -2495,6 +2505,12 @@ function initDashboardPage() {
       const end = document.getElementById('self-leave-end').value;
       const reason = document.getElementById('self-leave-reason').value.trim();
 
+      if (start && end && new Date(start) > new Date(end)) {
+        sound.playPop(450);
+        showToast('End date cannot be earlier than start date.', 'info');
+        return;
+      }
+
       sound.playSuccess();
 
       // Add to personal history
@@ -2972,6 +2988,16 @@ function initDashboardPage() {
       showToast('✓ Organization policy & system rules updated successfully!', 'success');
     });
   }
+
+  // D. Native Backdrop Dismissal for Dialog Modals
+  document.querySelectorAll('dialog.modal-dialog').forEach(dlg => {
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) {
+        sound.playPop(500, 0.05);
+        dlg.close();
+      }
+    });
+  });
 }
 
 // Utility Helper
