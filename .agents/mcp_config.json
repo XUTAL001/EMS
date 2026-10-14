@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "note": "Official Vercel MCP server for deployments, domain management, project inspection, logs, and env vars."
+    }
+  }
+}
