@@ -1040,11 +1040,21 @@ function initDashboardPage() {
         portalRoleBadge.className = 'ems-badge emp-badge';
       }
 
-      const empName = localStorage.getItem('auth_user_name') || 'Sophia Clark';
-      const empRole = localStorage.getItem('auth_user_title') || 'Lead Frontend Engineer';
-      const empDept = localStorage.getItem('auth_user_dept') || 'Engineering';
-      const empId = localStorage.getItem('auth_user_id') || 'EMP-1002';
-      const empAvatar = localStorage.getItem('auth_user_avatar') || 'SC';
+      let empName = localStorage.getItem('auth_user_name') || 'Sophia Clark';
+      let empRole = localStorage.getItem('auth_user_title');
+      let empDept = localStorage.getItem('auth_user_dept') || 'Engineering';
+      let empId = localStorage.getItem('auth_user_id') || 'EMP-1002';
+      let empAvatar = localStorage.getItem('auth_user_avatar');
+
+      // Prevent stale HR Administrator session credentials from showing on Employee Portal
+      if (!empRole || empRole === 'HR Administrator' || empRole === 'HR Manager' || empRole.includes('HR')) {
+        empRole = 'Lead Frontend Engineer';
+        localStorage.setItem('auth_user_title', empRole);
+      }
+      if (!empAvatar || empAvatar === 'T') {
+        empAvatar = 'SC';
+        localStorage.setItem('auth_user_avatar', empAvatar);
+      }
 
       if (dashUserName) dashUserName.textContent = empName;
       if (dashUserRole) dashUserRole.textContent = empRole;
@@ -2251,7 +2261,13 @@ function initDashboardPage() {
     if (empKpiTodayStatus) empKpiTodayStatus.innerHTML = `<span>In: ${escapeHtml(currentEmp.inTime || '09:12 AM')}</span> • Out: ${escapeHtml(currentEmp.outTime || '05:45 PM')}`;
     if (empKpiBonusVal) empKpiBonusVal.textContent = `+$${appr.bonusAmount.toLocaleString()}`;
     if (empKpiTierTag) empKpiTierTag.textContent = `${appr.tierName} (${appr.perfScore}%)`;
-    if (empKpiIncVal) empKpiIncVal.textContent = `+${appr.incPercent}%`;
+    const displayInc = (typeof appr.incPercent === 'number' && appr.incPercent > 0) ? appr.incPercent : 15;
+    if (empKpiIncVal) empKpiIncVal.textContent = `+${displayInc}%`;
+    const empKpiIncAmount = document.getElementById('emp-kpi-inc-amount');
+    if (empKpiIncAmount) {
+      const displayAmt = (typeof appr.incAmount === 'number' && appr.incAmount > 0) ? appr.incAmount : Math.round((appr.baseSalary || 8450) * (displayInc / 100));
+      empKpiIncAmount.textContent = `+$${displayAmt.toLocaleString()}/mo`;
+    }
 
     renderEmployeePayrollData();
 
