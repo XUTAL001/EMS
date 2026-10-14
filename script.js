@@ -1209,7 +1209,7 @@ function initDashboardPage() {
 
     if (countBadge) countBadge.innerHTML = `Showing <strong>${filtered.length}</strong> of ${employees.length} employees`;
     if (sidebarEmpCount) sidebarEmpCount.textContent = employees.length;
-    if (kpiTotalEmp) kpiTotalEmp.textContent = employees.length;
+    if (kpiTotalEmp && !document.getElementById('donut-total-val')) kpiTotalEmp.textContent = employees.length;
     if (kpiTotalStaffVal) kpiTotalStaffVal.textContent = `${employees.length} Employees`;
     updateDashboardKpis();
   }
@@ -1248,10 +1248,10 @@ function initDashboardPage() {
     if (kpiTotalTeams) kpiTotalTeams.textContent = `${uniqueTeams.length} Teams`;
     if (kpiTeamsList) kpiTeamsList.textContent = uniqueTeams.join(', ');
 
-    if (kpiPresentCount) kpiPresentCount.textContent = `${presentStaff} Present`;
+    if (kpiPresentCount && !document.getElementById('donut-total-val')) kpiPresentCount.textContent = `${presentStaff} Present`;
     if (kpiAttendancePct) kpiAttendancePct.textContent = `${presentRate}%`;
 
-    if (kpiLeaveCount) kpiLeaveCount.textContent = `${absentStaff} Absent`;
+    if (kpiLeaveCount && !document.getElementById('donut-total-val')) kpiLeaveCount.textContent = `${absentStaff} Absent`;
     if (kpiLeaveDesc) kpiLeaveDesc.textContent = `${absentStaff} Approved Leave • 0 Unexcused`;
 
     if (sidebarEmpCount) sidebarEmpCount.textContent = totalStaff;
