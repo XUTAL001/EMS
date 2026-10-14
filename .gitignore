@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & secrets
+.env
+*.log
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Dynamic runtime database storage (preserve schema.sql)
+database/nexus_ems_data.json
+storage/uploads/*
+!storage/uploads/.gitkeep

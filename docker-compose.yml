@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  nexus-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexus_ems_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_NAME=NexusEMS
+      - APP_ENV=production
+      - APP_PORT=8080
+      - DB_CONNECTION=mysql
+      - DB_HOST=nexus-db
+      - DB_PORT=3306
+      - DB_DATABASE=nexus_ems
+      - DB_USERNAME=ems_user
+      - DB_PASSWORD=Secret_EMS_Pass_2026!
+    depends_on:
+      nexus-db:
+        condition: service_healthy
+    volumes:
+      - storage_uploads:/app/storage/uploads
+      - db_data:/app/database
+
+  nexus-db:
+    image: mysql:8.0
+    container_name: nexus_ems_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Root_Secure_Pass_2026!
+      MYSQL_DATABASE: nexus_ems
+      MYSQL_USER: ems_user
+      MYSQL_PASSWORD: Secret_EMS_Pass_2026!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_storage:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRoot_Secure_Pass_2026!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  storage_uploads:
+  db_data:
+  mysql_storage:

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusEMS • Performance-Based Bonus & Salary Increment</title>
+  <meta name="description" content="Dedicated Performance Appraisal Board, Work-Hours Bonus Calculator, and Salary Increment Engine">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Global Header -->
+  <header class="dash-topbar" id="dash-header">
+    <div class="dash-brand-area">
+      <button id="sidebar-toggle" class="neu-circle-btn menu-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="dash-brand">
+        <div class="dash-brand-icon ems-brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>EMS</span></span>
+          <span class="ems-badge" id="portal-role-badge">HR PORTAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Staff Search Bar (HR View) / Employee Self-Search -->
+    <div class="dash-search-wrap" id="top-search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search appraisal evaluations or staff... (/)">
+      <span class="search-kbd">/</span>
+    </div>
+
+    <!-- Right Topbar Controls -->
+    <div class="dash-actions">
+      <!-- Live Clock -->
+      <div class="dash-clock-badge">
+        <span class="pulse-dot"></span>
+        <span id="dash-clock">10:42 AM</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Notifications -->
+      <div class="notifications-wrapper">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot" id="top-notif-dot"></span>
+        </button>
+
+        <!-- Interactive Notifications Dropdown -->
+        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="notif-title-wrap">
+              <h4>Notifications</h4>
+              <span class="notif-count-badge" id="dropdown-notif-count">4 New</span>
+            </div>
+            <button class="notif-mark-read-btn" id="btn-mark-all-read">Mark all as read</button>
+          </div>
+          <div class="notifications-list" id="notifications-list-container">
+            <div class="notif-item unread" data-id="1">
+              <div class="notif-icon-circle payroll">💰</div>
+              <div class="notif-body">
+                <div class="notif-body-title">September 2026 Salary Disbursed</div>
+                <div class="notif-body-desc">Net salary of $8,450.00 has been credited to your Bank of America account (ending 4892).</div>
+                <div class="notif-body-time">Today • 09:00 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="2">
+              <div class="notif-icon-circle leave">📅</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Leave Request Approved</div>
+                <div class="notif-body-desc">Your 3-day Medical Leave application for Oct 18 - Oct 20 has been approved by HR Admin.</div>
+                <div class="notif-body-time">Yesterday • 04:30 PM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="3">
+              <div class="notif-icon-circle performance">🏆</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Performance Appraisal Complete</div>
+                <div class="notif-body-desc">Congratulations! You achieved a 98% rating (Tier A) with a +15% salary increment recommendation.</div>
+                <div class="notif-body-time">2 days ago • 11:15 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="4">
+              <div class="notif-icon-circle attendance">⏱️</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Shift Attendance Logged</div>
+                <div class="notif-body-desc">Today's clock-in verified at 09:12 AM. Shift target of 8 hours is active.</div>
+                <div class="notif-body-time">Today • 09:12 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile (Dynamic for HR or Employee) -->
+      <div class="user-profile-menu">
+        <div class="user-avatar-wrap">
+          <div class="tanvir-avatar-badge" id="top-user-avatar">T</div>
+          <span class="avatar-online-dot"></span>
+        </div>
+        <div class="user-info-text">
+          <span class="user-name" id="dash-user-name">Tanvir</span>
+          <span class="user-role" id="dash-user-role">HR Administrator</span>
+        </div>
+        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account" aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="dash-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="sidebar-nav">
+      <!-- HR Menu Items -->
+      <nav class="sidebar-menu hidden" id="hr-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="sidebar-category-header">Main</div>
+
+        <a href="employees.html" class="sidebar-item" id="nav-hr-employees">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Employees</span>
+          <span class="menu-counter highlight" id="sidebar-emp-count">13</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-hr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-hr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Management</span>
+          <span class="menu-counter" id="sidebar-pending-leaves">3</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-hr-payroll">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>Payroll &amp; Salary</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item active" id="nav-hr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-recruitment">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+          <span>Recruitment</span>
+          <span class="menu-counter" id="sidebar-recruitment-count">4</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-reports">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports &amp; Analytics</span>
+        </a>
+
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Employee Menu Items (7 Core Modules) -->
+      <nav class="sidebar-menu hidden" id="employee-sidebar-menu">
+        <a href="employee-dashboard.html" class="sidebar-item" id="nav-emp-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>My Dashboard</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-emp-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>My Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-emp-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>My Leaves</span>
+          <span class="menu-counter" id="sidebar-emp-leave-counter">14d</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item active" id="nav-emp-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>My Performance</span>
+          <span class="menu-counter highlight">98%</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-emp-payslips">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>My Payslips</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-notif-count">4</span>
+        </a>
+      </nav>
+
+      <!-- Manager Menu Items (NO PAYROLL) -->
+      <nav class="sidebar-menu hidden" id="manager-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="dashboard.html#manager-team-section" class="sidebar-item" id="nav-mgr-team">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>My Team</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-team-count">5</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-mgr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Team Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-mgr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Requests</span>
+          <span class="menu-counter" id="sidebar-mgr-leave-count">2</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item active" id="nav-mgr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance Reviews</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-notif-count">3</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Status Card -->
+      <div class="sidebar-storage-card">
+        <span class="storage-title" id="sidebar-card-label">Organization Capacity</span>
+        <span class="storage-meta" id="sidebar-plan-label">Nexus Enterprise Active</span>
+        <div class="storage-track">
+          <div class="storage-fill storage-fill-78"></div>
+        </div>
+      </div>
+
+      <!-- Sign Out -->
+      <a href="index.html" id="btn-sidebar-logout" class="sidebar-item logout" title="Sign out to switch between HR and Employee portals">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </a>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="dash-content">
+      
+      <!-- ================================================================== -->
+      <!-- VIEW 1: HR PERFORMANCE-BASED BONUS & INCREMENT APPRAISAL BOARD     -->
+      <!-- ================================================================== -->
+      <div id="view-hr-portal" class="portal-view-container hidden">
+        <section class="dash-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge">NEXUS EMS • COMPENSATION APPRAISAL ENGINE</span>
+            <h1 class="hero-title">Performance-Based Bonus & Salary Increment Board</h1>
+            <p class="hero-desc">Bonus amounts and salary increases are calculated dynamically from work hours logged and sprint deliverables completed. High performers unlock up to 20% bonus and 15% increment.</p>
+          </div>
+          <div class="hero-actions-col">
+            <a href="dashboard.html" class="neu-btn dash-action-btn secondary">
+              <span>&larr; Back to Directory</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- Appraisal KPI Cards -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Bonus Pool</span>
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">$18,450.00</div>
+            <div class="kpi-trend positive"><span>Allocated</span> based on logged hours</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Avg Recommended Raise</span>
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">+11.4% Avg</div>
+            <div class="kpi-trend positive"><span>Top performers:</span> +15% to +20%</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Tier A Performers</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">4 Staff</div>
+            <div class="kpi-trend positive"><span>Score &ge; 90%</span> unlocked max rewards</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Cycle Status</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">Active Q4</div>
+            <div class="kpi-trend neutral"><span>Dynamic</span> auto-evaluation</div>
+          </div>
+        </section>
+
+        <!-- Appraisal Board Table -->
+        <section class="dash-widget mt-6" id="hr-appraisal-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Employee Performance & Compensation Appraisal Board</h2>
+              <span class="widget-subtitle">Bonus amounts and salary increment recommendations calculated dynamically from work hours & deliverables</span>
+            </div>
+            <span class="tier-badge tier-a">Appraisal Cycle Active</span>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Base Monthly</th>
+                  <th>Hours Logged (Target 160h)</th>
+                  <th>Sprint Tasks Output</th>
+                  <th>Performance Score</th>
+                  <th>Earned Bonus ($)</th>
+                  <th>Recommended Increment (%)</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="hr-appraisal-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 2: EMPLOYEE SELF-SERVICE PERFORMANCE BONUS & INCREMENT        -->
+      <!-- ================================================================== -->
+      <div id="view-employee-portal" class="portal-view-container hidden">
+        
+        <!-- Employee Appraisal Hero Card -->
+        <section class="bonus-hero-card" id="emp-bonus-increment-section">
+          <div class="widget-header appraisal-header-spacing">
+            <div>
+              <span class="hero-badge emp-badge appraisal-badge-spacing">NEXUS EMS • COMPENSATION APPRAISAL</span>
+              <h2 class="widget-title appraisal-title">My Performance Bonus & Salary Increment</h2>
+              <span class="widget-subtitle">Real-time compensation projections based on your tracked shift duration and sprint velocity.</span>
+            </div>
+            <div class="hero-actions-col">
+              <div class="tier-badge tier-a" id="emp-tier-badge">Tier A • Top Performer</div>
+              <a href="dashboard.html" class="neu-btn dash-action-btn secondary">
+                <span>&larr; Back to Directory</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="bonus-hero-grid">
+            <div class="bonus-metric-box">
+              <span class="bonus-metric-label">Overall Performance Score</span>
+              <span class="bonus-metric-val green" id="emp-perf-score-val">98%</span>
+              <div class="appraisal-score-bar">
+                <div class="appraisal-score-fill green score-fill-98" id="emp-perf-score-fill"></div>
+              </div>
+              <span class="bonus-metric-sub">Hours (40%) + deliverables (40%) + punctuality (20%)</span>
+            </div>
+
+            <div class="bonus-metric-box">
+              <span class="bonus-metric-label">Earned Bonus (This Cycle)</span>
+              <span class="bonus-metric-val green" id="emp-bonus-amount-val">+$1,690.00</span>
+              <span class="bonus-metric-sub">20% of base salary ($8,450)</span>
+            </div>
+
+            <div class="bonus-metric-box">
+              <span class="bonus-metric-label">Projected Salary Increment</span>
+              <span class="bonus-metric-val purple" id="emp-increment-val">+15% Raise</span>
+              <span class="bonus-metric-sub" id="emp-increment-amount-sub">+$1,268.00 / month added to base</span>
+            </div>
+
+            <div class="bonus-metric-box">
+              <span class="bonus-metric-label">Monthly Work Hours Output</span>
+              <span class="bonus-metric-val blue" id="emp-hours-val">172.5 / 160 hrs</span>
+              <span class="bonus-metric-sub" id="emp-hours-sub">108% of target • +12.5 hrs Overtime</span>
+            </div>
+          </div>
+
+          <div class="demo-credential-box appraisal-hint-box">
+            <p class="demo-credential-hint appraisal-hint-text">
+              💡 <strong>How to increase your bonus & increment:</strong> Log at least 8.0 hours per shift, arrive on time before 09:30 AM, and deliver assigned sprint tasks. Maintaining Tier A (90%+) unlocks the maximum 20% performance bonus and 15% salary increment!
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Review & Adjust Appraisal (HR Portal) -->
+  <dialog id="modal-appraisal-adjust" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🏆</span>
+          <h3 id="modal-appraise-title">Review & Adjust Employee Appraisal</h3>
+        </div>
+        <button id="btn-close-appraise-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-adjust-appraisal" class="ems-modal-form">
+        <input type="hidden" id="appraise-emp-id">
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label>Employee Name</label>
+            <input type="text" id="appraise-emp-name" class="neu-input" readonly>
+          </div>
+
+          <div class="form-field">
+            <label>Base Monthly Salary ($)</label>
+            <input type="number" id="appraise-base-salary" class="neu-input" readonly>
+          </div>
+
+          <div class="form-field">
+            <label for="appraise-bonus-val">Performance Bonus ($)</label>
+            <input type="number" id="appraise-bonus-val" class="neu-input" min="0" step="50" required>
+          </div>
+
+          <div class="form-field">
+            <label for="appraise-inc-percent">Salary Increment (%)</label>
+            <input type="number" id="appraise-inc-percent" class="neu-input" min="0" max="40" step="1" required>
+          </div>
+        </div>
+
+        <div class="form-field mt-3">
+          <label for="appraise-remarks">HR Appraisal Evaluation Notes</label>
+          <textarea id="appraise-remarks" class="neu-input scratchpad-textarea" placeholder="Add specific feedback regarding hours worked, code quality, and bonus justification..." rows="2"></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-appraise" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Save & Award Compensation</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>

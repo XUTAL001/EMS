@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Nexus Technologies • Open Careers & Talent Portal</title>
+  <meta name="description" content="Explore open engineering, design, marketing, and leadership career opportunities at Nexus Technologies.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body" style="background: var(--neu-bg);">
+
+  <header class="dash-topbar" style="max-width: 1200px; margin: 1rem auto; border-radius: var(--radius-card);">
+    <div class="dash-brand-area">
+      <div class="dash-brand">
+        <div class="dash-brand-icon ems-brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>CAREERS</span></span>
+          <span class="ems-badge">WE'RE HIRING</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-actions">
+      <a href="index.html" class="neu-btn dash-action-btn primary" style="text-decoration: none;">
+        <span>Staff Login &rarr;</span>
+      </a>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 1.5rem;">
+    <!-- Careers Hero -->
+    <section class="dash-hero" style="border-left: 4px solid var(--accent-blue); margin-bottom: 2rem;">
+      <div class="hero-text-col">
+        <span class="hero-badge">NEXUS TALENT NETWORK</span>
+        <h1 class="hero-title">Build the Future of Enterprise Systems</h1>
+        <p class="hero-desc">We are an ambitious startup scaling fast. Join our high-performance engineering, product, and operations squads.</p>
+      </div>
+    </section>
+
+    <!-- Open Positions Grid -->
+    <div id="careers-job-list" class="dash-quick-nav-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem;">
+      <!-- Populated via API -->
+    </div>
+  </main>
+
+  <!-- Modal: Apply for Job -->
+  <dialog id="modal-apply-job" class="modal-dialog">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">📄</span>
+          <h3 id="apply-modal-job-title">Apply for Position</h3>
+        </div>
+        <button id="btn-close-apply-modal" class="neu-circle-btn close-modal-btn">✕</button>
+      </div>
+
+      <form id="form-job-application" class="ems-modal-form" enctype="multipart/form-data">
+        <input type="hidden" id="apply-job-id" name="job_opening_id">
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label>Full Name *</label>
+            <input type="text" name="applicant_name" id="apply-name" class="neu-input" required placeholder="e.g. Maya Lin">
+          </div>
+          <div class="form-field">
+            <label>Email Address *</label>
+            <input type="email" name="applicant_email" id="apply-email" class="neu-input" required placeholder="maya.lin@example.com">
+          </div>
+          <div class="form-field">
+            <label>Phone Number *</label>
+            <input type="tel" name="applicant_phone" id="apply-phone" class="neu-input" required placeholder="+1 (555) 000-0000">
+          </div>
+          <div class="form-field">
+            <label>CV / Resume Document (PDF/Doc) *</label>
+            <input type="file" name="resume" id="apply-resume" class="neu-input" accept=".pdf,.doc,.docx" required>
+          </div>
+        </div>
+
+        <div class="form-field mt-3">
+          <label>Cover Note / Relevant Portfolio Links</label>
+          <textarea name="cover_note" id="apply-cover" class="neu-input scratchpad-textarea" rows="3" placeholder="Briefly highlight your technical background, GitHub, or previous projects..."></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-apply" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script>
+    async function loadCareers() {
+      try {
+        const res = await fetch('/api/public/careers');
+        const data = await res.json();
+        const container = document.getElementById('careers-job-list');
+        container.innerHTML = '';
+
+        if (!data.data || !data.data.length) {
+          container.innerHTML = '<p style="color:var(--text-subtitle);">No open vacancies at this time. Check back soon!</p>';
+          return;
+        }
+
+        data.data.forEach(job => {
+          const card = document.createElement('div');
+          card.className = 'dash-quick-nav-card';
+          card.innerHTML = `
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">${job.title}</h3>
+                <span class="dash-quick-nav-subtitle">${job.department_name} • ${job.employment_type.replace('_', ' ')}</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">${job.description}</p>
+            <div style="margin: 0.8rem 0; font-size: 0.82rem; color: var(--text-subtitle);">
+              <strong>Compensation:</strong> $${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()} / mo<br>
+              <strong>Deadline:</strong> ${job.deadline}
+            </div>
+            <button type="button" class="neu-btn dash-action-btn primary btn-apply-trigger" data-id="${job.id}" data-title="${job.title}" style="width: 100%; justify-content: center;">
+              Apply Now &rarr;
+            </button>
+          `;
+          container.appendChild(card);
+        });
+
+        document.querySelectorAll('.btn-apply-trigger').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            document.getElementById('apply-job-id').value = id;
+            document.getElementById('apply-modal-job-title').textContent = 'Apply for ' + title;
+            document.getElementById('modal-apply-job').showModal();
+          });
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('btn-close-apply-modal').addEventListener('click', () => document.getElementById('modal-apply-job').close());
+    document.getElementById('btn-cancel-apply').addEventListener('click', () => document.getElementById('modal-apply-job').close());
+
+    document.getElementById('form-job-application').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      try {
+        const res = await fetch('/api/public/apply', { method: 'POST', body: formData });
+        const result = await res.json();
+        if (result.success) {
+          document.getElementById('modal-apply-job').close();
+          e.target.reset();
+          alert('✓ Thank you! Your application has been successfully submitted to Nexus Technologies.');
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        alert('Submission failed: ' + err.message);
+      }
+    });
+
+    loadCareers();
+  </script>
+</body>
+</html>

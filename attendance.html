@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusEMS • Employee Attendance & Shift Hours Log</title>
+  <meta name="description" content="Dedicated Employee Attendance, Arrival (In-Time), Departure (Out-Time), and Work Duration Ledger">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Global Header -->
+  <header class="dash-topbar" id="dash-header">
+    <div class="dash-brand-area">
+      <button id="sidebar-toggle" class="neu-circle-btn menu-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="dash-brand">
+        <div class="dash-brand-icon ems-brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>EMS</span></span>
+          <span class="ems-badge" id="portal-role-badge">HR PORTAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Staff Search Bar (HR View) / Employee Self-Search -->
+    <div class="dash-search-wrap" id="top-search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search attendance records or staff... (/)">
+      <span class="search-kbd">/</span>
+    </div>
+
+    <!-- Right Topbar Controls -->
+    <div class="dash-actions">
+      <!-- Live Clock -->
+      <div class="dash-clock-badge">
+        <span class="pulse-dot"></span>
+        <span id="dash-clock">10:42 AM</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Notifications -->
+      <div class="notifications-wrapper">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot" id="top-notif-dot"></span>
+        </button>
+
+        <!-- Interactive Notifications Dropdown -->
+        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="notif-title-wrap">
+              <h4>Notifications</h4>
+              <span class="notif-count-badge" id="dropdown-notif-count">4 New</span>
+            </div>
+            <button class="notif-mark-read-btn" id="btn-mark-all-read">Mark all as read</button>
+          </div>
+          <div class="notifications-list" id="notifications-list-container">
+            <div class="notif-item unread" data-id="1">
+              <div class="notif-icon-circle payroll">💰</div>
+              <div class="notif-body">
+                <div class="notif-body-title">September 2026 Salary Disbursed</div>
+                <div class="notif-body-desc">Net salary of $8,450.00 has been credited to your Bank of America account (ending 4892).</div>
+                <div class="notif-body-time">Today • 09:00 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="2">
+              <div class="notif-icon-circle leave">📅</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Leave Request Approved</div>
+                <div class="notif-body-desc">Your 3-day Medical Leave application for Oct 18 - Oct 20 has been approved by HR Admin.</div>
+                <div class="notif-body-time">Yesterday • 04:30 PM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="3">
+              <div class="notif-icon-circle performance">🏆</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Performance Appraisal Complete</div>
+                <div class="notif-body-desc">Congratulations! You achieved a 98% rating (Tier A) with a +15% salary increment recommendation.</div>
+                <div class="notif-body-time">2 days ago • 11:15 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="4">
+              <div class="notif-icon-circle attendance">⏱️</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Shift Attendance Logged</div>
+                <div class="notif-body-desc">Today's clock-in verified at 09:12 AM. Shift target of 8 hours is active.</div>
+                <div class="notif-body-time">Today • 09:12 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile (Dynamic for HR or Employee) -->
+      <div class="user-profile-menu">
+        <div class="user-avatar-wrap">
+          <div class="tanvir-avatar-badge" id="top-user-avatar">T</div>
+          <span class="avatar-online-dot"></span>
+        </div>
+        <div class="user-info-text">
+          <span class="user-name" id="dash-user-name">Tanvir</span>
+          <span class="user-role" id="dash-user-role">HR Administrator</span>
+        </div>
+        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account" aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="dash-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="sidebar-nav">
+      <!-- HR Menu Items -->
+      <nav class="sidebar-menu hidden" id="hr-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="sidebar-category-header">Main</div>
+
+        <a href="employees.html" class="sidebar-item" id="nav-hr-employees">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Employees</span>
+          <span class="menu-counter highlight" id="sidebar-emp-count">13</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item active" id="nav-hr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-hr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Management</span>
+          <span class="menu-counter" id="sidebar-pending-leaves">3</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-hr-payroll">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>Payroll &amp; Salary</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-hr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-recruitment">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+          <span>Recruitment</span>
+          <span class="menu-counter" id="sidebar-recruitment-count">4</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-reports">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports &amp; Analytics</span>
+        </a>
+
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Employee Menu Items (7 Core Modules) -->
+      <nav class="sidebar-menu hidden" id="employee-sidebar-menu">
+        <a href="employee-dashboard.html" class="sidebar-item" id="nav-emp-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>My Dashboard</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item active" id="nav-emp-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>My Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-emp-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>My Leaves</span>
+          <span class="menu-counter" id="sidebar-emp-leave-counter">14d</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-emp-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>My Performance</span>
+          <span class="menu-counter highlight">98%</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-emp-payslips">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>My Payslips</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-notif-count">4</span>
+        </a>
+      </nav>
+
+      <!-- Manager Menu Items (NO PAYROLL) -->
+      <nav class="sidebar-menu hidden" id="manager-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="dashboard.html#manager-team-section" class="sidebar-item" id="nav-mgr-team">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>My Team</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-team-count">5</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item active" id="nav-mgr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Team Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-mgr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Requests</span>
+          <span class="menu-counter" id="sidebar-mgr-leave-count">2</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-mgr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance Reviews</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-notif-count">3</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-mgr-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Status Card -->
+      <div class="sidebar-storage-card">
+        <span class="storage-title" id="sidebar-card-label">Organization Capacity</span>
+        <span class="storage-meta" id="sidebar-plan-label">Nexus Enterprise Active</span>
+        <div class="storage-track">
+          <div class="storage-fill storage-fill-78"></div>
+        </div>
+      </div>
+
+      <!-- Sign Out -->
+      <a href="index.html" id="btn-sidebar-logout" class="sidebar-item logout" title="Sign out to switch between HR and Employee portals">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </a>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="dash-content">
+      
+      <!-- ================================================================== -->
+      <!-- VIEW 1: HR ATTENDANCE & SHIFT MONITOR PORTAL                       -->
+      <!-- ================================================================== -->
+      <div id="view-hr-portal" class="portal-view-container hidden">
+        <section class="dash-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge">NEXUS EMS • ATTENDANCE & WORK DURATION</span>
+            <h1 class="hero-title">Shift Hours, In/Out Times & Work Duration</h1>
+            <p class="hero-desc">Monitor when an employee arrives, when they leave, and their exact work duration. Overtime and attendance discipline feed directly into their bonus appraisals.</p>
+          </div>
+          <div class="hero-actions-col">
+            <a href="dashboard.html" class="neu-btn dash-action-btn secondary">
+              <span>&larr; Back to Directory</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- Attendance KPI Pills -->
+        <div class="bonus-hero-grid mb-6">
+          <div class="bonus-metric-box">
+            <span class="bonus-metric-label">Checked In Today</span>
+            <span class="bonus-metric-val green" id="hr-stat-checkedin">11 Staff</span>
+            <span class="bonus-metric-sub">Actively on-duty & logging work</span>
+          </div>
+          <div class="bonus-metric-box">
+            <span class="bonus-metric-label">Avg Shift Duration</span>
+            <span class="bonus-metric-val blue">8.4 Hours</span>
+            <span class="bonus-metric-sub">Standard shift requirement: 8.0h</span>
+          </div>
+          <div class="bonus-metric-box">
+            <span class="bonus-metric-label">Total Overtime Logged</span>
+            <span class="bonus-metric-val purple">+34.5 Hrs</span>
+            <span class="bonus-metric-sub">Counted towards performance bonus</span>
+          </div>
+          <div class="bonus-metric-box">
+            <span class="bonus-metric-label">Late Arrivals Today</span>
+            <span class="bonus-metric-val amber">2 Staff</span>
+            <span class="bonus-metric-sub">Arrived after 09:30 AM cutoff</span>
+          </div>
+        </div>
+
+        <!-- Attendance Ledger Table -->
+        <section class="dash-widget" id="hr-attendance-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Daily Shift Attendance & Hours Ledger</h2>
+              <span class="widget-subtitle">Real-time ledger: Arrival Time (In), Departure Time (Out), Total Working Duration, and Overtime logged</span>
+            </div>
+            <div class="dash-clock-badge">
+              <span class="pulse-dot"></span>
+              <span id="hr-live-shift-status">Live Shift Monitor</span>
+            </div>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Shift Date</th>
+                  <th>Arrival (In Time)</th>
+                  <th>Departure (Out Time)</th>
+                  <th>Total Duration (Work Time)</th>
+                  <th>Overtime / Deficit</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="hr-attendance-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 2: EMPLOYEE SELF-SERVICE ATTENDANCE & PUNCH CLOCK             -->
+      <!-- ================================================================== -->
+      <div id="view-employee-portal" class="portal-view-container hidden">
+        <section class="dash-hero emp-self-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge emp-badge">NEXUS EMS • MY ATTENDANCE & SHIFT CLOCK</span>
+            <h1 class="hero-title">My Attendance & Shift Hours</h1>
+            <p class="hero-desc">Record your daily arrival and departure times. Your shift hours are tracked live and directly calculate your performance bonus.</p>
+          </div>
+          <div class="hero-actions-col">
+            <!-- Daily Punch Clock Widget with Live Shift Timer -->
+            <div id="emp-punch-timer-display" class="punch-timer-badge">
+              <span class="pulse-dot"></span>
+              <span id="emp-timer-text">Shift: Ready to Clock In</span>
+            </div>
+            <button id="btn-punch-clock" class="neu-btn punch-clock-btn">
+              <span class="punch-indicator-dot"></span>
+              <span id="punch-clock-text">Clock In (Start Shift)</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Employee Shift Timesheet Table -->
+        <section class="dash-widget mt-6" id="emp-attendance-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">My Verified Shift Timesheet</h2>
+              <span class="widget-subtitle">Personal attendance ledger showing Arrival (In), Departure (Out), Total Duration, and Overtime</span>
+            </div>
+            <span class="status-pill completed">Timesheet Active</span>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Shift Date</th>
+                  <th>Arrival (In Time)</th>
+                  <th>Departure (Out Time)</th>
+                  <th>Total Duration (Work Time)</th>
+                  <th>Overtime</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="emp-timesheet-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Company Employee Management System (EMS) — Distinct portals for HR Administrators and Company Staff.">
+  <title>Nexus EMS — Company Portal</title>
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Global Header -->
+  <header class="dash-topbar" id="dash-header">
+    <div class="dash-brand-area">
+      <button id="sidebar-toggle" class="neu-circle-btn menu-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="dash-brand">
+        <div class="dash-brand-icon ems-brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>EMS</span></span>
+          <span class="ems-badge" id="portal-role-badge">HR PORTAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Staff Search Bar (HR View) / Employee Self-Search -->
+    <div class="dash-search-wrap" id="top-search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search staff, documents, or policies... (/)">
+      <span class="search-kbd">/</span>
+    </div>
+
+    <!-- Right Topbar Controls -->
+    <div class="dash-actions">
+      <!-- Live Clock -->
+      <div class="dash-clock-badge">
+        <span class="pulse-dot"></span>
+        <span id="dash-clock">10:42 AM</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Notifications -->
+      <div class="notifications-wrapper">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot" id="top-notif-dot"></span>
+        </button>
+
+        <!-- Interactive Notifications Dropdown -->
+        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="notif-title-wrap">
+              <h4>Notifications</h4>
+              <span class="notif-count-badge" id="dropdown-notif-count">4 New</span>
+            </div>
+            <button class="notif-mark-read-btn" id="btn-mark-all-read">Mark all as read</button>
+          </div>
+          <div class="notifications-list" id="notifications-list-container">
+            <!-- 1. Payroll notification -->
+            <div class="notif-item unread" data-id="1">
+              <div class="notif-icon-circle payroll">💰</div>
+              <div class="notif-body">
+                <div class="notif-body-title">September 2026 Salary Disbursed</div>
+                <div class="notif-body-desc">Net salary of $8,450.00 has been credited to your Bank of America account (ending 4892).</div>
+                <div class="notif-body-time">Today • 09:00 AM</div>
+              </div>
+            </div>
+
+            <!-- 2. Leave notification -->
+            <div class="notif-item unread" data-id="2">
+              <div class="notif-icon-circle leave">📅</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Leave Request Approved</div>
+                <div class="notif-body-desc">Your 3-day Medical Leave application for Oct 18 - Oct 20 has been approved by HR Admin.</div>
+                <div class="notif-body-time">Yesterday • 04:30 PM</div>
+              </div>
+            </div>
+
+            <!-- 3. Performance notification -->
+            <div class="notif-item unread" data-id="3">
+              <div class="notif-icon-circle performance">🏆</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Performance Appraisal Complete</div>
+                <div class="notif-body-desc">Congratulations! You achieved a 98% rating (Tier A) with a +15% salary increment recommendation.</div>
+                <div class="notif-body-time">2 days ago • 11:15 AM</div>
+              </div>
+            </div>
+
+            <!-- 4. Attendance notification -->
+            <div class="notif-item unread" data-id="4">
+              <div class="notif-icon-circle attendance">⏱️</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Shift Attendance Logged</div>
+                <div class="notif-body-desc">Today's clock-in verified at 09:12 AM. Shift target of 8 hours is active.</div>
+                <div class="notif-body-time">Today • 09:12 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile (Dynamic for HR or Employee) -->
+      <div class="user-profile-menu">
+        <div class="user-avatar-wrap">
+          <div class="tanvir-avatar-badge" id="top-user-avatar">T</div>
+          <span class="avatar-online-dot"></span>
+        </div>
+        <div class="user-info-text">
+          <span class="user-name" id="dash-user-name">Tanvir</span>
+          <span class="user-role" id="dash-user-role">HR Administrator</span>
+        </div>
+        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account" aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="dash-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="sidebar-nav">
+      <!-- HR Menu Items (Shown when HR logs in) -->
+      <nav class="sidebar-menu hidden" id="hr-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item active" id="nav-hr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="sidebar-category-header">Main</div>
+
+        <a href="employees.html" class="sidebar-item" id="nav-hr-employees">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Employees</span>
+          <span class="menu-counter highlight" id="sidebar-emp-count">13</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-hr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-hr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Management</span>
+          <span class="menu-counter" id="sidebar-pending-leaves">3</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-hr-payroll">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>Payroll &amp; Salary</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-hr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-hr-recruitment">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+          <span>Recruitment</span>
+          <span class="menu-counter" id="sidebar-recruitment-count">4</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-hr-reports">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports &amp; Analytics</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-hr-settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Employee Menu Items (7 Core Modules requested) -->
+      <nav class="sidebar-menu hidden" id="employee-sidebar-menu">
+        <a href="employee-dashboard.html" class="sidebar-item" id="nav-emp-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>My Dashboard</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-emp-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>My Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-emp-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>My Leaves</span>
+          <span class="menu-counter" id="sidebar-emp-leave-counter">14d</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-emp-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>My Performance</span>
+          <span class="menu-counter highlight">98%</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item" id="nav-emp-payslips">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>My Payslips</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-emp-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-emp-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-notif-count">4</span>
+        </a>
+      </nav>
+
+      <!-- Manager Menu Items (7 Core Modules requested - NO PAYROLL) -->
+      <nav class="sidebar-menu hidden" id="manager-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item active" id="nav-mgr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#manager-team-section" class="sidebar-item" id="nav-mgr-team">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>My Team</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-team-count">5</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-mgr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Team Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-mgr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Requests</span>
+          <span class="menu-counter" id="sidebar-mgr-leave-count">2</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-mgr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance Reviews</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-mgr-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-mgr-notif-count">3</span>
+        </a>
+
+        <a href="javascript:void(0)" class="sidebar-item" id="nav-mgr-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Status Card -->
+      <div class="sidebar-storage-card">
+        <div class="storage-info">
+          <span id="sidebar-card-label">Organization Capacity</span>
+          <strong id="org-capacity-text">12 / 20 Seats</strong>
+        </div>
+        <div class="storage-bar-track">
+          <div class="storage-bar-fill storage-fill-60" id="org-capacity-bar"></div>
+        </div>
+        <span class="org-plan-badge" id="sidebar-plan-label">Nexus Enterprise Active</span>
+      </div>
+
+      <!-- Quick Sign Out Link in Sidebar -->
+      <a href="index.html" id="btn-sidebar-logout" class="sidebar-item logout" title="Sign out to switch between HR and Employee portals">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </a>
+    </aside>
+
+    <!-- Main Workspace Content Container -->
+    <main class="dash-content">
+      
+      <!-- ================================================================== -->
+      <!-- VIEW 1: HR MANAGEMENT PORTAL (Visible if HR logs in)               -->
+      <!-- ================================================================== -->
+      <div id="view-hr-portal" class="portal-view-container hidden">
+        
+        <!-- Welcome Hero Banner -->
+        <section class="dash-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge">NEXUS EMS • HR MANAGEMENT PORTAL</span>
+            <h1 class="hero-title" id="dash-hero-title">Welcome back, Tanvir 👋</h1>
+            <p class="hero-desc">Executive organizational overview: track active task workers, team distributions, live staff presence, and employee directories.</p>
+          </div>
+          <div class="hero-actions-col">
+            <button id="btn-open-add-emp-modal" class="neu-btn dash-action-btn primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Employee</span>
+            </button>
+            <button id="btn-export-csv" class="neu-btn dash-action-btn secondary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 4 Key HR Executive KPI Metric Cards (Answering user questions) -->
+        <section class="kpi-grid" id="kpi-section">
+          <!-- 1. How many employees are working on office tasks -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Working on Office Tasks</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-task-workers">11 Staff</div>
+            <div class="kpi-trend positive"><span id="kpi-task-rate">91.7%</span> active on sprint deliverables</div>
+          </div>
+
+          <!-- 2. How many teams are there -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Total Teams</span>
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-total-teams">5 Teams</div>
+            <div class="kpi-trend positive"><span id="kpi-teams-list">Eng, Product, Mktg, HR, Finance</span></div>
+          </div>
+
+          <!-- 3. How many have come in today (Present) -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Come in Today (Present)</span>
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-present-count">11 Present</div>
+            <div class="kpi-trend positive"><span id="kpi-attendance-pct">91.7%</span> checked in & logged shifts</div>
+          </div>
+
+          <!-- 4. How many are absent -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Absent / On Leave</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                  <line x1="20" y1="8" x2="20" y2="14"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-leave-count">1 Absent</div>
+            <div class="kpi-trend neutral"><span id="kpi-leave-desc">1 Approved Leave • 0 Unexcused</span></div>
+          </div>
+        </section>
+
+        <!-- Quick Navigation Cards to Dedicated Separate Pages -->
+        <section class="dash-quick-nav-grid">
+          <a href="attendance.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Shift Hours Log</h3>
+                <span class="dash-quick-nav-subtitle">Arrival, Departure & Working Hours</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Track exact In-time, Out-time, 8h duration, and overtime per employee.</p>
+            <span class="dash-quick-nav-action">Open Shift Log Page &rarr;</span>
+          </a>
+
+          <a href="appraisals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Bonus & Increment</h3>
+                <span class="dash-quick-nav-subtitle">Performance Appraisal Engine</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Work hours & sprint deliverables dynamically dictate compensation.</p>
+            <span class="dash-quick-nav-action">Open Appraisal Board &rarr;</span>
+          </a>
+
+          <a href="leave-approvals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Leave Approvals</h3>
+                <span class="dash-quick-nav-subtitle">Dedicated Review Center</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Review pending applications, approve vacation, sick or casual leaves.</p>
+            <span class="dash-quick-nav-action">Open Leave Approvals &rarr;</span>
+          </a>
+        </section>
+
+        <!-- Staff Directory Table -->
+        <section class="dash-widget directory-widget" id="directory-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Staff Directory & Database</h2>
+              <span class="widget-subtitle">Full administrative CRUD access to add, update, and manage company personnel</span>
+            </div>
+            <button id="btn-quick-add" class="neu-btn dash-action-btn primary btn-sm-custom">+ Add New</button>
+          </div>
+
+          <!-- Filter Toolbar -->
+          <div class="emp-filter-toolbar">
+            <div class="filter-item">
+              <label for="filter-department">Department:</label>
+              <select id="filter-department" class="neu-select">
+                <option value="all">All Departments</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Product">Product & Design</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Finance">Finance</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="filter-status">Status:</label>
+              <select id="filter-status" class="neu-select">
+                <option value="all">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="On Leave">On Leave</option>
+                <option value="Remote">Remote</option>
+              </select>
+            </div>
+
+            <div class="filter-stats-text" id="filter-result-count">
+              Showing <strong>12</strong> employees
+            </div>
+          </div>
+
+          <!-- Employees Table -->
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Employee ID</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Work Mode</th>
+                  <th>Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="emp-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Leaves Review & Department Allocations -->
+        <div class="dash-main-grid mt-6" id="leaves-section">
+          <!-- Departments Breakdown -->
+          <div class="dash-col-left" id="departments-section">
+            <div class="dash-widget">
+              <div class="widget-header">
+                <div>
+                  <h2 class="widget-title">Company Department Allocation</h2>
+                  <span class="widget-subtitle">Staff breakdown across active corporate units</span>
+                </div>
+              </div>
+
+              <div class="dept-progress-list">
+                <div class="dept-row">
+                  <div class="dept-info"><span>Engineering</span><strong>5 Staff (42%)</strong></div>
+                  <div class="table-progress-bar"><div class="table-fill table-fill-42"></div></div>
+                </div>
+                <div class="dept-row">
+                  <div class="dept-info"><span>Product & Design</span><strong>2 Staff (17%)</strong></div>
+                  <div class="table-progress-bar"><div class="table-fill table-fill-cyan"></div></div>
+                </div>
+                <div class="dept-row">
+                  <div class="dept-info"><span>Marketing & Growth</span><strong>2 Staff (17%)</strong></div>
+                  <div class="table-progress-bar"><div class="table-fill table-fill-amber"></div></div>
+                </div>
+                <div class="dept-row">
+                  <div class="dept-info"><span>Human Resources</span><strong>2 Staff (17%)</strong></div>
+                  <div class="table-progress-bar"><div class="table-fill table-fill-purple"></div></div>
+                </div>
+                <div class="dept-row">
+                  <div class="dept-info"><span>Finance & Ops</span><strong>1 Staff (8%)</strong></div>
+                  <div class="table-progress-bar"><div class="table-fill table-fill-green"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HR Scratchpad & Memos -->
+          <div class="dash-col-right">
+            <div class="dash-widget">
+              <div class="widget-header">
+                <h2 class="widget-title">HR Notes & Policy Memos</h2>
+                <span class="autosave-label" id="dash-scratch-status">Saved</span>
+              </div>
+              <textarea id="dash-scratchpad" class="neu-input scratchpad-textarea" placeholder="Jot down interview notes, employee onboardings, or policy reminders..."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 2: EMPLOYEE SELF-SERVICE PORTAL (Visible if Employee logs in) -->
+      <!-- ================================================================== -->
+      <div id="view-employee-portal" class="portal-view-container hidden">
+        
+        <!-- Employee Hero Banner (Appears on login, then smoothly auto-dismisses) -->
+        <section class="dash-hero emp-self-hero welcome-toast-banner" id="emp-welcome-banner">
+          <div class="hero-text-col">
+            <span class="hero-badge emp-badge">NEXUS EMS • WELCOME</span>
+            <h1 class="hero-title" id="emp-hero-title">Welcome back, Sophia Clark 👋</h1>
+            <p class="hero-desc" id="emp-hero-subtitle">Lead Frontend Engineer • Engineering Unit • Employee ID: <strong>EMP-1002</strong></p>
+          </div>
+          <div class="hero-actions-col">
+            <button type="button" class="neu-circle-btn close-welcome-btn" id="btn-close-welcome" title="Dismiss Greeting" aria-label="Dismiss Greeting">✕</button>
+          </div>
+        </section>
+
+        <!-- 4 Employee Personal Metrics -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Today's Shift Hours</span>
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="emp-kpi-today-hours">8h 33m</div>
+            <div class="kpi-trend positive" id="emp-kpi-today-status"><span>In: 09:12 AM</span> • Out: 05:45 PM</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Earned Bonus</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="emp-kpi-bonus-val">+$1,690</div>
+            <div class="kpi-trend positive"><span id="emp-kpi-tier-tag">Tier A (98%)</span> • Work Hours + Tasks</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Salary Increment</span>
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="emp-kpi-inc-val">+15%</div>
+            <div class="kpi-trend positive"><span>+$1,268/mo</span> raise recommendation</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Leave Balance</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">14 Days</div>
+            <div class="kpi-trend neutral"><span>10 Annual</span> • 4 Sick days left</div>
+          </div>
+        </section>
+
+        <!-- Employee Quick Navigation Cards to Dedicated Modules -->
+        <section class="dash-quick-nav-grid">
+          <!-- 1. My Attendance -->
+          <a href="attendance.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Attendance</h3>
+                <span class="dash-quick-nav-subtitle">Punch Clock & Timesheet</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Clock in/out, view daily logs, weekly logged hours, and arrival records.</p>
+            <span class="dash-quick-nav-action">Open Attendance &rarr;</span>
+          </a>
+
+          <!-- 2. My Leaves -->
+          <a href="leave-approvals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Leaves</h3>
+                <span class="dash-quick-nav-subtitle">Time-Off & Leave Quotas</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Submit new leave requests and check approved/pending status.</p>
+            <span class="dash-quick-nav-action">Apply for Leave &rarr;</span>
+          </a>
+
+          <!-- 3. My Performance -->
+          <a href="appraisals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Performance</h3>
+                <span class="dash-quick-nav-subtitle">Bonus & Increment Rating</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Review your 98% Tier A rating, task scorecards, and salary increment.</p>
+            <span class="dash-quick-nav-action">View Performance &rarr;</span>
+          </a>
+
+          <!-- 4. My Payslips -->
+          <a href="payroll.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                  <line x1="6" y1="15" x2="8" y2="15"></line>
+                  <line x1="12" y1="15" x2="16" y2="15"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Payslips</h3>
+                <span class="dash-quick-nav-subtitle">Salary & Compensation</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Check your $8,450 net payout, tax breakdowns, and download official slips.</p>
+            <span class="dash-quick-nav-action">Open Payslips &rarr;</span>
+          </a>
+
+          <!-- 5. My Profile -->
+          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-open-profile">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap" style="background: rgba(0, 112, 243, 0.12); color: var(--accent-blue);">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Profile</h3>
+                <span class="dash-quick-nav-subtitle">Personal Details & Bank Wire</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">View and manage your employee profile, designation, contacts, and bank info.</p>
+            <span class="dash-quick-nav-action">View & Edit Profile &rarr;</span>
+          </a>
+
+          <!-- 6. Notifications -->
+          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-open-notifs">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Notifications</h3>
+                <span class="dash-quick-nav-subtitle">4 Unread Alerts & Notices</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Stay informed about approved leaves, salary disbursements, and reviews.</p>
+            <span class="dash-quick-nav-action">Open Notifications &rarr;</span>
+          </a>
+        </section>
+
+        <!-- 2 Column: Leave Status Overview & Tasks/Payslips -->
+        <div class="dash-main-grid mt-6">
+          
+          <!-- Left: My Time-Off & Leaves Status -->
+          <div class="dash-col-left" id="emp-leave-section">
+            <div class="dash-widget">
+              <div class="widget-header">
+                <div>
+                  <h2 class="widget-title">My Leave & Time-Off Status</h2>
+                  <span class="widget-subtitle">Track your leave requests and quotas</span>
+                </div>
+                <a href="leave-approvals.html" class="neu-btn dash-action-btn primary">
+                  <span>Manage Leaves &rarr;</span>
+                </a>
+              </div>
+
+              <!-- My Leave History -->
+              <div class="leave-history-list" id="emp-leave-history">
+                <div class="leave-history-item">
+                  <div class="history-info">
+                    <strong>Medical Leave (Dental Procedure)</strong>
+                    <span>Oct 18 - Oct 20 (3 Days)</span>
+                  </div>
+                  <span class="status-pill active">Pending HR Review</span>
+                </div>
+                <div class="leave-history-item">
+                  <div class="history-info">
+                    <strong>Summer Vacation Break</strong>
+                    <span>Aug 12 - Aug 16 (5 Days)</span>
+                  </div>
+                  <span class="status-pill completed">Approved ✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: My Tasks & Payslips -->
+          <div class="dash-col-right" id="emp-tasks-section">
+            
+            <!-- My Sprint Checklist -->
+            <div class="dash-widget">
+              <div class="widget-header">
+                <div>
+                  <h2 class="widget-title">My Sprint Tasks</h2>
+                  <span class="widget-subtitle">Your personal project milestones</span>
+                </div>
+              </div>
+
+              <ul class="dash-task-list" id="emp-personal-tasks">
+                <li class="dash-task-item done">
+                  <div class="task-left">
+                    <span class="dash-chk"></span>
+                    <span class="dash-task-text">Implement Neumorphic UI buttons</span>
+                  </div>
+                </li>
+                <li class="dash-task-item">
+                  <div class="task-left">
+                    <span class="dash-chk"></span>
+                    <span class="dash-task-text">Audit mobile responsive breakpoints</span>
+                  </div>
+                </li>
+                <li class="dash-task-item">
+                  <div class="task-left">
+                    <span class="dash-chk"></span>
+                    <span class="dash-task-text">Integrate punch clock attendance API</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- My Payslips Widget -->
+            <div class="dash-widget" id="emp-payslips-section">
+              <div class="widget-header">
+                <h2 class="widget-title">My Payslips & Compensation</h2>
+              </div>
+              <div class="payslips-list">
+                <div class="payslip-item">
+                  <div class="payslip-left">
+                    <div class="payslip-icon">📄</div>
+                    <div>
+                      <strong>September 2026 Payslip</strong>
+                      <small>Disbursed on Oct 01, 2026</small>
+                    </div>
+                  </div>
+                  <button class="neu-circle-btn action-circle-btn download-payslip-btn" title="Download Payslip">↓</button>
+                </div>
+
+                <div class="payslip-item">
+                  <div class="payslip-left">
+                    <div class="payslip-icon">📄</div>
+                    <div>
+                      <strong>August 2026 Payslip</strong>
+                      <small>Disbursed on Sep 01, 2026</small>
+                    </div>
+                  </div>
+                  <button class="neu-circle-btn action-circle-btn download-payslip-btn" title="Download Payslip">↓</button>
+                </div>
+              </div>
+              <div style="margin-top: 1rem; text-align: center;">
+                <a href="payroll.html" class="neu-btn dash-action-btn secondary btn-full-width" style="display: inline-flex; text-decoration: none; justify-content: center;">
+                  <span>Open Full Payroll & Tax Statements →</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 3: MANAGER PORTAL (Visible if Manager logs in - NO PAYROLL)   -->
+      <!-- ================================================================== -->
+      <div id="view-manager-portal" class="portal-view-container hidden">
+        
+        <!-- Manager Welcome Hero Banner -->
+        <section class="dash-hero" style="border-left: 4px solid #7928ca;">
+          <div class="hero-text-col">
+            <span class="hero-badge" style="background: rgba(121, 40, 202, 0.12); color: #7928ca;">NEXUS EMS • TEAM MANAGER PORTAL</span>
+            <h1 class="hero-title" id="mgr-hero-title">Welcome back, Alex Rivera 👋</h1>
+            <p class="hero-desc" id="mgr-hero-subtitle">Engineering Manager • Operations Unit • Oversight of 5 Direct Reports (No Financial/Payroll Clearance)</p>
+          </div>
+          <div class="hero-actions-col">
+            <a href="#manager-team-section" class="neu-btn dash-action-btn primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+              </svg>
+              <span>Manage Team (5)</span>
+            </a>
+            <a href="leave-approvals.html" class="neu-btn dash-action-btn secondary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+              </svg>
+              <span>Leave Approvals (2)</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 4 Manager Operational KPI Metric Cards (NO SALARY/NO PAYROLL FIGURES) -->
+        <section class="kpi-grid">
+          <!-- 1. Team Headcount -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">My Team Size</span>
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="mgr-kpi-team-count">5 Members</div>
+            <div class="kpi-trend positive"><span>100% active</span> in Engineering Unit</div>
+          </div>
+
+          <!-- 2. Today's Team Presence -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Today's Team Presence</span>
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">5 / 5 Present</div>
+            <div class="kpi-trend positive"><span>4 Onsite</span> • 1 Remote • 0 Absent</div>
+          </div>
+
+          <!-- 3. Pending Team Leaves -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Pending Team Leaves</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="mgr-kpi-pending-leaves">2 Requests</div>
+            <div class="kpi-trend neutral"><span>Sophia Clark</span> & <span>James Wright</span></div>
+          </div>
+
+          <!-- 4. Team Task Velocity -->
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">Sprint Task Velocity</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">85.7% Done</div>
+            <div class="kpi-trend positive"><span>24 of 28 tasks</span> verified on sprint</div>
+          </div>
+        </section>
+
+        <!-- Manager Quick Navigation Cards (The 6 Core Modules - NO PAYROLL) -->
+        <section class="dash-quick-nav-grid">
+          <!-- 1. My Team -->
+          <a href="#manager-team-section" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap purple">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Team</h3>
+                <span class="dash-quick-nav-subtitle">Staff Roster & Assignments</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Inspect engineering team members, current task assignments, and active status.</p>
+            <span class="dash-quick-nav-action">View Team Roster &rarr;</span>
+          </a>
+
+          <!-- 2. Team Attendance -->
+          <a href="attendance.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap green">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Team Attendance</h3>
+                <span class="dash-quick-nav-subtitle">Shift Logs & Punctuality</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Check arrival/departure times, logged daily hours, and team overtime records.</p>
+            <span class="dash-quick-nav-action">Open Shift Logs &rarr;</span>
+          </a>
+
+          <!-- 3. Leave Requests -->
+          <a href="leave-approvals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Leave Requests</h3>
+                <span class="dash-quick-nav-subtitle">Review & Approvals</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Approve or reject time-off applications submitted by your team members.</p>
+            <span class="dash-quick-nav-action">Review Leave Applications &rarr;</span>
+          </a>
+
+          <!-- 4. Performance Reviews -->
+          <a href="appraisals.html" class="dash-quick-nav-card">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Performance Reviews</h3>
+                <span class="dash-quick-nav-subtitle">Operational Milestones</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Evaluate task output %, punctuality rating, and provide qualitative appraisal reviews.</p>
+            <span class="dash-quick-nav-action">Open Reviews &rarr;</span>
+          </a>
+
+          <!-- 5. Notifications -->
+          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-mgr-open-notifs">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">Notifications</h3>
+                <span class="dash-quick-nav-subtitle">3 Team Alerts</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">Immediate notices on new leave submissions, shift check-ins, and milestones.</p>
+            <span class="dash-quick-nav-action">Open Notifications &rarr;</span>
+          </a>
+
+          <!-- 6. My Profile -->
+          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-mgr-open-profile">
+            <div class="dash-quick-nav-header">
+              <div class="kpi-icon-wrap" style="background: rgba(0, 112, 243, 0.12); color: var(--accent-blue);">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dash-quick-nav-title">My Profile</h3>
+                <span class="dash-quick-nav-subtitle">Personal Credentials</span>
+              </div>
+            </div>
+            <p class="dash-quick-nav-desc">View and update your personal manager profile details and contact information.</p>
+            <span class="dash-quick-nav-action">View & Edit Profile &rarr;</span>
+          </a>
+        </section>
+
+        <!-- 2 Column: Team Roster Table & Team Leave Approvals -->
+        <div class="dash-main-grid mt-6" id="manager-team-section">
+          
+          <!-- Left: My Team Members Roster (NO SALARY COLUMN) -->
+          <div class="dash-col-left" style="flex: 2;">
+            <div class="dash-widget">
+              <div class="widget-header">
+                <div>
+                  <h2 class="widget-title">My Team Members (Engineering Unit)</h2>
+                  <span class="widget-subtitle">Direct reports roster • Operational status only (No Salary Access)</span>
+                </div>
+              </div>
+
+              <!-- Team Table (Notice: Zero Salary/Payroll Columns!) -->
+              <div class="dash-table-wrap">
+                <table class="dash-table projects-table">
+                  <thead>
+                    <tr>
+                      <th>Team Member</th>
+                      <th>Designation</th>
+                      <th>Mode</th>
+                      <th>Today's Shift</th>
+                      <th>Sprint Tasks</th>
+                      <th>Performance</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mgr-team-table-body">
+                    <!-- Populated dynamically by script.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Pending Leave Requests Widget -->
+          <div class="dash-col-right" style="flex: 1;">
+            <div class="dash-widget">
+              <div class="widget-header">
+                <div>
+                  <h2 class="widget-title">Pending Team Leaves</h2>
+                  <span class="widget-subtitle">Time-off requiring your authorization</span>
+                </div>
+              </div>
+
+              <div class="leave-history-list" id="mgr-pending-leaves-list">
+                <!-- 1. Sophia Clark Medical Leave -->
+                <div class="leave-history-item" style="flex-direction: column; align-items: flex-start; gap: 0.65rem;">
+                  <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <strong style="color: var(--text-title); font-size: 0.88rem;">Sophia Clark (Lead Frontend)</strong>
+                    <span class="status-pill active">Pending Review</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-subtitle); line-height: 1.4;">
+                    <strong>Medical Leave (Dental Procedure)</strong><br>
+                    Oct 18 - Oct 20 (3 Days)
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; width: 100%; margin-top: 0.35rem;">
+                    <button type="button" class="neu-btn dash-action-btn primary btn-mgr-approve-leave" data-name="Sophia Clark" style="flex: 1; justify-content: center; font-size: 0.75rem; padding: 0.4rem 0.5rem;">
+                      Approve ✓
+                    </button>
+                    <button type="button" class="neu-btn dash-action-btn secondary btn-mgr-reject-leave" data-name="Sophia Clark" style="flex: 1; justify-content: center; font-size: 0.75rem; padding: 0.4rem 0.5rem;">
+                      Reject ✕
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 2. James Wright Casual Leave -->
+                <div class="leave-history-item" style="flex-direction: column; align-items: flex-start; gap: 0.65rem; margin-top: 0.75rem;">
+                  <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <strong style="color: var(--text-title); font-size: 0.88rem;">James Wright (DevOps Arch)</strong>
+                    <span class="status-pill active">Pending Review</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-subtitle); line-height: 1.4;">
+                    <strong>Casual Leave (Family Event)</strong><br>
+                    Oct 24 (1 Day)
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; width: 100%; margin-top: 0.35rem;">
+                    <button type="button" class="neu-btn dash-action-btn primary btn-mgr-approve-leave" data-name="James Wright" style="flex: 1; justify-content: center; font-size: 0.75rem; padding: 0.4rem 0.5rem;">
+                      Approve ✓
+                    </button>
+                    <button type="button" class="neu-btn dash-action-btn secondary btn-mgr-reject-leave" data-name="James Wright" style="flex: 1; justify-content: center; font-size: 0.75rem; padding: 0.4rem 0.5rem;">
+                      Reject ✕
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal: Add New Employee (HR Portal) -->
+  <dialog id="modal-add-employee" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">👤</span>
+          <h3>Add New Employee</h3>
+        </div>
+        <button id="btn-close-emp-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-add-employee" class="ems-modal-form">
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label for="emp-name">Full Name *</label>
+            <input type="text" id="emp-name" class="neu-input" placeholder="e.g. Liam Anderson" required>
+          </div>
+
+          <div class="form-field">
+            <label for="emp-email">Company Email *</label>
+            <input type="email" id="emp-email" class="neu-input" placeholder="e.g. liam@company.com" required>
+          </div>
+
+          <div class="form-field">
+            <label for="emp-dept">Department *</label>
+            <select id="emp-dept" class="neu-input" required>
+              <option value="Engineering">Engineering</option>
+              <option value="Product">Product & Design</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Finance">Finance</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="emp-role">Designation / Role *</label>
+            <input type="text" id="emp-role" class="neu-input" placeholder="e.g. Cloud Security Architect" required>
+          </div>
+
+          <div class="form-field">
+            <label for="emp-mode">Work Mode *</label>
+            <select id="emp-mode" class="neu-input" required>
+              <option value="Onsite">Onsite</option>
+              <option value="Remote">Remote</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="emp-status">Initial Status *</label>
+            <select id="emp-status" class="neu-input" required>
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Probation">Probation</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-emp" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Save Employee</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal: Review & Adjust Appraisal (HR Portal) -->
+  <dialog id="modal-appraisal-adjust" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🏆</span>
+          <h3 id="modal-appraise-title">Review & Adjust Employee Appraisal</h3>
+        </div>
+        <button id="btn-close-appraise-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-adjust-appraisal" class="ems-modal-form">
+        <input type="hidden" id="appraise-emp-id">
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label>Employee Name</label>
+            <input type="text" id="appraise-emp-name" class="neu-input" readonly>
+          </div>
+
+          <div class="form-field">
+            <label>Base Monthly Salary ($)</label>
+            <input type="number" id="appraise-base-salary" class="neu-input" readonly>
+          </div>
+
+          <div class="form-field">
+            <label for="appraise-bonus-val">Performance Bonus ($)</label>
+            <input type="number" id="appraise-bonus-val" class="neu-input" min="0" step="50" required>
+          </div>
+
+          <div class="form-field">
+            <label for="appraise-inc-percent">Salary Increment (%)</label>
+            <input type="number" id="appraise-inc-percent" class="neu-input" min="0" max="40" step="1" required>
+          </div>
+        </div>
+
+        <div class="form-field mt-3">
+          <label for="appraise-remarks">HR Appraisal Evaluation Notes</label>
+          <textarea id="appraise-remarks" class="neu-input scratchpad-textarea" placeholder="Add specific feedback regarding hours worked, code quality, and bonus justification..." rows="2"></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-appraise" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Save & Award Compensation</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal: Certified Payslip Document -->
+  <dialog id="modal-payslip-view" class="modal-dialog">
+    <div class="payslip-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">📄</span>
+          <h3>Verified Corporate Salary Slip</h3>
+        </div>
+        <button id="btn-close-payslip-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- Printable Payslip Document Content -->
+      <div class="payslip-sheet" id="printable-payslip-sheet">
+        <div class="payslip-top-header">
+          <div class="payslip-company-info">
+            <h2>
+              <span style="display:inline-block; width:10px; height:10px; background:var(--accent-blue); border-radius:50%;"></span>
+              NEXUS EMS TECHNOLOGIES LTD.
+            </h2>
+            <p>Enterprise Global Headquarters • Dhaka Tech Hub & Silicon Tower</p>
+            <p>Registration No: NX-88429-EMS • Payroll Disbursement Div.</p>
+          </div>
+          <div class="payslip-badge-right">
+            <span class="ems-badge" id="slip-month-badge">SEPTEMBER 2026</span>
+            <span class="payslip-serial" id="slip-serial-no">Slip No: NX-PAY-202609-1002</span>
+          </div>
+        </div>
+
+        <div class="payslip-emp-meta-grid">
+          <div>
+            <div class="meta-field-row">
+              <span>Employee Name:</span>
+              <strong id="slip-emp-name">Sophia Clark</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Employee ID:</span>
+              <strong id="slip-emp-id">EMP-1002</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Department:</span>
+              <strong id="slip-emp-dept">Engineering</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Designation:</span>
+              <strong id="slip-emp-role">Lead Frontend Engineer</strong>
+            </div>
+          </div>
+          <div>
+            <div class="meta-field-row">
+              <span>Pay Period:</span>
+              <strong id="slip-emp-period">01 Sep 2026 - 30 Sep 2026</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Disbursement Mode:</span>
+              <span>Direct Bank Wire (ACH/SWIFT)</span>
+            </div>
+            <div class="meta-field-row">
+              <span>Bank Account:</span>
+              <strong id="slip-emp-bank">•••• •••• 4892</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Tax ID / PAN:</span>
+              <strong id="slip-emp-taxid">TX-8921-99B</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="payslip-calc-grid">
+          <div class="payslip-box-col">
+            <h4>
+              <span>Earnings</span>
+              <span>Amount ($)</span>
+            </h4>
+            <div class="payslip-line-item">
+              <span>Base Monthly Salary</span>
+              <strong id="slip-earn-base">$8,450.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>House Rent Allowance (HRA)</span>
+              <strong id="slip-earn-hra">$1,267.50</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Medical & Health Allowance</span>
+              <strong id="slip-earn-med">$250.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Appraisal Performance Bonus</span>
+              <strong class="pay-positive" id="slip-earn-bonus">+$1,014.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Overtime Shift Hours</span>
+              <strong class="pay-positive" id="slip-earn-ot">+$345.00</strong>
+            </div>
+            <div class="payslip-subtotal-row">
+              <span>Gross Earnings:</span>
+              <strong class="pay-positive" id="slip-gross-total">$11,326.50</strong>
+            </div>
+          </div>
+
+          <div class="payslip-box-col">
+            <h4>
+              <span>Statutory Deductions</span>
+              <span>Amount ($)</span>
+            </h4>
+            <div class="payslip-line-item">
+              <span>Income Tax Withholding (10%)</span>
+              <strong class="pay-deduct" id="slip-deduct-tax">-$1,132.65</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Provident Fund (PF 5%)</span>
+              <strong class="pay-deduct" id="slip-deduct-pf">-$422.50</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Professional Health Insurance</span>
+              <strong class="pay-deduct" id="slip-deduct-ins">-$85.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Unexcused Shift Absence</span>
+              <strong class="pay-deduct" id="slip-deduct-leave">-$0.00</strong>
+            </div>
+            <div class="payslip-subtotal-row">
+              <span>Total Deductions:</span>
+              <strong class="pay-deduct" id="slip-deduct-total">-$1,640.15</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="payslip-net-box">
+          <div class="net-amount-wrap">
+            <span>NET DISBURSED SALARY</span>
+            <strong id="slip-net-amount">$9,686.35</strong>
+          </div>
+          <div class="net-in-words" id="slip-net-words">
+            Amount in Words: Nine Thousand Six Hundred Eighty-Six USD and Thirty-Five Cents Only.
+          </div>
+        </div>
+
+        <div class="payslip-footer-signatures">
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <span>Tanvir — Head of HR</span>
+            <span>NexusEMS Authority</span>
+          </div>
+
+          <div class="official-seal-badge">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Certified & Disbursed</span>
+          </div>
+
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <span id="slip-sig-emp-name">Employee Signature</span>
+            <span>Acknowledgment</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="payslip-actions-bar">
+        <button type="button" id="btn-print-payslip" class="neu-btn dash-action-btn primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Print / Save PDF</span>
+        </button>
+        <button type="button" id="btn-cancel-payslip-view" class="neu-btn dash-action-btn secondary">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal: Employee Profile (My Profile) -->
+  <dialog id="modal-emp-profile" class="modal-dialog">
+    <div class="modal-card emp-profile-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">👤</span>
+          <h3>My Employee Profile</h3>
+        </div>
+        <button id="btn-close-profile-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="profile-hero-card">
+        <div class="profile-avatar-large" id="modal-prof-avatar">SC</div>
+        <div class="profile-hero-info">
+          <h3 class="profile-hero-name" id="modal-prof-name">Sophia Clark</h3>
+          <p class="profile-hero-title" id="modal-prof-role">Lead Frontend Engineer • Engineering Unit</p>
+          <div class="profile-badges-row">
+            <span class="ems-badge" id="modal-prof-id-badge">ID: EMP-1002</span>
+            <span class="status-pill active" id="modal-prof-status">Active Staff</span>
+            <span class="tier-badge" id="modal-prof-tier">Tier A Elite (98%)</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="form-emp-profile">
+        <div class="profile-meta-grid">
+          <div class="profile-field-group">
+            <label for="prof-input-name">Full Legal Name</label>
+            <input type="text" id="prof-input-name" class="profile-field-input" value="Sophia Clark" required>
+          </div>
+
+          <div class="profile-field-group">
+            <label for="prof-input-title">Designation / Role</label>
+            <input type="text" id="prof-input-title" class="profile-field-input" value="Lead Frontend Engineer" required>
+          </div>
+
+          <div class="profile-field-group">
+            <label for="prof-input-dept">Department</label>
+            <select id="prof-input-dept" class="profile-field-input">
+              <option value="Engineering" selected>Engineering</option>
+              <option value="Product">Product & Design</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Finance">Finance</option>
+            </select>
+          </div>
+
+          <div class="profile-field-group">
+            <label for="prof-input-mode">Work Arrangement</label>
+            <select id="prof-input-mode" class="profile-field-input">
+              <option value="Onsite" selected>Onsite (Headquarters)</option>
+              <option value="Remote">Remote</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          <div class="profile-field-group">
+            <label for="prof-input-email">Company Email</label>
+            <input type="email" id="prof-input-email" class="profile-field-input" value="sophia@company.com" readonly style="opacity: 0.85; cursor: not-allowed;">
+          </div>
+
+          <div class="profile-field-group">
+            <label for="prof-input-phone">Personal Phone</label>
+            <input type="tel" id="prof-input-phone" class="profile-field-input" value="+1 (555) 234-8901">
+          </div>
+
+          <div class="profile-field-group">
+            <label>Base Monthly Compensation</label>
+            <div class="profile-value-box" id="modal-prof-salary">$8,450.00 / month ($101,400/yr)</div>
+          </div>
+
+          <div class="profile-field-group">
+            <label>Disbursement Bank Wire</label>
+            <div class="profile-value-box">Bank of America • Acct ****4892</div>
+          </div>
+
+          <div class="profile-field-group" style="grid-column: span 2;">
+            <label for="prof-input-emergency">Emergency Contact (Name & Relationship)</label>
+            <input type="text" id="prof-input-emergency" class="profile-field-input" value="David Clark (Spouse) • +1 (555) 987-6543">
+          </div>
+        </div>
+
+        <div class="profile-actions-row">
+          <button type="button" id="btn-cancel-profile" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" id="btn-save-profile" class="neu-btn dash-action-btn primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Save Profile Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal 1: Recruitment & Talent Acquisition -->
+  <dialog id="modal-recruitment" class="modal-dialog">
+    <div class="modal-card ems-modal-card" style="max-width: 680px; width: 95%;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🎯</span>
+          <div>
+            <h3 style="font-size: 1.15rem; color: var(--text-title); margin: 0;">Recruitment &amp; Talent Acquisition</h3>
+            <span style="font-size: 0.78rem; color: var(--text-subtitle);">Job openings, applicant pipeline, interviews &amp; hiring decisions</span>
+          </div>
+        </div>
+        <button id="btn-close-recruitment-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- Pipeline KPI Stats -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.25rem;">
+        <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+          <span style="font-size: 0.72rem; color: var(--text-subtitle); text-transform: uppercase;">Active Jobs</span>
+          <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-blue); margin-top: 0.2rem;">4 Roles</div>
+        </div>
+        <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+          <span style="font-size: 0.72rem; color: var(--text-subtitle); text-transform: uppercase;">Applicants</span>
+          <div style="font-size: 1.3rem; font-weight: 800; color: #10b981; margin-top: 0.2rem;">18 Total</div>
+        </div>
+        <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+          <span style="font-size: 0.72rem; color: var(--text-subtitle); text-transform: uppercase;">Interviews</span>
+          <div style="font-size: 1.3rem; font-weight: 800; color: #8b5cf6; margin-top: 0.2rem;">6 Active</div>
+        </div>
+        <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+          <span style="font-size: 0.72rem; color: var(--text-subtitle); text-transform: uppercase;">Offers</span>
+          <div style="font-size: 1.3rem; font-weight: 800; color: #f59e0b; margin-top: 0.2rem;">2 Pending</div>
+        </div>
+      </div>
+
+      <!-- Candidate Pipeline Table -->
+      <div style="margin-top: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+          <strong style="font-size: 0.88rem; color: var(--text-title);">Candidate Pipeline &amp; Interview Schedule</strong>
+          <button type="button" id="btn-post-job-open" class="neu-btn dash-action-btn primary" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">+ Post New Opening</button>
+        </div>
+
+        <div class="projects-table-wrap">
+          <table class="projects-table emp-table">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Target Role</th>
+                <th>Stage</th>
+                <th>Interview Date</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="recruitment-candidates-tbody">
+              <tr>
+                <td>
+                  <div class="emp-avatar-cell">
+                    <div class="emp-avatar">NL</div>
+                    <div class="emp-info-wrap">
+                      <span class="emp-name-text">Nathan Lewis</span>
+                      <span class="emp-email-text">nathan.lewis@gmail.com</span>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>Distributed Systems Lead</strong></td>
+                <td><span class="status-pill active">Technical Round</span></td>
+                <td>Oct 16, 2:00 PM</td>
+                <td style="text-align: right;">
+                  <button type="button" class="neu-btn dash-action-btn primary btn-hire-candidate" data-name="Nathan Lewis" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Hire ✓</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="emp-avatar-cell">
+                    <div class="emp-avatar">CS</div>
+                    <div class="emp-info-wrap">
+                      <span class="emp-name-text">Chloe Simmons</span>
+                      <span class="emp-email-text">chloe.sim@design.io</span>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>Staff Product Designer</strong></td>
+                <td><span class="status-pill review">Design Review</span></td>
+                <td>Oct 17, 11:30 AM</td>
+                <td style="text-align: right;">
+                  <button type="button" class="neu-btn dash-action-btn primary btn-hire-candidate" data-name="Chloe Simmons" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Hire ✓</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="emp-avatar-cell">
+                    <div class="emp-avatar">DV</div>
+                    <div class="emp-info-wrap">
+                      <span class="emp-name-text">David Vance</span>
+                      <span class="emp-email-text">d.vance@cloudsec.net</span>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>Cloud SecOps Architect</strong></td>
+                <td><span class="status-pill completed">Offer Stage</span></td>
+                <td>Oct 19, 10:00 AM</td>
+                <td style="text-align: right;">
+                  <button type="button" class="neu-btn dash-action-btn primary btn-hire-candidate" data-name="David Vance" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Finalize ✉</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal 2: Reports & Analytics -->
+  <dialog id="modal-reports-analytics" class="modal-dialog">
+    <div class="modal-card ems-modal-card" style="max-width: 680px; width: 95%;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">📊</span>
+          <div>
+            <h3 style="font-size: 1.15rem; color: var(--text-title); margin: 0;">Executive Reports &amp; Analytics</h3>
+            <span style="font-size: 0.78rem; color: var(--text-subtitle);">Salary cost, shift attendance, performance tiers &amp; headcount audit</span>
+          </div>
+        </div>
+        <button id="btn-close-reports-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- 4 Report Pillar Cards -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.25rem;">
+        <div class="kpi-card" style="padding: 1.1rem;">
+          <span class="kpi-label">Monthly Salary &amp; Payroll Cost</span>
+          <div class="kpi-value" style="font-size: 1.4rem; color: #10b981; margin: 0.35rem 0;">$109,050.00</div>
+          <p style="font-size: 0.76rem; color: var(--text-subtitle); margin: 0;">13 Staff Disbursed • Gross Base $98.5k + Bonus $10.5k</p>
+        </div>
+
+        <div class="kpi-card" style="padding: 1.1rem;">
+          <span class="kpi-label">Attendance &amp; Punctuality Index</span>
+          <div class="kpi-value" style="font-size: 1.4rem; color: var(--accent-blue); margin: 0.35rem 0;">92.3% Rate</div>
+          <p style="font-size: 0.76rem; color: var(--text-subtitle); margin: 0;">Avg Shift: 8.4h • 34.5 hrs Overtime Logged</p>
+        </div>
+
+        <div class="kpi-card" style="padding: 1.1rem;">
+          <span class="kpi-label">Performance Tiers Distribution</span>
+          <div class="kpi-value" style="font-size: 1.4rem; color: #8b5cf6; margin: 0.35rem 0;">Tier A: 38%</div>
+          <p style="font-size: 0.76rem; color: var(--text-subtitle); margin: 0;">Tier B: 46% (Solid) • Tier C: 16% (Review)</p>
+        </div>
+
+        <div class="kpi-card" style="padding: 1.1rem;">
+          <span class="kpi-label">Organization Capacity &amp; Churn</span>
+          <div class="kpi-value" style="font-size: 1.4rem; color: #f59e0b; margin: 0.35rem 0;">13 / 25 Seats</div>
+          <p style="font-size: 0.76rem; color: var(--text-subtitle); margin: 0;">5 Active Departments • 0% Involuntary Churn</p>
+        </div>
+      </div>
+
+      <!-- Export Action Buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <button type="button" id="btn-print-executive-report" class="neu-btn dash-action-btn secondary">
+          <span>🖨️ Print Summary</span>
+        </button>
+        <button type="button" id="btn-download-reports-csv" class="neu-btn dash-action-btn primary">
+          <span>📥 Download Full Audit CSV</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal 3: Settings & Company Policy -->
+  <dialog id="modal-company-settings" class="modal-dialog">
+    <div class="modal-card ems-modal-card" style="max-width: 640px; width: 95%;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">⚙️</span>
+          <div>
+            <h3 style="font-size: 1.15rem; color: var(--text-title); margin: 0;">System Settings &amp; Company Policy</h3>
+            <span style="font-size: 0.78rem; color: var(--text-subtitle);">Configure policies, leave rules, role access &amp; organizational controls</span>
+          </div>
+        </div>
+        <button id="btn-close-settings-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-company-settings" class="ems-modal-form" style="margin-top: 1rem;">
+        <!-- Policy Section 1: Work Hours -->
+        <div style="background: var(--neu-card-bg); padding: 1rem; border-radius: 18px; box-shadow: inset 1px 1px 3px var(--neu-inset-dark);">
+          <strong style="font-size: 0.85rem; color: var(--text-title); display: block; margin-bottom: 0.65rem;">🕒 Work Hours &amp; Shift Discipline Policy</strong>
+          <div class="modal-form-grid">
+            <div class="form-field">
+              <label for="set-shift-duration">Standard Daily Shift</label>
+              <input type="text" id="set-shift-duration" class="profile-field-input" value="8.0 Hours / Day">
+            </div>
+            <div class="form-field">
+              <label for="set-cutoff-time">Late Arrival Cutoff Time</label>
+              <input type="text" id="set-cutoff-time" class="profile-field-input" value="09:30 AM">
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy Section 2: Leave Quotas -->
+        <div style="background: var(--neu-card-bg); padding: 1rem; border-radius: 18px; box-shadow: inset 1px 1px 3px var(--neu-inset-dark);">
+          <strong style="font-size: 0.85rem; color: var(--text-title); display: block; margin-bottom: 0.65rem;">📅 Annual Leave Rules &amp; Balances</strong>
+          <div class="modal-form-grid">
+            <div class="form-field">
+              <label for="set-annual-leave">Paid Vacation Allowance</label>
+              <input type="text" id="set-annual-leave" class="profile-field-input" value="14 Days / Year">
+            </div>
+            <div class="form-field">
+              <label for="set-sick-leave">Medical / Sick Leave</label>
+              <input type="text" id="set-sick-leave" class="profile-field-input" value="12 Days / Year">
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy Section 3: Organization Details -->
+        <div style="background: var(--neu-card-bg); padding: 1rem; border-radius: 18px; box-shadow: inset 1px 1px 3px var(--neu-inset-dark);">
+          <strong style="font-size: 0.85rem; color: var(--text-title); display: block; margin-bottom: 0.65rem;">🏢 Enterprise Account &amp; Super Admin</strong>
+          <div class="modal-form-grid">
+            <div class="form-field">
+              <label for="set-company-name">Legal Entity Name</label>
+              <input type="text" id="set-company-name" class="profile-field-input" value="Nexus Technologies Corp">
+            </div>
+            <div class="form-field">
+              <label for="set-admin-email">Super Admin Root Email</label>
+              <input type="email" id="set-admin-email" class="profile-field-input" value="tanvir@gmai.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-settings" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" id="btn-save-settings" class="neu-btn dash-action-btn primary">Save Changes ✓</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Center -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Master Script -->
+  <script src="script.js"></script>
+</body>
+</html>

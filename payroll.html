@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>NexusEMS • Automated Payroll & Salary Disbursement</title>
+  <meta name="description" content="Company Employee Payroll, Statutory Deductions, Overtime & Bonus Allocation, and Certified Payslips Generator.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Global Header -->
+  <header class="dash-topbar" id="dash-header">
+    <div class="dash-brand-area">
+      <button id="sidebar-toggle" class="neu-circle-btn menu-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="dash-brand">
+        <div class="dash-brand-icon ems-brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>EMS</span></span>
+          <span class="ems-badge" id="portal-role-badge">HR PORTAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Staff Search Bar -->
+    <div class="dash-search-wrap" id="top-search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search staff payroll records, payslips, or taxes... (/)">
+      <span class="search-kbd">/</span>
+    </div>
+
+    <!-- Right Topbar Controls -->
+    <div class="dash-actions">
+      <!-- Live Clock -->
+      <div class="dash-clock-badge">
+        <span class="pulse-dot"></span>
+        <span id="dash-clock">10:42 AM</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <!-- Notifications -->
+      <div class="notifications-wrapper">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot" id="top-notif-dot"></span>
+        </button>
+
+        <!-- Interactive Notifications Dropdown -->
+        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="notif-title-wrap">
+              <h4>Notifications</h4>
+              <span class="notif-count-badge" id="dropdown-notif-count">4 New</span>
+            </div>
+            <button class="notif-mark-read-btn" id="btn-mark-all-read">Mark all as read</button>
+          </div>
+          <div class="notifications-list" id="notifications-list-container">
+            <div class="notif-item unread" data-id="1">
+              <div class="notif-icon-circle payroll">💰</div>
+              <div class="notif-body">
+                <div class="notif-body-title">September 2026 Salary Disbursed</div>
+                <div class="notif-body-desc">Net salary of $8,450.00 has been credited to your Bank of America account (ending 4892).</div>
+                <div class="notif-body-time">Today • 09:00 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="2">
+              <div class="notif-icon-circle leave">📅</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Leave Request Approved</div>
+                <div class="notif-body-desc">Your 3-day Medical Leave application for Oct 18 - Oct 20 has been approved by HR Admin.</div>
+                <div class="notif-body-time">Yesterday • 04:30 PM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="3">
+              <div class="notif-icon-circle performance">🏆</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Performance Appraisal Complete</div>
+                <div class="notif-body-desc">Congratulations! You achieved a 98% rating (Tier A) with a +15% salary increment recommendation.</div>
+                <div class="notif-body-time">2 days ago • 11:15 AM</div>
+              </div>
+            </div>
+            <div class="notif-item unread" data-id="4">
+              <div class="notif-icon-circle attendance">⏱️</div>
+              <div class="notif-body">
+                <div class="notif-body-title">Shift Attendance Logged</div>
+                <div class="notif-body-desc">Today's clock-in verified at 09:12 AM. Shift target of 8 hours is active.</div>
+                <div class="notif-body-time">Today • 09:12 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile -->
+      <div class="user-profile-menu">
+        <div class="user-avatar-wrap">
+          <div class="tanvir-avatar-badge" id="top-user-avatar">T</div>
+          <span class="avatar-online-dot"></span>
+        </div>
+        <div class="user-info-text">
+          <span class="user-name" id="dash-user-name">Tanvir</span>
+          <span class="user-role" id="dash-user-role">HR Administrator</span>
+        </div>
+        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account" aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="dash-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="sidebar-nav">
+      <!-- HR Menu Items -->
+      <nav class="sidebar-menu hidden" id="hr-sidebar-menu">
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="sidebar-category-header">Main</div>
+
+        <a href="employees.html" class="sidebar-item" id="nav-hr-employees">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Employees</span>
+          <span class="menu-counter highlight" id="sidebar-emp-count">13</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-hr-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-hr-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Leave Management</span>
+          <span class="menu-counter" id="sidebar-pending-leaves">3</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item active" id="nav-hr-payroll">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>Payroll &amp; Salary</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-hr-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Performance</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-recruitment">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+          <span>Recruitment</span>
+          <span class="menu-counter" id="sidebar-recruitment-count">4</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-reports">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports &amp; Analytics</span>
+        </a>
+
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-hr-settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Employee Menu Items (7 Core Modules) -->
+      <nav class="sidebar-menu hidden" id="employee-sidebar-menu">
+        <a href="employee-dashboard.html" class="sidebar-item" id="nav-emp-dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>My Dashboard</span>
+        </a>
+
+        <a href="attendance.html" class="sidebar-item" id="nav-emp-attendance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>My Attendance</span>
+        </a>
+
+        <a href="leave-approvals.html" class="sidebar-item" id="nav-emp-leaves">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>My Leaves</span>
+          <span class="menu-counter" id="sidebar-emp-leave-counter">14d</span>
+        </a>
+
+        <a href="appraisals.html" class="sidebar-item" id="nav-emp-performance">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>My Performance</span>
+          <span class="menu-counter highlight">98%</span>
+        </a>
+
+        <a href="payroll.html" class="sidebar-item active" id="nav-emp-payslips">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+            <line x1="6" y1="15" x2="8" y2="15"></line>
+            <line x1="12" y1="15" x2="16" y2="15"></line>
+          </svg>
+          <span>My Payslips</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>My Profile</span>
+        </a>
+
+        <a href="dashboard.html" class="sidebar-item" id="nav-emp-notifications">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Notifications</span>
+          <span class="menu-counter highlight" id="sidebar-notif-count">4</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Status Card -->
+      <div class="sidebar-storage-card">
+        <div class="storage-info">
+          <span id="sidebar-card-label">Organization Capacity</span>
+          <strong id="org-capacity-text">12 / 20 Seats</strong>
+        </div>
+        <div class="storage-bar-track">
+          <div class="storage-bar-fill storage-fill-60" id="org-capacity-bar"></div>
+        </div>
+        <span class="org-plan-badge" id="sidebar-plan-label">Nexus Enterprise Active</span>
+      </div>
+
+      <!-- Quick Sign Out Link -->
+      <a href="index.html" id="btn-sidebar-logout" class="sidebar-item logout" title="Sign out to switch account">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </a>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="dash-content">
+
+      <!-- ================================================================== -->
+      <!-- VIEW 1: HR PAYROLL MANAGEMENT PORTAL                               -->
+      <!-- ================================================================== -->
+      <div id="view-hr-portal" class="portal-view-container hidden">
+        
+        <!-- Welcome Hero Banner -->
+        <section class="dash-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge">NEXUS EMS • PAYROLL & COMPENSATION HUB</span>
+            <h1 class="hero-title">Automated Payroll & Salary Disbursement</h1>
+            <p class="hero-desc">Execute monthly staff disbursements, manage statutory Tax & Provident Fund deductions, allocate overtime & performance appraisal bonuses, and issue verified corporate payslips.</p>
+          </div>
+          <div class="hero-actions-col">
+            <button id="btn-run-payroll-batch" class="neu-btn dash-action-btn primary" title="Calculate and execute batch payroll for the active cycle">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Run Monthly Payroll</span>
+            </button>
+            <button id="btn-disburse-all-paid" class="neu-btn dash-action-btn secondary" title="Mark all processed salaries as Paid / Disbursed">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Disburse All</span>
+            </button>
+            <button id="btn-export-payroll-csv" class="neu-btn dash-action-btn secondary" title="Export bank transfer ledger to CSV">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Bank CSV</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Payroll Executive Financial KPIs -->
+        <section class="dash-kpi-grid">
+          <!-- Total Monthly Payroll Cost -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Monthly Payroll</span>
+              <div class="kpi-icon-wrap" style="color: var(--accent-blue);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="kpi-total-payroll-val">$98,450</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend positive">↑ 4.2%</span>
+                <span class="kpi-desc" id="kpi-total-payroll-desc">Includes Base + Allowances</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Net Disbursed -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Disbursed Take-Home</span>
+              <div class="kpi-icon-wrap" style="color: #10b981;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="kpi-disbursed-val">$84,120</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend positive" id="kpi-disbursed-rate">86%</span>
+                <span class="kpi-desc" id="kpi-disbursed-desc">Processed to Bank Accounts</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Appraisal Bonuses & Overtime -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Bonuses & Overtime Pay</span>
+              <div class="kpi-icon-wrap" style="color: #8b5cf6;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="kpi-bonuses-ot-val">+$11,280</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend neutral">Tier Engine</span>
+                <span class="kpi-desc">Appraisal + Overtime Shift Pay</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Withheld Statutory Deductions -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Tax & PF Withheld</span>
+              <div class="kpi-icon-wrap" style="color: #f43f5e;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="kpi-deductions-val">$14,330</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend negative">Withholding</span>
+                <span class="kpi-desc">10% TDS + 5% Provident Fund</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payroll Ledger Section -->
+        <section class="dash-widget mt-6">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Corporate Staff Payroll Ledger</h2>
+              <p class="widget-subtitle">Live compensation computation with automatic appraisal bonus linkage and one-click payslip generation.</p>
+            </div>
+            <div class="filter-controls-row">
+              <!-- Pay Cycle Selection -->
+              <select id="payroll-cycle-select" class="pay-cycle-selector" aria-label="Select Pay Cycle">
+                <option value="Oct 2026" selected>Pay Cycle: October 2026</option>
+                <option value="Sep 2026">Pay Cycle: September 2026</option>
+                <option value="Aug 2026">Pay Cycle: August 2026</option>
+                <option value="Jul 2026">Pay Cycle: July 2026</option>
+              </select>
+
+              <!-- Department Filter -->
+              <div class="filter-pill-group">
+                <select id="filter-payroll-dept" class="neu-select-native" aria-label="Filter Department">
+                  <option value="all">All Departments</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Product">Product</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Finance">Finance</option>
+                </select>
+              </div>
+
+              <!-- Status Filter -->
+              <div class="filter-pill-group">
+                <select id="filter-payroll-status" class="neu-select-native" aria-label="Filter Payment Status">
+                  <option value="all">All Payment Status</option>
+                  <option value="Paid">Disbursed (Paid)</option>
+                  <option value="Processed">Processed (Ready)</option>
+                  <option value="Pending">Pending Review</option>
+                </select>
+              </div>
+
+              <span class="result-count-badge" id="payroll-result-count">Showing 12 records</span>
+            </div>
+          </div>
+
+          <!-- Main Payroll Table -->
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Base Salary</th>
+                  <th>Appraisal Bonus & OT</th>
+                  <th>Allowances (HRA/Med)</th>
+                  <th>Deductions (Tax/PF)</th>
+                  <th>Net Payable</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Disbursement Actions</th>
+                </tr>
+              </thead>
+              <tbody id="payroll-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Bottom Compensation Rule Hint -->
+          <div class="demo-credential-box appraisal-hint-box">
+            <p class="demo-credential-hint appraisal-hint-text">
+              💼 <strong>Automated Compensation Engine Formula:</strong> Gross Pay = Base Salary + HRA (15%) + Medical ($250) + Performance Appraisal Bonus + Overtime Pay. Statutory Deductions = 10% Withholding Tax + 5% Provident Fund. Performance bonus dynamically inherits from the <strong>Bonus & Increment</strong> engine!
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- VIEW 2: EMPLOYEE SELF-SERVICE PAYROLL & PAYSLIPS PORTAL             -->
+      <!-- ================================================================== -->
+      <div id="view-employee-portal" class="portal-view-container hidden">
+        
+        <!-- Employee Hero Banner -->
+        <section class="dash-hero emp-hero">
+          <div class="hero-text-col">
+            <span class="hero-badge emp-badge">NEXUS EMS • EMPLOYEE COMPENSATION HUB</span>
+            <h1 class="hero-title" id="emp-hero-title">My Payroll & Payslips</h1>
+            <p class="hero-desc" id="emp-hero-subtitle">Comprehensive monthly earnings breakdown, statutory tax deductions, performance incentives, and verified corporate payslips.</p>
+          </div>
+          <div class="hero-actions-col">
+            <button id="btn-download-latest-payslip" class="neu-btn dash-action-btn primary" title="View & Download this month's payslip">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download Oct Payslip</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Employee Personal Compensation KPIs -->
+        <section class="dash-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Net Take-Home Pay</span>
+              <div class="kpi-icon-wrap" style="color: #10b981;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="emp-pay-net-val">$7,890.00</strong>
+              <div class="kpi-sub">
+                <span class="status-pill paid" id="emp-pay-status-pill">Disbursed ✓</span>
+                <span class="kpi-desc">Deposited to Bank Account</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Performance Bonus Added</span>
+              <div class="kpi-icon-wrap" style="color: #8b5cf6;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="emp-pay-bonus-val">+$1,014.00</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend positive" id="emp-pay-tier-tag">Tier A (12%)</span>
+                <span class="kpi-desc">Appraisal score incentive</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Overtime Pay Logged</span>
+              <div class="kpi-icon-wrap" style="color: #06b6d4;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="emp-pay-ot-val">+$345.00</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend positive" id="emp-pay-ot-hours">+12.5 hrs</span>
+                <span class="kpi-desc">Standard 1.5x shift OT rate</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Deductions (Tax & PF)</span>
+              <div class="kpi-icon-wrap" style="color: #f43f5e;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <strong class="kpi-value" id="emp-pay-deduct-val">-$1,342.00</strong>
+              <div class="kpi-sub">
+                <span class="kpi-trend negative">Tax & PF</span>
+                <span class="kpi-desc">Automatic statutory withholding</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visual Salary Ratio Breakdown Component -->
+        <section class="salary-breakdown-card">
+          <div class="appraisal-header-spacing">
+            <h3 class="widget-title">Monthly Compensation Structure Breakdown</h3>
+            <p class="widget-subtitle">Visual distribution of base salary, allowances, appraisal bonuses, and withheld taxes.</p>
+          </div>
+
+          <div class="salary-ratio-bar-track">
+            <div class="salary-segment base" style="width: 65%;" title="Base Salary"></div>
+            <div class="salary-segment allowance" style="width: 15%;" title="Allowances (HRA + Medical)"></div>
+            <div class="salary-segment bonus" style="width: 10%;" title="Performance Bonus"></div>
+            <div class="salary-segment overtime" style="width: 4%;" title="Overtime Hours"></div>
+            <div class="salary-segment tax" style="width: 6%;" title="Taxes & Deductions"></div>
+          </div>
+
+          <div class="salary-legend-row">
+            <div class="salary-legend-item">
+              <span class="legend-dot base"></span>
+              <span>Base Pay (65%)</span>
+            </div>
+            <div class="salary-legend-item">
+              <span class="legend-dot allowance"></span>
+              <span>HRA & Medical Allowance (15%)</span>
+            </div>
+            <div class="salary-legend-item">
+              <span class="legend-dot bonus"></span>
+              <span>Appraisal Performance Bonus (10%)</span>
+            </div>
+            <div class="salary-legend-item">
+              <span class="legend-dot overtime"></span>
+              <span>Overtime Shift Pay (4%)</span>
+            </div>
+            <div class="salary-legend-item">
+              <span class="legend-dot tax"></span>
+              <span>Tax & Provident Fund (15% Withheld)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Past Payslips Archive Table -->
+        <section class="dash-widget">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Historical Payslips & Salary Statements</h2>
+              <p class="widget-subtitle">Official digitally signed PDF payslips for banking, visa verification, and income tax filing.</p>
+            </div>
+          </div>
+
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Pay Period</th>
+                  <th>Disbursement Date</th>
+                  <th>Gross Earnings</th>
+                  <th>Total Deductions</th>
+                  <th>Net Take-Home</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="emp-payslips-history-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 1: HIGH-FIDELITY PRINTABLE PAYSLIP DOCUMENT                      -->
+  <!-- ====================================================================== -->
+  <dialog id="modal-payslip-view" class="modal-dialog">
+    <div class="payslip-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">📄</span>
+          <h3>Verified Corporate Salary Slip</h3>
+        </div>
+        <button id="btn-close-payslip-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- Printable Payslip Document Content -->
+      <div class="payslip-sheet" id="printable-payslip-sheet">
+        <!-- Top Letterhead -->
+        <div class="payslip-top-header">
+          <div class="payslip-company-info">
+            <h2>
+              <span style="display:inline-block; width:10px; height:10px; background:var(--accent-blue); border-radius:50%;"></span>
+              NEXUS EMS TECHNOLOGIES LTD.
+            </h2>
+            <p>Enterprise Global Headquarters • Dhaka Tech Hub & Silicon Tower</p>
+            <p>Registration No: NX-88429-EMS • Payroll Disbursement Div.</p>
+          </div>
+          <div class="payslip-badge-right">
+            <span class="ems-badge" id="slip-month-badge">OCTOBER 2026</span>
+            <span class="payslip-serial" id="slip-serial-no">Slip No: NX-PAY-202610-1002</span>
+          </div>
+        </div>
+
+        <!-- Employee Metadata Grid -->
+        <div class="payslip-emp-meta-grid">
+          <div>
+            <div class="meta-field-row">
+              <span>Employee Name:</span>
+              <strong id="slip-emp-name">Sophia Clark</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Employee ID:</span>
+              <strong id="slip-emp-id">EMP-1002</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Department:</span>
+              <strong id="slip-emp-dept">Engineering</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Designation:</span>
+              <strong id="slip-emp-role">Lead Frontend Engineer</strong>
+            </div>
+          </div>
+          <div>
+            <div class="meta-field-row">
+              <span>Pay Period:</span>
+              <strong id="slip-emp-period">01 Oct 2026 - 31 Oct 2026</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Disbursement Mode:</span>
+              <span>Direct Bank Wire (ACH/SWIFT)</span>
+            </div>
+            <div class="meta-field-row">
+              <span>Bank Account:</span>
+              <strong id="slip-emp-bank">•••• •••• 4892</strong>
+            </div>
+            <div class="meta-field-row">
+              <span>Tax ID / PAN:</span>
+              <strong id="slip-emp-taxid">TX-8921-99B</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Earnings & Deductions Dual Grid -->
+        <div class="payslip-calc-grid">
+          <!-- Earnings -->
+          <div class="payslip-box-col">
+            <h4>
+              <span>Earnings</span>
+              <span>Amount ($)</span>
+            </h4>
+            <div class="payslip-line-item">
+              <span>Base Monthly Salary</span>
+              <strong id="slip-earn-base">$8,450.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>House Rent Allowance (HRA)</span>
+              <strong id="slip-earn-hra">$1,267.50</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Medical & Health Allowance</span>
+              <strong id="slip-earn-med">$250.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Appraisal Performance Bonus</span>
+              <strong class="pay-positive" id="slip-earn-bonus">+$1,014.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Overtime Shift Hours</span>
+              <strong class="pay-positive" id="slip-earn-ot">+$345.00</strong>
+            </div>
+            <div class="payslip-subtotal-row">
+              <span>Gross Earnings:</span>
+              <strong class="pay-positive" id="slip-gross-total">$11,326.50</strong>
+            </div>
+          </div>
+
+          <!-- Deductions -->
+          <div class="payslip-box-col">
+            <h4>
+              <span>Statutory Deductions</span>
+              <span>Amount ($)</span>
+            </h4>
+            <div class="payslip-line-item">
+              <span>Income Tax Withholding (10%)</span>
+              <strong class="pay-deduct" id="slip-deduct-tax">-$1,132.65</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Provident Fund (PF 5%)</span>
+              <strong class="pay-deduct" id="slip-deduct-pf">-$422.50</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Professional Health Insurance</span>
+              <strong class="pay-deduct" id="slip-deduct-ins">-$85.00</strong>
+            </div>
+            <div class="payslip-line-item">
+              <span>Unexcused Shift Absence</span>
+              <strong class="pay-deduct" id="slip-deduct-leave">-$0.00</strong>
+            </div>
+            <div class="payslip-subtotal-row">
+              <span>Total Deductions:</span>
+              <strong class="pay-deduct" id="slip-deduct-total">-$1,640.15</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Net Disbursed Highlight Card -->
+        <div class="payslip-net-box">
+          <div class="net-amount-wrap">
+            <span>NET DISBURSED SALARY</span>
+            <strong id="slip-net-amount">$9,686.35</strong>
+          </div>
+          <div class="net-in-words" id="slip-net-words">
+            Amount in Words: Nine Thousand Six Hundred Eighty-Six USD and Thirty-Five Cents Only.
+          </div>
+        </div>
+
+        <!-- Footer Signatures & Official Seal -->
+        <div class="payslip-footer-signatures">
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <span>Tanvir — Head of HR</span>
+            <span>NexusEMS Authority</span>
+          </div>
+
+          <div class="official-seal-badge">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Certified & Disbursed</span>
+          </div>
+
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <span id="slip-sig-emp-name">Employee Signature</span>
+            <span>Acknowledgment</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Bottom Actions Bar -->
+      <div class="payslip-actions-bar">
+        <button type="button" id="btn-print-payslip" class="neu-btn dash-action-btn primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Print / Save PDF</span>
+        </button>
+        <button type="button" id="btn-cancel-payslip-view" class="neu-btn dash-action-btn secondary">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 2: EDIT EMPLOYEE COMPENSATION & ALLOWANCES (HR PORTAL)          -->
+  <!-- ====================================================================== -->
+  <dialog id="modal-payroll-adjust" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">⚙️</span>
+          <h3>Adjust Employee Compensation Structure</h3>
+        </div>
+        <button id="btn-close-payroll-adjust-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-adjust-payroll" class="ems-modal-form">
+        <input type="hidden" id="adjust-emp-id">
+
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label>Employee Name & Role</label>
+            <input type="text" id="adjust-emp-name" class="neu-input" readonly>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-base-salary">Base Salary ($ / month)</label>
+            <input type="number" id="adjust-base-salary" class="neu-input" min="1000" step="50" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-custom-bonus">Performance Bonus ($)</label>
+            <input type="number" id="adjust-custom-bonus" class="neu-input" min="0" step="25" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-custom-ot">Overtime Compensation ($)</label>
+            <input type="number" id="adjust-custom-ot" class="neu-input" min="0" step="10" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-hra-allowance">House Rent Allowance ($)</label>
+            <input type="number" id="adjust-hra-allowance" class="neu-input" min="0" step="25" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-medical-allowance">Medical Allowance ($)</label>
+            <input type="number" id="adjust-medical-allowance" class="neu-input" min="0" step="25" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-tax-pct">Tax Withholding Rate (%)</label>
+            <input type="number" id="adjust-tax-pct" class="neu-input" min="0" max="40" step="1" value="10" required>
+          </div>
+
+          <div class="form-field">
+            <label for="adjust-status-select">Payment Status</label>
+            <select id="adjust-status-select" class="neu-input">
+              <option value="Paid">Disbursed (Paid)</option>
+              <option value="Processed">Processed (Ready)</option>
+              <option value="Pending">Pending Review</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Real-time Net Preview -->
+        <div class="demo-credential-box" style="margin-top: 1rem;">
+          <p class="demo-credential-hint">
+            Calculated Net Take-Home: <strong class="pay-positive" id="adjust-preview-net">$0.00</strong>
+          </p>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-payroll-adjust" class="neu-btn dash-action-btn secondary">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Save Compensation</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Center -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
