@@ -400,6 +400,12 @@
             <p class="hero-desc">Monitor when an employee arrives, when they leave, and their exact work duration. Overtime and attendance discipline feed directly into their bonus appraisals.</p>
           </div>
           <div class="hero-actions-col">
+            <button id="btn-open-hr-direct-remote" class="neu-btn dash-action-btn primary" title="Assign temporary remote work period without altering system role">
+              <span>+ Assign Remote Period</span>
+            </button>
+            <button id="btn-open-hr-office-config" class="neu-btn dash-action-btn secondary" title="Configure office network subnets, QR token, and verification mode">
+              <span>⚙ Office Security Rules</span>
+            </button>
             <a href="dashboard.html" class="neu-btn dash-action-btn secondary">
               <span>&larr; Back to Directory</span>
             </a>
@@ -462,6 +468,91 @@
             </table>
           </div>
         </section>
+
+        <!-- HR Section 2: Temporary Remote Work Requests & Approvals -->
+        <section class="dash-widget mt-6" id="hr-remote-requests-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Temporary Remote Work Requests & Approvals</h2>
+              <span class="widget-subtitle">Review employee temporary remote requests. Approved periods apply remote rules automatically and expire on the end date without changing system roles.</span>
+            </div>
+            <span class="menu-counter highlight" id="hr-pending-remote-count">0 Pending</span>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Reason</th>
+                  <th>Status & Auto-Expiry</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="hr-remote-requests-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- HR Section 3: Mistaken Attendance Corrections & Audit Log -->
+        <section class="dash-widget mt-6" id="hr-corrections-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">Reported Attendance Mistakes & Correction Approvals</h2>
+              <span class="widget-subtitle">Employees can report accidental badge taps or check-in mistakes. HR reviews, corrects, and an immutable audit log is generated.</span>
+            </div>
+            <span class="menu-counter" id="hr-pending-corrections-count">0 Pending</span>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Shift Date</th>
+                  <th>Correction Type</th>
+                  <th>Employee Explanation</th>
+                  <th>Proposed Times</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="hr-corrections-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Immutable Audit Log Sub-Section -->
+          <div class="widget-header mt-6" style="padding-top: 16px; border-top: 1px solid var(--neu-border, #e2e8f0);">
+            <div>
+              <h3 class="widget-title" style="font-size: 16px;">Immutable Attendance Audit Log</h3>
+              <span class="widget-subtitle">Security log of all attendance modifications, approving HR user, and timestamped diff snapshots.</span>
+            </div>
+          </div>
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Employee</th>
+                  <th>Action</th>
+                  <th>Authorized By</th>
+                  <th>Old Values</th>
+                  <th>New Values</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody id="hr-audit-logs-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
       <!-- ================================================================== -->
@@ -472,7 +563,11 @@
           <div class="hero-text-col">
             <span class="hero-badge emp-badge">NEXUS EMS • MY ATTENDANCE & SHIFT CLOCK</span>
             <h1 class="hero-title">My Attendance & Shift Hours</h1>
-            <p class="hero-desc">Record your daily arrival and departure times. Your shift hours are tracked live and directly calculate your performance bonus.</p>
+            <p class="hero-desc">Record your daily arrival and departure times. Your shift hours are tracked live with server-side timestamp verification.</p>
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span id="emp-active-mode-badge" class="status-pill active" style="font-weight: 600;">Work Mode: Office</span>
+              <span id="emp-remote-window-info" style="font-size: 13px; color: var(--neu-text-muted);"></span>
+            </div>
           </div>
           <div class="hero-actions-col">
             <!-- Daily Punch Clock Widget with Live Shift Timer -->
@@ -484,6 +579,14 @@
               <span class="punch-indicator-dot"></span>
               <span id="punch-clock-text">Clock In (Start Shift)</span>
             </button>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button id="btn-open-emp-remote-req" class="neu-btn dash-action-btn secondary" style="font-size: 12px; padding: 7px 12px;" title="Submit temporary remote work request">
+                <span>🏠 Request Remote</span>
+              </button>
+              <button id="btn-open-emp-correction-req" class="neu-btn dash-action-btn secondary" style="font-size: 12px; padding: 7px 12px;" title="Report accidental check-in or mistake">
+                <span>⚠️ Report Mistake</span>
+              </button>
+            </div>
           </div>
         </section>
 
@@ -515,9 +618,220 @@
             </table>
           </div>
         </section>
+
+        <!-- Employee Section: My Requests Status -->
+        <section class="dash-widget mt-6" id="emp-my-requests-section">
+          <div class="widget-header">
+            <div>
+              <h2 class="widget-title">My Remote Work & Correction Requests</h2>
+              <span class="widget-subtitle">Status of your temporary remote periods and reported attendance corrections.</span>
+            </div>
+          </div>
+
+          <div class="projects-table-wrap">
+            <table class="projects-table emp-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Date / Period</th>
+                  <th>Reason / Details</th>
+                  <th>Submitted At</th>
+                  <th>Status</th>
+                  <th>HR Review Note</th>
+                </tr>
+              </thead>
+              <tbody id="emp-my-requests-table-body">
+                <!-- Dynamically populated via script.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </main>
   </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODALS (PRESERVING EXISTING NEUMORPHIC SOFT UI SYSTEM)               -->
+  <!-- ==================================================================== -->
+
+  <!-- Modal 1: Employee Submit Remote Work Request -->
+  <dialog id="modal-emp-remote-req" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🏠</span>
+          <h3>Request Temporary Remote Work</h3>
+        </div>
+        <button id="btn-close-emp-remote-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-emp-remote-req" class="ems-modal-form">
+        <p style="font-size: 13px; color: var(--neu-text-muted); margin-bottom: 14px;">
+          Submit your temporary remote work window. Once approved by HR, remote attendance rules will automatically apply and expire on the end date without modifying your system role.
+        </p>
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label for="emp-remote-start">Start Date *</label>
+            <input type="date" id="emp-remote-start" class="neu-input" required>
+          </div>
+          <div class="form-field">
+            <label for="emp-remote-end">End Date *</label>
+            <input type="date" id="emp-remote-end" class="neu-input" required>
+          </div>
+          <div class="form-field full-width">
+            <label for="emp-remote-reason">Reason for Remote Work *</label>
+            <textarea id="emp-remote-reason" class="neu-input neu-textarea" rows="3" placeholder="Provide reason (e.g. Home office setup, family emergency, doctor consultation nearby)..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-emp-remote" class="neu-btn dash-action-btn secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal 2: Employee Report Attendance Mistake -->
+  <dialog id="modal-emp-correction-req" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">⚠️</span>
+          <h3>Report Mistaken Attendance</h3>
+        </div>
+        <button id="btn-close-emp-correction-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-emp-correction-req" class="ems-modal-form">
+        <p style="font-size: 13px; color: var(--neu-text-muted); margin-bottom: 14px;">
+          Did you accidentally clock in early, forget to clock out, or experience a network badge error? Submit a correction request for HR review.
+        </p>
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label for="corr-date">Shift Date *</label>
+            <input type="date" id="corr-date" class="neu-input" required>
+          </div>
+          <div class="form-field">
+            <label for="corr-type">Correction Type *</label>
+            <select id="corr-type" class="neu-input neu-select" required>
+              <option value="MISTAKEN_CHECK_IN">Mistaken Check-In (Accidental Tap)</option>
+              <option value="MISSED_CHECK_OUT">Missed Check-Out</option>
+              <option value="INCORRECT_TIME">Incorrect Arrival/Departure Time</option>
+              <option value="OTHER">Other Discrepancy</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="corr-proposed-in">Actual Arrival (In-Time)</label>
+            <input type="time" id="corr-proposed-in" class="neu-input">
+          </div>
+          <div class="form-field">
+            <label for="corr-proposed-out">Actual Departure (Out-Time)</label>
+            <input type="time" id="corr-proposed-out" class="neu-input">
+          </div>
+          <div class="form-field full-width">
+            <label for="corr-reason">Reason / Explanation *</label>
+            <textarea id="corr-reason" class="neu-input neu-textarea" rows="3" placeholder="Explain what happened (e.g. Accidental badge tap while testing device, left office for emergency)..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-emp-correction" class="neu-btn dash-action-btn secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal 3: HR Direct Remote Work Assignment -->
+  <dialog id="modal-hr-direct-remote" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">💼</span>
+          <h3>Assign Temporary Remote Work Period</h3>
+        </div>
+        <button id="btn-close-hr-direct-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-hr-direct-remote" class="ems-modal-form">
+        <p style="font-size: 13px; color: var(--neu-text-muted); margin-bottom: 14px;">
+          Set a remote work period for an employee. The employee's system role will strictly remain unchanged, while attendance rules adapt to remote verification for the designated period.
+        </p>
+        <div class="modal-form-grid">
+          <div class="form-field full-width">
+            <label for="hr-direct-employee">Select Employee *</label>
+            <select id="hr-direct-employee" class="neu-input neu-select" required>
+              <!-- Populated dynamically via script.js -->
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="hr-direct-start">Start Date *</label>
+            <input type="date" id="hr-direct-start" class="neu-input" required>
+          </div>
+          <div class="form-field">
+            <label for="hr-direct-end">End Date *</label>
+            <input type="date" id="hr-direct-end" class="neu-input" required>
+          </div>
+          <div class="form-field full-width">
+            <label for="hr-direct-reason">Approval &amp; Assignment Note *</label>
+            <textarea id="hr-direct-reason" class="neu-input neu-textarea" rows="2" placeholder="Administrative reason for remote work assignment..." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-hr-direct" class="neu-btn dash-action-btn secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Assign Remote Period</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal 4: HR Office Security & Verification Rules -->
+  <dialog id="modal-hr-office-config" class="modal-dialog">
+    <div class="modal-card ems-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🛡️</span>
+          <h3>Office Attendance Security Configuration</h3>
+        </div>
+        <button id="btn-close-hr-office-modal" class="neu-circle-btn close-modal-btn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="form-hr-office-config" class="ems-modal-form">
+        <p style="font-size: 13px; color: var(--neu-text-muted); margin-bottom: 14px;">
+          Configure security rules for office-based attendance. Browser GPS coordinates are explicitly rejected as definitive proof. Employees must connect via approved network subnets or scan the rotating office QR code.
+        </p>
+        <div class="modal-form-grid">
+          <div class="form-field full-width">
+            <label for="cfg-verification-mode">Verification Mode *</label>
+            <select id="cfg-verification-mode" class="neu-input neu-select" required>
+              <option value="NETWORK_OR_QR">Office Network IP OR Dynamic QR Token (Recommended)</option>
+              <option value="NETWORK_ONLY">Office Network IP Only</option>
+              <option value="QR_ONLY">Dynamic QR Code Token Only</option>
+              <option value="STRICT_BOTH">Strict Both (Office Network AND QR Token)</option>
+            </select>
+          </div>
+          <div class="form-field full-width">
+            <label for="cfg-allowed-ips">Approved Office Network CIDRs / IPs (comma-separated) *</label>
+            <input type="text" id="cfg-allowed-ips" class="neu-input" placeholder="127.0.0.1, ::1, 192.168.1.0/24, 10.0.0.0/8" required>
+          </div>
+          <div class="form-field full-width">
+            <label for="cfg-qr-secret">Dynamic Office QR Code Secret Token *</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="cfg-qr-secret" class="neu-input" style="flex: 1;" required>
+              <button type="button" id="btn-generate-new-qr" class="neu-btn dash-action-btn secondary" style="white-space: nowrap; font-size: 12px;">Rotate Key</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" id="btn-cancel-hr-office" class="neu-btn dash-action-btn secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="neu-btn dash-action-btn primary">Save Security Rules</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <!-- Toast Container -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>

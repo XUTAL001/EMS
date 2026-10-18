@@ -1667,6 +1667,365 @@ function initDashboardPage() {
   }
 
   // ------------------------------------------------------------------------
+  // HR TEMPORARY REMOTE WORK & ATTENDANCE CORRECTIONS (SECURITY & AUDIT)
+  // ------------------------------------------------------------------------
+  const hrRemoteRequestsTableBody = document.getElementById('hr-remote-requests-table-body');
+  const hrPendingRemoteCount = document.getElementById('hr-pending-remote-count');
+  const hrCorrectionsTableBody = document.getElementById('hr-corrections-table-body');
+  const hrPendingCorrectionsCount = document.getElementById('hr-pending-corrections-count');
+  const hrAuditLogsTableBody = document.getElementById('hr-audit-logs-table-body');
+
+  async function loadHrRemoteRequests() {
+    if (!hrRemoteRequestsTableBody) return;
+    try {
+      const res = await fetch('/api/remote-work/requests');
+      const data = await res.json();
+      if (!data.success) return;
+
+      const requests = data.data || [];
+      const pendingCount = requests.filter(r => r.status === 'PENDING').length;
+      if (hrPendingRemoteCount) hrPendingRemoteCount.textContent = `${pendingCount} Pending`;
+
+      hrRemoteRequestsTableBody.innerHTML = '';
+      if (requests.length === 0) {
+        hrRemoteRequestsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--neu-text-muted);">No temporary remote work requests recorded.</td></tr>`;
+        return;
+      }
+
+      requests.forEach(r => {
+        const tr = document.createElement('tr');
+        const isPending = r.status === 'PENDING';
+        const isApproved = r.status === 'APPROVED';
+
+        let expiryStatus = '';
+        if (isApproved) {
+          if (r.is_expired) {
+            expiryStatus = '<span class="status-pill review" style="font-size:11px;">Expired (Reverted to Office)</span>';
+          } else if (r.is_active_now) {
+            expiryStatus = '<span class="status-pill active" style="font-size:11px;">Active Window (Remote)</span>';
+          } else {
+            expiryStatus = '<span class="status-pill completed" style="font-size:11px;">Scheduled Future</span>';
+          }
+        } else {
+          expiryStatus = `<span class="status-pill ${isPending ? 'pending' : 'review'}" style="font-size:11px;">${r.status}</span>`;
+        }
+
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(r.employee_name)}</strong> <span style="font-size: 11px; color: var(--neu-text-muted);">(${escapeHtml(r.employee_code || '')})</span></td>
+          <td><span class="emp-id-badge">${escapeHtml(r.start_date)}</span></td>
+          <td><span class="emp-id-badge">${escapeHtml(r.end_date)}</span></td>
+          <td style="max-width: 220px; font-size: 13px;">${escapeHtml(r.reason)}</td>
+          <td>${expiryStatus}</td>
+          <td>
+            ${isPending ? `
+              <div style="display: flex; gap: 6px;">
+                <button class="neu-btn dash-action-btn primary btn-approve-remote" data-id="${r.id}" style="padding: 4px 10px; font-size: 11px;">Approve</button>
+                <button class="neu-btn dash-action-btn secondary btn-reject-remote" data-id="${r.id}" style="padding: 4px 10px; font-size: 11px;">Reject</button>
+              </div>
+            ` : `<span style="font-size: 12px; color: var(--neu-text-muted);">${r.reviewer_name ? 'Reviewed by ' + escapeHtml(r.reviewer_name) : 'Finalized'}</span>`}
+          </td>
+        `;
+
+        const btnApprove = tr.querySelector('.btn-approve-remote');
+        if (btnApprove) {
+          btnApprove.addEventListener('click', async () => {
+            const resp = await fetch(`/api/remote-work/requests/${r.id}/approve`, { method: 'POST' });
+            const result = await resp.json();
+            if (result.success) {
+              showToast(result.message, 'success');
+              loadHrRemoteRequests();
+              loadEmployeeActiveMode();
+            } else {
+              showToast(result.error || 'Failed to approve request', 'error');
+            }
+          });
+        }
+
+        const btnReject = tr.querySelector('.btn-reject-remote');
+        if (btnReject) {
+          btnReject.addEventListener('click', async () => {
+            const reason = prompt('Rejection reason (optional):') || 'Declined by HR';
+            const resp = await fetch(`/api/remote-work/requests/${r.id}/reject`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reason })
+            });
+            const result = await resp.json();
+            if (result.success) {
+              showToast(result.message, 'info');
+              loadHrRemoteRequests();
+            } else {
+              showToast(result.error || 'Failed to reject request', 'error');
+            }
+          });
+        }
+
+        hrRemoteRequestsTableBody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error('Error loading remote requests:', e);
+    }
+  }
+
+  async function loadHrCorrections() {
+    if (!hrCorrectionsTableBody) return;
+    try {
+      const res = await fetch('/api/attendance/correction-requests');
+      const data = await res.json();
+      if (!data.success) return;
+
+      const corrections = data.data || [];
+      const pendingCount = corrections.filter(c => c.status === 'PENDING').length;
+      if (hrPendingCorrectionsCount) hrPendingCorrectionsCount.textContent = `${pendingCount} Pending`;
+
+      hrCorrectionsTableBody.innerHTML = '';
+      if (corrections.length === 0) {
+        hrCorrectionsTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color: var(--neu-text-muted);">No attendance mistake reports pending.</td></tr>`;
+        return;
+      }
+
+      corrections.forEach(c => {
+        const tr = document.createElement('tr');
+        const isPending = c.status === 'PENDING';
+        const typeLabels = {
+          'MISTAKEN_CHECK_IN': 'Mistaken Check-In',
+          'MISSED_CHECK_OUT': 'Missed Check-Out',
+          'INCORRECT_TIME': 'Incorrect Time',
+          'OTHER': 'Other'
+        };
+
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(c.employee_name)}</strong> <span style="font-size: 11px; color: var(--neu-text-muted);">(${escapeHtml(c.employee_code || '')})</span></td>
+          <td><span class="emp-id-badge">${escapeHtml(c.date)}</span></td>
+          <td><span class="status-pill ${c.correction_type === 'MISTAKEN_CHECK_IN' ? 'review' : 'pending'}" style="font-size:11px;">${typeLabels[c.correction_type] || c.correction_type}</span></td>
+          <td style="max-width: 220px; font-size: 13px;">${escapeHtml(c.reason)}</td>
+          <td style="font-size: 12px;">
+            ${c.proposed_check_in ? `In: ${escapeHtml(c.proposed_check_in.includes('T') ? c.proposed_check_in.split('T')[1].substring(0, 5) : c.proposed_check_in)}<br>` : ''}
+            ${c.proposed_check_out ? `Out: ${escapeHtml(c.proposed_check_out.includes('T') ? c.proposed_check_out.split('T')[1].substring(0, 5) : c.proposed_check_out)}` : ''}
+            ${!c.proposed_check_in && !c.proposed_check_out ? '<span style="color:var(--neu-text-muted);">Revert to Void</span>' : ''}
+          </td>
+          <td><span class="status-pill ${isPending ? 'pending' : (c.status === 'APPROVED' ? 'completed' : 'review')}" style="font-size:11px;">${c.status}</span></td>
+          <td>
+            ${isPending ? `
+              <div style="display: flex; gap: 6px;">
+                <button class="neu-btn dash-action-btn primary btn-approve-corr" data-id="${c.id}" style="padding: 4px 10px; font-size: 11px;">Approve &amp; Log</button>
+                <button class="neu-btn dash-action-btn secondary btn-reject-corr" data-id="${c.id}" style="padding: 4px 10px; font-size: 11px;">Reject</button>
+              </div>
+            ` : `<span style="font-size: 12px; color: var(--neu-text-muted);">${c.reviewer_name ? 'Reviewed by ' + escapeHtml(c.reviewer_name) : 'Finalized'}</span>`}
+          </td>
+        `;
+
+        const btnApprove = tr.querySelector('.btn-approve-corr');
+        if (btnApprove) {
+          btnApprove.addEventListener('click', async () => {
+            const resp = await fetch(`/api/attendance/correction-requests/${c.id}/approve`, { method: 'POST' });
+            const result = await resp.json();
+            if (result.success) {
+              showToast(result.message, 'success');
+              loadHrCorrections();
+              loadHrAuditLogs();
+              renderHrAttendanceTable();
+            } else {
+              showToast(result.error || 'Failed to approve correction', 'error');
+            }
+          });
+        }
+
+        const btnReject = tr.querySelector('.btn-reject-corr');
+        if (btnReject) {
+          btnReject.addEventListener('click', async () => {
+            const notes = prompt('Rejection explanation:') || 'Declined by HR';
+            const resp = await fetch(`/api/attendance/correction-requests/${c.id}/reject`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ notes })
+            });
+            const result = await resp.json();
+            if (result.success) {
+              showToast(result.message, 'info');
+              loadHrCorrections();
+              loadHrAuditLogs();
+            } else {
+              showToast(result.error || 'Failed to reject correction', 'error');
+            }
+          });
+        }
+
+        hrCorrectionsTableBody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error('Error loading corrections:', e);
+    }
+  }
+
+  async function loadHrAuditLogs() {
+    if (!hrAuditLogsTableBody) return;
+    try {
+      const res = await fetch('/api/attendance/audit-logs');
+      const data = await res.json();
+      if (!data.success) return;
+
+      const logs = data.data || [];
+      hrAuditLogsTableBody.innerHTML = '';
+      if (logs.length === 0) {
+        hrAuditLogsTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color: var(--neu-text-muted);">No attendance audit records yet.</td></tr>`;
+        return;
+      }
+
+      logs.forEach(l => {
+        const tr = document.createElement('tr');
+        const timeStr = l.created_at ? new Date(l.created_at).toLocaleString() : '';
+        tr.innerHTML = `
+          <td style="font-size: 11px; white-space: nowrap;">${timeStr}</td>
+          <td><strong>${escapeHtml(l.employee_name)}</strong></td>
+          <td><span class="status-pill completed" style="font-size: 10px;">${escapeHtml(l.action)}</span></td>
+          <td>${escapeHtml(l.changer_name)} (${escapeHtml(l.changed_by_role)})</td>
+          <td style="font-size: 11px; font-family: monospace;">${escapeHtml(JSON.stringify(l.old_values || 'None'))}</td>
+          <td style="font-size: 11px; font-family: monospace; color: var(--neu-primary, #0070f3);">${escapeHtml(JSON.stringify(l.new_values || 'None'))}</td>
+          <td style="font-size: 12px;">${escapeHtml(l.reason || 'N/A')}</td>
+        `;
+        hrAuditLogsTableBody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error('Error loading audit logs:', e);
+    }
+  }
+
+  // HR Direct Remote Work Period Assignment Modal
+  const modalHrDirectRemote = document.getElementById('modal-hr-direct-remote');
+  const btnOpenHrDirectRemote = document.getElementById('btn-open-hr-direct-remote');
+  const btnCloseHrDirectModal = document.getElementById('btn-close-hr-direct-modal');
+  const btnCancelHrDirect = document.getElementById('btn-cancel-hr-direct');
+  const formHrDirectRemote = document.getElementById('form-hr-direct-remote');
+  const selectHrDirectEmployee = document.getElementById('hr-direct-employee');
+
+  if (btnOpenHrDirectRemote && modalHrDirectRemote) {
+    btnOpenHrDirectRemote.addEventListener('click', () => {
+      if (selectHrDirectEmployee) {
+        selectHrDirectEmployee.innerHTML = employees.map(e => `
+          <option value="${e.id}">${escapeHtml(e.name)} (${escapeHtml(e.id ? 'EMP-100' + e.id : '')} - ${escapeHtml(e.role || 'Staff')})</option>
+        `).join('');
+      }
+      modalHrDirectRemote.showModal();
+    });
+  }
+
+  if (btnCloseHrDirectModal && modalHrDirectRemote) {
+    btnCloseHrDirectModal.addEventListener('click', () => modalHrDirectRemote.close());
+  }
+  if (btnCancelHrDirect && modalHrDirectRemote) {
+    btnCancelHrDirect.addEventListener('click', () => modalHrDirectRemote.close());
+  }
+
+  if (formHrDirectRemote) {
+    formHrDirectRemote.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const empId = document.getElementById('hr-direct-employee')?.value;
+      const startDate = document.getElementById('hr-direct-start')?.value;
+      const endDate = document.getElementById('hr-direct-end')?.value;
+      const reason = document.getElementById('hr-direct-reason')?.value;
+
+      try {
+        const res = await fetch('/api/remote-work/set-direct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ employee_id: empId, start_date: startDate, end_date: endDate, reason })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          modalHrDirectRemote.close();
+          formHrDirectRemote.reset();
+          loadHrRemoteRequests();
+        } else {
+          showToast(data.error || 'Failed to assign remote period', 'error');
+        }
+      } catch (err) {
+        showToast('Network error assigning remote period', 'error');
+      }
+    });
+  }
+
+  // HR Office Security & Verification Config Modal
+  const modalHrOfficeConfig = document.getElementById('modal-hr-office-config');
+  const btnOpenHrOfficeConfig = document.getElementById('btn-open-hr-office-config');
+  const btnCloseHrOfficeModal = document.getElementById('btn-close-hr-office-modal');
+  const btnCancelHrOffice = document.getElementById('btn-cancel-hr-office');
+  const formHrOfficeConfig = document.getElementById('form-hr-office-config');
+  const btnGenerateNewQr = document.getElementById('btn-generate-new-qr');
+
+  if (btnOpenHrOfficeConfig && modalHrOfficeConfig) {
+    btnOpenHrOfficeConfig.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/config/office-verification');
+        const data = await res.json();
+        if (data.success && data.data) {
+          const cfgMode = document.getElementById('cfg-verification-mode');
+          const cfgIps = document.getElementById('cfg-allowed-ips');
+          const cfgQr = document.getElementById('cfg-qr-secret');
+          if (cfgMode) cfgMode.value = data.data.office_verification_mode;
+          if (cfgIps) cfgIps.value = data.data.office_allowed_ips;
+          if (cfgQr) cfgQr.value = data.data.office_qr_secret;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      modalHrOfficeConfig.showModal();
+    });
+  }
+
+  if (btnCloseHrOfficeModal && modalHrOfficeConfig) {
+    btnCloseHrOfficeModal.addEventListener('click', () => modalHrOfficeConfig.close());
+  }
+  if (btnCancelHrOffice && modalHrOfficeConfig) {
+    btnCancelHrOffice.addEventListener('click', () => modalHrOfficeConfig.close());
+  }
+
+  if (btnGenerateNewQr) {
+    btnGenerateNewQr.addEventListener('click', () => {
+      const newSecret = 'NEXUS-OFFICE-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + new Date().getFullYear();
+      const cfgQr = document.getElementById('cfg-qr-secret');
+      if (cfgQr) cfgQr.value = newSecret;
+      showToast('Dynamic QR key rotated. Remember to save settings!', 'info');
+    });
+  }
+
+  if (formHrOfficeConfig) {
+    formHrOfficeConfig.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cfgMode = document.getElementById('cfg-verification-mode')?.value;
+      const cfgIps = document.getElementById('cfg-allowed-ips')?.value;
+      const cfgQr = document.getElementById('cfg-qr-secret')?.value;
+
+      try {
+        const res = await fetch('/api/config/office-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            office_verification_mode: cfgMode,
+            office_allowed_ips: cfgIps,
+            office_qr_secret: cfgQr
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          modalHrOfficeConfig.close();
+        } else {
+          showToast(data.error || 'Failed to update office verification settings', 'error');
+        }
+      } catch (err) {
+        showToast('Network error saving configuration', 'error');
+      }
+    });
+  }
+
+  // Auto load HR lists
+  loadHrRemoteRequests();
+  loadHrCorrections();
+  loadHrAuditLogs();
+
+  // ------------------------------------------------------------------------
   // HR PERFORMANCE-BASED BONUS & SALARY INCREMENT APPRAISAL BOARD
   // ------------------------------------------------------------------------
   const hrAppraisalTableBody = document.getElementById('hr-appraisal-table-body');
@@ -2865,11 +3224,33 @@ function initDashboardPage() {
     }
   }
 
-  function handleClockIn() {
+  async function handleClockIn() {
     if (isClockedIn) {
       showToast('Shift already started today! Active shift timer is running.', 'info');
       return;
     }
+
+    // Server-Side Verification Gate (Enforces Office Network / Dynamic QR, rejects GPS spoofing)
+    try {
+      const qrToken = localStorage.getItem('nexus_office_qr') || '';
+      const res = await fetch('/api/attendance/check-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ office_qr_token: qrToken })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showToast(data.error || 'Check-in rejected by attendance security rules.', 'error');
+        return;
+      }
+      if (data.work_mode) {
+        localStorage.setItem('nexus_emp_effective_mode', data.work_mode.effective_mode);
+      }
+      showToast(data.message, 'success');
+    } catch (err) {
+      console.warn('Backend check-in fetch error, continuing offline shift fallback:', err);
+    }
+
     isClockedIn = true;
     localStorage.setItem('nexus_emp_clocked_in', 'true');
     const now = new Date();
@@ -2889,15 +3270,25 @@ function initDashboardPage() {
     syncPunchClockUI();
     renderEmployeePortalData();
     renderHrAttendanceTable();
-
-    showToast(`✓ In-Time Logged: Clocked in at ${timeStr}. Work shift started!`, 'success');
+    loadEmployeeActiveMode();
   }
 
-  function handleClockOut() {
+  async function handleClockOut() {
     if (!isClockedIn) {
       showToast('No active shift to check out. Please clock in first.', 'info');
       return;
     }
+
+    try {
+      const res = await fetch('/api/attendance/check-out', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+      }
+    } catch (err) {
+      console.warn('Backend check-out fetch error, continuing offline fallback:', err);
+    }
+
     isClockedIn = false;
     localStorage.setItem('nexus_emp_clocked_in', 'false');
 
@@ -2939,9 +3330,9 @@ function initDashboardPage() {
     renderHrAppraisalTable();
     renderHrPayrollTable();
     renderEmployeePayrollData();
+    loadEmployeeActiveMode();
 
     sound.playPop(520, 0.15);
-    showToast(`✓ Out-Time Logged: Shift ended at ${timeStr} (${durationFormatted} logged). Performance bonus & increment updated!`, 'success');
   }
 
   syncPunchClockUI();
@@ -2950,6 +3341,123 @@ function initDashboardPage() {
   if (btnClockOut) btnClockOut.addEventListener('click', handleClockOut);
   if (btnPunchClock) btnPunchClock.addEventListener('click', () => isClockedIn ? handleClockOut() : handleClockIn());
   if (btnEmpPunchClock) btnEmpPunchClock.addEventListener('click', () => isClockedIn ? handleClockOut() : handleClockIn());
+
+  // ------------------------------------------------------------------------
+  // EMPLOYEE TEMPORARY REMOTE REQUEST & ATTENDANCE CORRECTION MODALS
+  // ------------------------------------------------------------------------
+  const modalEmpRemoteReq = document.getElementById('modal-emp-remote-req');
+  const btnOpenEmpRemoteReq = document.getElementById('btn-open-emp-remote-req');
+  const btnCloseEmpRemoteModal = document.getElementById('btn-close-emp-remote-modal');
+  const btnCancelEmpRemote = document.getElementById('btn-cancel-emp-remote');
+  const formEmpRemoteReq = document.getElementById('form-emp-remote-req');
+
+  if (btnOpenEmpRemoteReq && modalEmpRemoteReq) {
+    btnOpenEmpRemoteReq.addEventListener('click', () => {
+      const today = new Date().toISOString().split('T')[0];
+      const startInput = document.getElementById('emp-remote-start');
+      const endInput = document.getElementById('emp-remote-end');
+      if (startInput) startInput.min = today;
+      if (endInput) endInput.min = today;
+      modalEmpRemoteReq.showModal();
+    });
+  }
+
+  if (btnCloseEmpRemoteModal && modalEmpRemoteReq) {
+    btnCloseEmpRemoteModal.addEventListener('click', () => modalEmpRemoteReq.close());
+  }
+  if (btnCancelEmpRemote && modalEmpRemoteReq) {
+    btnCancelEmpRemote.addEventListener('click', () => modalEmpRemoteReq.close());
+  }
+
+  if (formEmpRemoteReq) {
+    formEmpRemoteReq.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const startDate = document.getElementById('emp-remote-start')?.value;
+      const endDate = document.getElementById('emp-remote-end')?.value;
+      const reason = document.getElementById('emp-remote-reason')?.value;
+
+      try {
+        const res = await fetch('/api/remote-work/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ start_date: startDate, end_date: endDate, reason })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          modalEmpRemoteReq.close();
+          formEmpRemoteReq.reset();
+          loadEmployeeMyRequests();
+        } else {
+          showToast(data.error || 'Failed to submit remote work request', 'error');
+        }
+      } catch (err) {
+        showToast('Network error submitting remote request', 'error');
+      }
+    });
+  }
+
+  const modalEmpCorrectionReq = document.getElementById('modal-emp-correction-req');
+  const btnOpenEmpCorrectionReq = document.getElementById('btn-open-emp-correction-req');
+  const btnCloseEmpCorrectionModal = document.getElementById('btn-close-emp-correction-modal');
+  const btnCancelEmpCorrection = document.getElementById('btn-cancel-emp-correction');
+  const formEmpCorrectionReq = document.getElementById('form-emp-correction-req');
+
+  if (btnOpenEmpCorrectionReq && modalEmpCorrectionReq) {
+    btnOpenEmpCorrectionReq.addEventListener('click', () => {
+      const dateInput = document.getElementById('corr-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+      modalEmpCorrectionReq.showModal();
+    });
+  }
+
+  if (btnCloseEmpCorrectionModal && modalEmpCorrectionReq) {
+    btnCloseEmpCorrectionModal.addEventListener('click', () => modalEmpCorrectionReq.close());
+  }
+  if (btnCancelEmpCorrection && modalEmpCorrectionReq) {
+    btnCancelEmpCorrection.addEventListener('click', () => modalEmpCorrectionReq.close());
+  }
+
+  if (formEmpCorrectionReq) {
+    formEmpCorrectionReq.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const corrDate = document.getElementById('corr-date')?.value;
+      const corrType = document.getElementById('corr-type')?.value;
+      const proposedIn = document.getElementById('corr-proposed-in')?.value;
+      const proposedOut = document.getElementById('corr-proposed-out')?.value;
+      const reason = document.getElementById('corr-reason')?.value;
+
+      try {
+        const res = await fetch('/api/attendance/correction-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: corrDate,
+            correction_type: corrType,
+            proposed_check_in: proposedIn ? `${corrDate}T${proposedIn}:00.000Z` : null,
+            proposed_check_out: proposedOut ? `${corrDate}T${proposedOut}:00.000Z` : null,
+            reason
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          modalEmpCorrectionReq.close();
+          formEmpCorrectionReq.reset();
+          loadEmployeeMyRequests();
+        } else {
+          showToast(data.error || 'Failed to submit correction request', 'error');
+        }
+      } catch (err) {
+        showToast('Network error submitting correction report', 'error');
+      }
+    });
+  }
+
+  // Load employee active mode & personal requests
+  loadEmployeeActiveMode();
 
   // 2. Self-Service Apply For Leave Form
   const formEmpLeave = document.getElementById('form-emp-apply-leave');

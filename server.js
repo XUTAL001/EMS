@@ -160,7 +160,11 @@ class RelationalDatabase {
       job_applications: [],
       notifications: [],
       audit_logs: [],
-      company_settings: []
+      company_settings: [],
+      remote_work_requests: [],
+      attendance_corrections: [],
+      attendance_audit_logs: [],
+      office_network_configs: []
     };
     this.load();
   }
@@ -170,6 +174,10 @@ class RelationalDatabase {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
         this.data = JSON.parse(raw);
+        if (!this.data.remote_work_requests) this.data.remote_work_requests = [];
+        if (!this.data.attendance_corrections) this.data.attendance_corrections = [];
+        if (!this.data.attendance_audit_logs) this.data.attendance_audit_logs = [];
+        if (!this.data.office_network_configs) this.data.office_network_configs = [];
         return;
       } catch (e) {
         console.error('Error loading DB, seeding fresh:', e);
@@ -195,7 +203,10 @@ class RelationalDatabase {
       { id: 5, key: 'target_shift_hours', value: '8.00' },
       { id: 6, key: 'weight_attendance', value: '25' },
       { id: 7, key: 'weight_goals', value: '50' },
-      { id: 8, key: 'weight_manager_review', value: '25' }
+      { id: 8, key: 'weight_manager_review', value: '25' },
+      { id: 9, key: 'office_allowed_ips', value: '127.0.0.1,::1,::ffff:127.0.0.1,192.168.1.0/24,10.0.0.0/8' },
+      { id: 10, key: 'office_qr_secret', value: 'NEXUS-OFFICE-SECURE-2026' },
+      { id: 11, key: 'office_verification_mode', value: 'NETWORK_OR_QR' }
     ];
 
     // 2. Leave Types
@@ -578,13 +589,15 @@ function authenticateToken(req, res, next) {
 
 app.use(authenticateToken);
 
-// Role Authorization Gate
+// Role Authorization Gate (Super Admin has root permissions; HR manages HR/Attendance/Corrections/Remote Work)
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required.' });
     }
-    if (!roles.includes(req.user.role)) {
+    const isSuperAdmin = req.user.role === 'SUPER_ADMIN';
+    const hasRole = roles.includes(req.user.role) || (isSuperAdmin && (roles.includes('HR') || roles.includes('MANAGER')));
+    if (!hasRole) {
       // Audit log unauthorized access attempts
       db.data.audit_logs.push({
         id: db.data.audit_logs.length + 1,
@@ -612,6 +625,103 @@ function forbidManagerPayroll(req, res, next) {
     });
   }
   next();
+}
+
+// ============================================================================
+// WORK MODE & OFFICE VERIFICATION HELPERS (BACKEND-FIRST VALIDATION)
+// ============================================================================
+
+function isIpInSubnet(clientIp, cidr) {
+  if (!clientIp || !cidr) return false;
+  let ip = clientIp.replace(/^::ffff:/, '').trim().toLowerCase();
+  const cleanCidr = cidr.replace(/^::ffff:/, '').trim().toLowerCase();
+  if (ip === cleanCidr) return true;
+  if (!cleanCidr.includes('/')) return false;
+
+  const [range, bits] = cleanCidr.split('/');
+  const mask = ~(2 ** (32 - parseInt(bits, 10)) - 1);
+
+  const ipParts = ip.split('.').map(Number);
+  const rangeParts = range.split('.').map(Number);
+  if (ipParts.length !== 4 || rangeParts.length !== 4) return false;
+
+  const ipNum = ((ipParts[0] << 24) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3]) >>> 0;
+  const rangeNum = ((rangeParts[0] << 24) | (rangeParts[1] << 16) | (rangeParts[2] << 8) | rangeParts[3]) >>> 0;
+  return ((ipNum & mask) >>> 0) === ((rangeNum & mask) >>> 0);
+}
+
+function checkOfficeNetwork(clientIp) {
+  if (!clientIp) return false;
+  const ipSetting = (db.data.company_settings || []).find(s => s.key === 'office_allowed_ips');
+  const allowedList = ipSetting
+    ? ipSetting.value.split(',').map(s => s.trim().toLowerCase())
+    : ['127.0.0.1', '::1', '::ffff:127.0.0.1', '192.168.1.0/24', '10.0.0.0/8'];
+
+  const cleanIp = clientIp.trim().toLowerCase();
+  const rawIpv4 = cleanIp.replace(/^::ffff:/, '');
+
+  // Exact matching for localhost / specific IPs
+  if (allowedList.includes(cleanIp) || allowedList.includes(rawIpv4)) {
+    return true;
+  }
+
+  // CIDR matching
+  for (const entry of allowedList) {
+    if (entry.includes('/') && isIpInSubnet(rawIpv4, entry)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkOfficeQrCode(token) {
+  if (!token) return false;
+  const qrSetting = (db.data.company_settings || []).find(s => s.key === 'office_qr_secret');
+  const secret = qrSetting ? qrSetting.value : 'NEXUS-OFFICE-SECURE-2026';
+  return String(token).trim() === secret.trim();
+}
+
+/**
+ * Separates system role from work mode.
+ * Dynamically resolves whether an employee is currently working remotely
+ * due to an approved temporary remote period that has not expired.
+ */
+function getEffectiveWorkMode(employeeId, dateStr = null) {
+  const emp = (db.data.employees || []).find(e => e.id === employeeId);
+  if (!emp) {
+    return { base_mode: 'ONSITE', effective_mode: 'ONSITE', is_temporary_remote: false };
+  }
+
+  const checkDate = dateStr || new Date().toISOString().split('T')[0];
+
+  // Check active approved temporary remote work requests
+  const activeRemote = (db.data.remote_work_requests || []).find(r =>
+    r.employee_id === employeeId &&
+    r.status === 'APPROVED' &&
+    r.start_date <= checkDate &&
+    r.end_date >= checkDate
+  );
+
+  if (activeRemote) {
+    return {
+      base_mode: (emp.work_mode || 'ONSITE').toUpperCase(),
+      effective_mode: 'REMOTE',
+      is_temporary_remote: true,
+      remote_request_id: activeRemote.id,
+      start_date: activeRemote.start_date,
+      end_date: activeRemote.end_date,
+      approved_by: activeRemote.approved_by,
+      reason: activeRemote.reason
+    };
+  }
+
+  const base = (emp.work_mode || 'ONSITE').toUpperCase();
+  const effective = (base === 'REMOTE') ? 'REMOTE' : (base === 'HYBRID' ? 'HYBRID' : 'ONSITE');
+  return {
+    base_mode: base,
+    effective_mode: effective,
+    is_temporary_remote: false
+  };
 }
 
 // ============================================================================
@@ -856,6 +966,58 @@ app.post('/api/attendance/check-in', (req, res) => {
     return res.status(400).json({ success: false, error: 'Duplicate check-in rejected: Active shift already started today.' });
   }
 
+  // Determine Effective Work Mode (Separating system role from work mode; handles temporary remote with auto-expiry)
+  const workModeInfo = getEffectiveWorkMode(req.employee.id, today);
+  const isRemote = workModeInfo.effective_mode === 'REMOTE';
+
+  let verificationMethod = 'OFFICE_NETWORK';
+
+  if (!isRemote) {
+    // Office attendance: enforce configurable verification (Network IP CIDRs or dynamic QR token)
+    // Security Rule: Browser-submitted GPS is explicitly rejected as definitive proof for office attendance.
+    const modeSetting = (db.data.company_settings.find(s => s.key === 'office_verification_mode') || {}).value || 'NETWORK_OR_QR';
+    const networkValid = checkOfficeNetwork(req.ip);
+    const qrToken = req.body.office_qr_token || req.headers['x-office-qr-token'];
+    const qrValid = checkOfficeQrCode(qrToken);
+
+    let passed = false;
+    if (modeSetting === 'NETWORK_ONLY') {
+      passed = networkValid;
+      verificationMethod = 'OFFICE_NETWORK';
+    } else if (modeSetting === 'QR_ONLY') {
+      passed = qrValid;
+      verificationMethod = 'OFFICE_QR';
+    } else if (modeSetting === 'STRICT_BOTH') {
+      passed = networkValid && qrValid;
+      verificationMethod = 'OFFICE_NETWORK_AND_QR';
+    } else { // 'NETWORK_OR_QR'
+      if (qrValid) {
+        passed = true;
+        verificationMethod = 'OFFICE_QR';
+      } else if (networkValid) {
+        passed = true;
+        verificationMethod = 'OFFICE_NETWORK';
+      }
+    }
+
+    if (!passed) {
+      // If browser sent GPS coordinates in an attempt to spoof or verify office attendance, reject explicitly
+      if (req.body.latitude || req.body.longitude || req.body.gps_coords) {
+        return res.status(403).json({
+          success: false,
+          error: 'Office check-in rejected: Browser GPS is not accepted as proof of office attendance. Please connect to the approved office network or scan the office QR code.'
+        });
+      }
+      return res.status(403).json({
+        success: false,
+        error: 'Office attendance verification failed: Device is not on an approved office network and valid QR code token was not provided. If working remotely, please request temporary remote work from HR.'
+      });
+    }
+  } else {
+    // Remote attendance: Server-verified timestamp and schedule enforcement without continuous GPS tracking
+    verificationMethod = 'REMOTE_SERVER_VERIFIED';
+  }
+
   // Grace period check (9:00 AM + 15 mins)
   const isLate = (now.getHours() > 9) || (now.getHours() === 9 && now.getMinutes() > 15);
   const lateMins = isLate ? ((now.getHours() - 9) * 60 + now.getMinutes() - 15) : 0;
@@ -870,7 +1032,9 @@ app.post('/api/attendance/check-in', (req, res) => {
     status: isLate ? 'LATE' : 'PRESENT',
     late_minutes: Math.max(0, lateMins),
     overtime_minutes: 0,
-    ip_address: req.ip
+    ip_address: req.ip,
+    work_mode_at_checkin: workModeInfo.effective_mode,
+    verification_method: verificationMethod
   };
 
   if (existing) {
@@ -880,7 +1044,12 @@ app.post('/api/attendance/check-in', (req, res) => {
   }
 
   db.save();
-  res.json({ success: true, message: `Checked in successfully at ${now.toLocaleTimeString()}`, data: newLog });
+  res.json({
+    success: true,
+    message: `Checked in successfully (${isRemote ? 'Remote' : 'Office'}) at ${now.toLocaleTimeString()}`,
+    data: newLog,
+    work_mode: workModeInfo
+  });
 });
 
 app.post('/api/attendance/check-out', (req, res) => {
@@ -910,6 +1079,470 @@ app.post('/api/attendance/check-out', (req, res) => {
     message: `Checked out successfully. Shift total: ${Math.floor(record.total_worked_minutes / 60)}h ${record.total_worked_minutes % 60}m`,
     data: record
   });
+});
+
+// --- Attendance Mistake Reporting & Correction Workflow ---
+app.post('/api/attendance/correction-request', (req, res) => {
+  if (!req.employee) return res.status(400).json({ success: false, error: 'Employee profile not associated.' });
+  const { attendance_id, date, correction_type, proposed_check_in, proposed_check_out, reason } = req.body;
+
+  if (!reason || !reason.trim()) {
+    return res.status(400).json({ success: false, error: 'Please provide a clear reason or explanation for this attendance correction.' });
+  }
+
+  const targetDate = date || new Date().toISOString().split('T')[0];
+  const attRecord = attendance_id
+    ? db.data.attendance.find(a => a.id === parseInt(attendance_id))
+    : db.data.attendance.find(a => a.employee_id === req.employee.id && a.date === targetDate);
+
+  const newRequest = {
+    id: (db.data.attendance_corrections || []).length + 1,
+    employee_id: req.employee.id,
+    attendance_id: attRecord ? attRecord.id : null,
+    date: targetDate,
+    correction_type: correction_type || 'MISTAKEN_CHECK_IN',
+    original_check_in: attRecord ? attRecord.check_in_time : null,
+    original_check_out: attRecord ? attRecord.check_out_time : null,
+    original_status: attRecord ? attRecord.status : 'ABSENT',
+    proposed_check_in: proposed_check_in || null,
+    proposed_check_out: proposed_check_out || null,
+    reason: reason.trim(),
+    status: 'PENDING',
+    submitted_at: new Date().toISOString(),
+    reviewed_by: null,
+    reviewed_at: null,
+    rejection_notes: null
+  };
+
+  db.data.attendance_corrections.push(newRequest);
+  db.save();
+
+  res.status(201).json({
+    success: true,
+    message: 'Attendance mistake reported successfully. Your correction request has been forwarded to HR for review.',
+    data: newRequest
+  });
+});
+
+app.get('/api/attendance/correction-requests', (req, res) => {
+  const isHR = req.user.role === 'HR' || req.user.role === 'SUPER_ADMIN';
+  let requests = (db.data.attendance_corrections || []);
+
+  if (!isHR) {
+    if (!req.employee) return res.json({ success: true, data: [] });
+    requests = requests.filter(r => r.employee_id === req.employee.id);
+  }
+
+  const enriched = requests.map(r => {
+    const emp = db.data.employees.find(e => e.id === r.employee_id);
+    const reviewer = r.reviewed_by ? db.data.users.find(u => u.id === r.reviewed_by) : null;
+    return {
+      ...r,
+      employee_name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+      employee_code: emp ? emp.emp_code : '',
+      reviewer_name: reviewer ? reviewer.name : null
+    };
+  });
+
+  res.json({ success: true, data: enriched.reverse() });
+});
+
+app.post('/api/attendance/correction-requests/:id/approve', requireRole('HR'), (req, res) => {
+  const reqId = parseInt(req.params.id);
+  const corr = (db.data.attendance_corrections || []).find(r => r.id === reqId);
+  if (!corr) return res.status(404).json({ success: false, error: 'Correction request not found.' });
+
+  if (corr.status !== 'PENDING') {
+    return res.status(400).json({ success: false, error: `Request already finalized with status: ${corr.status}` });
+  }
+
+  let attRecord = corr.attendance_id
+    ? db.data.attendance.find(a => a.id === corr.attendance_id)
+    : db.data.attendance.find(a => a.employee_id === corr.employee_id && a.date === corr.date);
+
+  const oldValues = attRecord ? {
+    check_in_time: attRecord.check_in_time,
+    check_out_time: attRecord.check_out_time,
+    status: attRecord.status,
+    total_worked_minutes: attRecord.total_worked_minutes
+  } : null;
+
+  const nowIso = new Date().toISOString();
+
+  if (!attRecord) {
+    attRecord = {
+      id: db.data.attendance.length + 1,
+      employee_id: corr.employee_id,
+      date: corr.date,
+      check_in_time: corr.proposed_check_in || `${corr.date}T09:00:00.000Z`,
+      check_out_time: corr.proposed_check_out || null,
+      total_worked_minutes: 0,
+      status: 'PRESENT',
+      late_minutes: 0,
+      overtime_minutes: 0,
+      ip_address: req.ip,
+      verification_method: 'HR_CORRECTED'
+    };
+    db.data.attendance.push(attRecord);
+    corr.attendance_id = attRecord.id;
+  } else {
+    if (corr.correction_type === 'MISTAKEN_CHECK_IN') {
+      if (corr.proposed_check_in) {
+        attRecord.check_in_time = corr.proposed_check_in;
+      } else {
+        attRecord.check_in_time = null;
+        attRecord.check_out_time = null;
+        attRecord.status = 'VOIDED';
+        attRecord.total_worked_minutes = 0;
+      }
+    } else {
+      if (corr.proposed_check_in) attRecord.check_in_time = corr.proposed_check_in;
+      if (corr.proposed_check_out) attRecord.check_out_time = corr.proposed_check_out;
+    }
+
+    if (attRecord.check_in_time && attRecord.check_out_time) {
+      const diffMs = new Date(attRecord.check_out_time) - new Date(attRecord.check_in_time);
+      attRecord.total_worked_minutes = Math.max(0, Math.round(diffMs / 60000));
+      attRecord.overtime_minutes = Math.max(0, attRecord.total_worked_minutes - 480);
+      attRecord.status = 'PRESENT';
+    }
+    attRecord.verification_method = 'HR_CORRECTED';
+  }
+
+  corr.status = 'APPROVED';
+  corr.reviewed_by = req.user.id;
+  corr.reviewed_at = nowIso;
+
+  const newValues = {
+    check_in_time: attRecord.check_in_time,
+    check_out_time: attRecord.check_out_time,
+    status: attRecord.status,
+    total_worked_minutes: attRecord.total_worked_minutes
+  };
+
+  // Create IMMUTABLE attendance audit log record
+  const auditEntry = {
+    id: (db.data.attendance_audit_logs || []).length + 1,
+    correction_request_id: corr.id,
+    attendance_id: attRecord.id,
+    employee_id: corr.employee_id,
+    action: 'ATTENDANCE_CORRECTION_APPROVED',
+    changed_by_user_id: req.user.id,
+    changed_by_role: req.user.role,
+    reason: corr.reason,
+    old_values: oldValues,
+    new_values: newValues,
+    created_at: nowIso
+  };
+  db.data.attendance_audit_logs.push(auditEntry);
+
+  db.data.audit_logs.push({
+    id: db.data.audit_logs.length + 1,
+    user_id: req.user.id,
+    action: 'ATTENDANCE_CORRECTION_APPROVED',
+    entity_type: 'ATTENDANCE',
+    entity_id: attRecord.id,
+    new_values: { correction_id: corr.id, newValues },
+    ip_address: req.ip,
+    created_at: nowIso
+  });
+
+  db.save();
+
+  res.json({
+    success: true,
+    message: 'Attendance correction approved and applied successfully with an immutable audit log entry.',
+    data: corr,
+    attendance: attRecord,
+    audit_log: auditEntry
+  });
+});
+
+app.post('/api/attendance/correction-requests/:id/reject', requireRole('HR'), (req, res) => {
+  const reqId = parseInt(req.params.id);
+  const corr = (db.data.attendance_corrections || []).find(r => r.id === reqId);
+  if (!corr) return res.status(404).json({ success: false, error: 'Correction request not found.' });
+
+  if (corr.status !== 'PENDING') {
+    return res.status(400).json({ success: false, error: `Request already finalized with status: ${corr.status}` });
+  }
+
+  const nowIso = new Date().toISOString();
+  corr.status = 'REJECTED';
+  corr.reviewed_by = req.user.id;
+  corr.reviewed_at = nowIso;
+  corr.rejection_notes = req.body.notes || 'Correction request declined by HR.';
+
+  db.data.attendance_audit_logs.push({
+    id: (db.data.attendance_audit_logs || []).length + 1,
+    correction_request_id: corr.id,
+    attendance_id: corr.attendance_id,
+    employee_id: corr.employee_id,
+    action: 'ATTENDANCE_CORRECTION_REJECTED',
+    changed_by_user_id: req.user.id,
+    changed_by_role: req.user.role,
+    reason: corr.rejection_notes,
+    old_values: null,
+    new_values: { status: 'REJECTED' },
+    created_at: nowIso
+  });
+
+  db.save();
+  res.json({ success: true, message: 'Attendance correction request rejected.', data: corr });
+});
+
+app.get('/api/attendance/audit-logs', requireRole('HR'), (req, res) => {
+  const logs = (db.data.attendance_audit_logs || []).map(l => {
+    const emp = db.data.employees.find(e => e.id === l.employee_id);
+    const changer = db.data.users.find(u => u.id === l.changed_by_user_id);
+    return {
+      ...l,
+      employee_name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+      changer_name: changer ? changer.name : 'System'
+    };
+  });
+  res.json({ success: true, data: logs.reverse() });
+});
+
+// --- Temporary Remote Work Workflow ---
+app.post('/api/remote-work/request', (req, res) => {
+  if (!req.employee) return res.status(400).json({ success: false, error: 'Employee record required.' });
+  const { start_date, end_date, reason } = req.body;
+
+  if (!start_date || !end_date || !reason || !reason.trim()) {
+    return res.status(400).json({ success: false, error: 'Please specify start date, end date, and reason for temporary remote work.' });
+  }
+
+  const start = new Date(start_date);
+  const end = new Date(end_date);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({ success: false, error: 'Invalid start or end date format.' });
+  }
+
+  if (end < start) {
+    return res.status(400).json({ success: false, error: 'Invalid date range: End date cannot be before start date.' });
+  }
+
+  const hasOverlap = (db.data.remote_work_requests || []).some(r => {
+    if (r.employee_id !== req.employee.id || r.status === 'REJECTED' || r.status === 'CANCELLED') return false;
+    const rStart = new Date(r.start_date);
+    const rEnd = new Date(r.end_date);
+    return (start <= rEnd && end >= rStart);
+  });
+
+  if (hasOverlap) {
+    return res.status(400).json({
+      success: false,
+      error: 'You already have an active or pending remote work request covering this date period.'
+    });
+  }
+
+  const newRequest = {
+    id: (db.data.remote_work_requests || []).length + 1,
+    employee_id: req.employee.id,
+    start_date,
+    end_date,
+    reason: reason.trim(),
+    status: 'PENDING',
+    created_at: new Date().toISOString(),
+    reviewed_by: null,
+    reviewed_at: null,
+    rejection_reason: null
+  };
+
+  db.data.remote_work_requests.push(newRequest);
+  db.save();
+
+  res.status(201).json({
+    success: true,
+    message: 'Temporary remote work request submitted successfully. Awaiting HR review and approval.',
+    data: newRequest
+  });
+});
+
+app.get('/api/remote-work/requests', (req, res) => {
+  const isHR = req.user.role === 'HR' || req.user.role === 'SUPER_ADMIN';
+  let requests = (db.data.remote_work_requests || []);
+
+  if (!isHR) {
+    if (!req.employee) return res.json({ success: true, data: [] });
+    requests = requests.filter(r => r.employee_id === req.employee.id);
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const enriched = requests.map(r => {
+    const emp = db.data.employees.find(e => e.id === r.employee_id);
+    const reviewer = r.reviewed_by ? db.data.users.find(u => u.id === r.reviewed_by) : null;
+    const isExpired = r.status === 'APPROVED' && r.end_date < today;
+    const isActiveNow = r.status === 'APPROVED' && r.start_date <= today && r.end_date >= today;
+
+    return {
+      ...r,
+      employee_name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+      employee_code: emp ? emp.emp_code : '',
+      reviewer_name: reviewer ? reviewer.name : null,
+      is_expired: isExpired,
+      is_active_now: isActiveNow
+    };
+  });
+
+  res.json({ success: true, data: enriched.reverse() });
+});
+
+app.post('/api/remote-work/requests/:id/approve', requireRole('HR'), (req, res) => {
+  const reqId = parseInt(req.params.id);
+  const record = (db.data.remote_work_requests || []).find(r => r.id === reqId);
+  if (!record) return res.status(404).json({ success: false, error: 'Remote work request not found.' });
+
+  if (record.status !== 'PENDING') {
+    return res.status(400).json({ success: false, error: `Request already finalized with status: ${record.status}` });
+  }
+
+  record.status = 'APPROVED';
+  record.reviewed_by = req.user.id;
+  record.reviewed_at = new Date().toISOString();
+
+  db.data.audit_logs.push({
+    id: db.data.audit_logs.length + 1,
+    user_id: req.user.id,
+    action: 'REMOTE_WORK_REQUEST_APPROVED',
+    entity_type: 'REMOTE_WORK_REQUEST',
+    entity_id: record.id,
+    new_values: { employee_id: record.employee_id, start_date: record.start_date, end_date: record.end_date },
+    ip_address: req.ip,
+    created_at: record.reviewed_at
+  });
+
+  db.save();
+  res.json({
+    success: true,
+    message: `Remote work approved for period ${record.start_date} to ${record.end_date}. Remote attendance rules will automatically apply during this window.`,
+    data: record
+  });
+});
+
+app.post('/api/remote-work/requests/:id/reject', requireRole('HR'), (req, res) => {
+  const reqId = parseInt(req.params.id);
+  const record = (db.data.remote_work_requests || []).find(r => r.id === reqId);
+  if (!record) return res.status(404).json({ success: false, error: 'Remote work request not found.' });
+
+  if (record.status !== 'PENDING') {
+    return res.status(400).json({ success: false, error: `Request already finalized with status: ${record.status}` });
+  }
+
+  record.status = 'REJECTED';
+  record.reviewed_by = req.user.id;
+  record.reviewed_at = new Date().toISOString();
+  record.rejection_reason = req.body.reason || 'Declined by HR.';
+
+  db.data.audit_logs.push({
+    id: db.data.audit_logs.length + 1,
+    user_id: req.user.id,
+    action: 'REMOTE_WORK_REQUEST_REJECTED',
+    entity_type: 'REMOTE_WORK_REQUEST',
+    entity_id: record.id,
+    new_values: { employee_id: record.employee_id, reason: record.rejection_reason },
+    ip_address: req.ip,
+    created_at: record.reviewed_at
+  });
+
+  db.save();
+  res.json({ success: true, message: 'Remote work request rejected.', data: record });
+});
+
+// HR direct remote work period assignment (without changing system role)
+app.post('/api/remote-work/set-direct', requireRole('HR'), (req, res) => {
+  const { employee_id, start_date, end_date, reason } = req.body;
+  if (!employee_id || !start_date || !end_date) {
+    return res.status(400).json({ success: false, error: 'Employee ID, start date, and end date are required.' });
+  }
+
+  const emp = db.data.employees.find(e => e.id === parseInt(employee_id));
+  if (!emp) return res.status(404).json({ success: false, error: 'Employee not found.' });
+
+  const start = new Date(start_date);
+  const end = new Date(end_date);
+  if (end < start) {
+    return res.status(400).json({ success: false, error: 'End date cannot be before start date.' });
+  }
+
+  const directRecord = {
+    id: (db.data.remote_work_requests || []).length + 1,
+    employee_id: emp.id,
+    start_date,
+    end_date,
+    reason: (reason || 'Directly assigned by HR').trim(),
+    status: 'APPROVED',
+    created_at: new Date().toISOString(),
+    reviewed_by: req.user.id,
+    reviewed_at: new Date().toISOString(),
+    rejection_reason: null
+  };
+
+  db.data.remote_work_requests.push(directRecord);
+
+  db.data.audit_logs.push({
+    id: db.data.audit_logs.length + 1,
+    user_id: req.user.id,
+    action: 'REMOTE_WORK_DIRECT_ASSIGNED',
+    entity_type: 'REMOTE_WORK_REQUEST',
+    entity_id: directRecord.id,
+    new_values: { employee_id: emp.id, start_date, end_date, reason: directRecord.reason },
+    ip_address: req.ip,
+    created_at: directRecord.reviewed_at
+  });
+
+  db.save();
+  res.status(201).json({
+    success: true,
+    message: `Temporary remote work set for ${emp.first_name} ${emp.last_name} from ${start_date} to ${end_date}. System role remains unchanged.`,
+    data: directRecord
+  });
+});
+
+app.get('/api/remote-work/effective-mode', (req, res) => {
+  const empId = req.query.employee_id ? parseInt(req.query.employee_id) : (req.employee ? req.employee.id : null);
+  if (!empId) return res.status(400).json({ success: false, error: 'Employee ID required.' });
+
+  const modeInfo = getEffectiveWorkMode(empId, req.query.date || null);
+  res.json({ success: true, data: modeInfo });
+});
+
+// --- Office Verification Settings Configuration ---
+app.get('/api/config/office-verification', requireRole('HR'), (req, res) => {
+  const ips = (db.data.company_settings.find(s => s.key === 'office_allowed_ips') || {}).value || '127.0.0.1,::1,::ffff:127.0.0.1';
+  const qrSecret = (db.data.company_settings.find(s => s.key === 'office_qr_secret') || {}).value || 'NEXUS-OFFICE-SECURE-2026';
+  const mode = (db.data.company_settings.find(s => s.key === 'office_verification_mode') || {}).value || 'NETWORK_OR_QR';
+
+  res.json({
+    success: true,
+    data: {
+      office_allowed_ips: ips,
+      office_qr_secret: qrSecret,
+      office_verification_mode: mode
+    }
+  });
+});
+
+app.post('/api/config/office-verification', requireRole('HR'), (req, res) => {
+  const { office_allowed_ips, office_qr_secret, office_verification_mode } = req.body;
+
+  function updateSetting(key, val) {
+    let setting = db.data.company_settings.find(s => s.key === key);
+    if (!setting) {
+      setting = { id: db.data.company_settings.length + 1, key, value: String(val) };
+      db.data.company_settings.push(setting);
+    } else {
+      setting.value = String(val);
+    }
+  }
+
+  if (office_allowed_ips !== undefined) updateSetting('office_allowed_ips', office_allowed_ips);
+  if (office_qr_secret !== undefined) updateSetting('office_qr_secret', office_qr_secret);
+  if (office_verification_mode !== undefined) updateSetting('office_verification_mode', office_verification_mode);
+
+  db.save();
+  res.json({ success: true, message: 'Office attendance verification settings updated.' });
 });
 
 // --- Leave Management Engine ---
@@ -1254,4 +1887,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, db };
+module.exports = { app, db, checkOfficeNetwork, checkOfficeQrCode, getEffectiveWorkMode };

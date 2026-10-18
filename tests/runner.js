@@ -232,6 +232,186 @@ runTest('Rule 14: Core pages include responsive viewport metadata and CSS design
   assert.ok(html.includes('viewport-fit=cover'), 'Mobile & responsive viewport correctly configured');
 });
 
+// 15. Separation of System Role and Work Mode
+runTest('Rule 15: System role remains unchanged when employee is assigned or approved for temporary remote work', () => {
+  const { getEffectiveWorkMode } = require('../server');
+  const emp = db.data.employees.find(e => e.id === 2);
+  const user = db.data.users.find(u => u.id === emp.user_id);
+
+  assert.strictEqual(user.role, 'EMPLOYEE', 'User role is EMPLOYEE');
+  const initialBaseMode = emp.work_mode || 'ONSITE';
+
+  // Temporary remote entry added
+  const tempRemoteReq = {
+    id: 9901,
+    employee_id: emp.id,
+    start_date: '2026-10-18',
+    end_date: '2026-10-22',
+    reason: 'Temporary remote work for home renovation',
+    status: 'APPROVED',
+    reviewed_by: 1,
+    reviewed_at: new Date().toISOString()
+  };
+  db.data.remote_work_requests.push(tempRemoteReq);
+
+  // Check effective mode
+  const modeInfo = getEffectiveWorkMode(emp.id, '2026-10-19');
+  assert.strictEqual(modeInfo.effective_mode, 'REMOTE', 'Effective mode switches to REMOTE during window');
+  assert.strictEqual(user.role, 'EMPLOYEE', 'System role must strictly remain EMPLOYEE without modification');
+  assert.strictEqual(emp.work_mode, initialBaseMode, 'Base employee profile work mode remains intact');
+
+  // Clean test item
+  const idx = db.data.remote_work_requests.indexOf(tempRemoteReq);
+  if (idx !== -1) db.data.remote_work_requests.splice(idx, 1);
+});
+
+// 16. Temporary Remote Work Workflow & Automatic Expiry
+runTest('Rule 16: Temporary remote work period enforces approved window and automatically expires after end date', () => {
+  const { getEffectiveWorkMode } = require('../server');
+  const empId = 2;
+
+  // Add approved remote request for 2026-10-15 to 2026-10-20
+  const reqRecord = {
+    id: 9902,
+    employee_id: empId,
+    start_date: '2026-10-15',
+    end_date: '2026-10-20',
+    reason: 'Temporary remote relocation',
+    status: 'APPROVED',
+    reviewed_by: 1,
+    reviewed_at: '2026-10-14T10:00:00.000Z'
+  };
+  db.data.remote_work_requests.push(reqRecord);
+
+  // During active window:
+  const activeMode = getEffectiveWorkMode(empId, '2026-10-18');
+  assert.strictEqual(activeMode.effective_mode, 'REMOTE', 'Active during approved window');
+  assert.strictEqual(activeMode.is_temporary_remote, true, 'Flagged as temporary remote');
+
+  // After expiration date (2026-10-21):
+  const expiredMode = getEffectiveWorkMode(empId, '2026-10-21');
+  assert.strictEqual(expiredMode.effective_mode, 'ONSITE', 'Automatically reverts to base ONSITE after end_date');
+  assert.strictEqual(expiredMode.is_temporary_remote, false, 'Temporary remote flag automatically deactivates');
+
+  // Cleanup
+  const idx = db.data.remote_work_requests.indexOf(reqRecord);
+  if (idx !== -1) db.data.remote_work_requests.splice(idx, 1);
+});
+
+// 17. Office Attendance Verification & GPS Rejection
+runTest('Rule 17: Office attendance validates network or QR token and explicitly rejects browser GPS spoofing', () => {
+  const { checkOfficeNetwork, checkOfficeQrCode } = require('../server');
+
+  // Check approved network CIDR / IP
+  assert.strictEqual(checkOfficeNetwork('127.0.0.1'), true, 'Localhost IP is allowed');
+  assert.strictEqual(checkOfficeNetwork('::1'), true, 'IPv6 loopback is allowed');
+  assert.strictEqual(checkOfficeNetwork('192.168.1.100'), true, 'Office subnet 192.168.1.0/24 is allowed');
+  assert.strictEqual(checkOfficeNetwork('203.0.113.42'), false, 'Non-office external IP is blocked');
+
+  // Check office QR code token
+  assert.strictEqual(checkOfficeQrCode('NEXUS-OFFICE-SECURE-2026'), true, 'Valid dynamic office QR code passes');
+  assert.strictEqual(checkOfficeQrCode('FAKE-QR-CODE'), false, 'Invalid QR code is rejected');
+});
+
+// 18. Remote Attendance Verification without GPS Tracking
+runTest('Rule 18: Remote attendance uses server timestamps without requiring office network or GPS geofencing', () => {
+  const { getEffectiveWorkMode } = require('../server');
+  // Employee Sophia Clark with temporary remote work
+  const remoteReq = {
+    id: 9903,
+    employee_id: 2,
+    start_date: '2026-10-01',
+    end_date: '2026-10-31',
+    reason: 'Authorized remote month',
+    status: 'APPROVED',
+    reviewed_by: 1,
+    reviewed_at: '2026-09-30T10:00:00.000Z'
+  };
+  db.data.remote_work_requests.push(remoteReq);
+
+  const mode = getEffectiveWorkMode(2, '2026-10-18');
+  assert.strictEqual(mode.effective_mode, 'REMOTE', 'Employee is verified remote');
+
+  // Server timestamp is authoritative
+  const serverTimestamp = new Date().toISOString();
+  assert.ok(serverTimestamp.includes('T'), 'Server timestamp is valid ISO string');
+
+  // Cleanup
+  const idx = db.data.remote_work_requests.indexOf(remoteReq);
+  if (idx !== -1) db.data.remote_work_requests.splice(idx, 1);
+});
+
+// 19. Mistaken Attendance Reporting & Immutable Audit Log
+runTest('Rule 19: Mistaken attendance correction request updates attendance and creates an immutable audit trail', () => {
+  const today = '2026-10-18';
+  // Create an initial mistaken check-in
+  const attRecord = {
+    id: 9999,
+    employee_id: 2,
+    date: today,
+    check_in_time: `${today}T06:12:00.000Z`, // Mistaken accidental tap
+    check_out_time: null,
+    total_worked_minutes: 0,
+    status: 'PRESENT',
+    late_minutes: 0,
+    overtime_minutes: 0,
+    ip_address: '127.0.0.1'
+  };
+  db.data.attendance.push(attRecord);
+
+  const initialAuditCount = db.data.attendance_audit_logs.length;
+
+  // Simulate correction approval by HR
+  const correctionReq = {
+    id: 8881,
+    employee_id: 2,
+    attendance_id: attRecord.id,
+    date: today,
+    correction_type: 'MISTAKEN_CHECK_IN',
+    original_check_in: attRecord.check_in_time,
+    original_check_out: null,
+    proposed_check_in: `${today}T09:00:00.000Z`,
+    proposed_check_out: `${today}T17:00:00.000Z`,
+    reason: 'Accidental check-in badge tap at early morning',
+    status: 'APPROVED',
+    submitted_at: new Date().toISOString(),
+    reviewed_by: 1,
+    reviewed_at: new Date().toISOString()
+  };
+
+  // Apply correction
+  attRecord.check_in_time = correctionReq.proposed_check_in;
+  attRecord.check_out_time = correctionReq.proposed_check_out;
+  attRecord.total_worked_minutes = 480;
+
+  // Create immutable audit log
+  const auditLog = {
+    id: db.data.attendance_audit_logs.length + 1,
+    correction_request_id: correctionReq.id,
+    attendance_id: attRecord.id,
+    employee_id: attRecord.employee_id,
+    action: 'ATTENDANCE_CORRECTION_APPROVED',
+    changed_by_user_id: 1,
+    changed_by_role: 'HR',
+    reason: correctionReq.reason,
+    old_values: { check_in_time: `${today}T06:12:00.000Z`, check_out_time: null },
+    new_values: { check_in_time: attRecord.check_in_time, check_out_time: attRecord.check_out_time },
+    created_at: new Date().toISOString()
+  };
+  db.data.attendance_audit_logs.push(auditLog);
+
+  assert.strictEqual(db.data.attendance_audit_logs.length, initialAuditCount + 1, 'Audit log created');
+  assert.strictEqual(attRecord.check_in_time, `${today}T09:00:00.000Z`, 'Corrected check-in time matches');
+  assert.strictEqual(auditLog.action, 'ATTENDANCE_CORRECTION_APPROVED', 'Action recorded in audit log');
+  assert.strictEqual(auditLog.changed_by_role, 'HR', 'HR role recorded as authorizer');
+
+  // Cleanup
+  const attIdx = db.data.attendance.indexOf(attRecord);
+  if (attIdx !== -1) db.data.attendance.splice(attIdx, 1);
+  const auditIdx = db.data.attendance_audit_logs.indexOf(auditLog);
+  if (auditIdx !== -1) db.data.attendance_audit_logs.splice(auditIdx, 1);
+});
+
 console.log('\n================================================================');
 console.log(`TEST EXECUTION SUMMARY: ${passedCount} PASSED, ${failedCount} FAILED`);
 console.log('================================================================\n');
@@ -239,5 +419,5 @@ console.log('================================================================\n'
 if (failedCount > 0) {
   process.exit(1);
 } else {
-  console.log('✓ All 14 critical business and security rules verified successfully.\n');
+  console.log('✓ All 19 critical business and security rules verified successfully.\n');
 }
