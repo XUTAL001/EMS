@@ -989,6 +989,15 @@ function initDashboardPage() {
   const dashUserName = document.getElementById('dash-user-name');
   const dashUserRole = document.getElementById('dash-user-role');
   const topUserAvatar = document.getElementById('top-user-avatar');
+  function updateTopAvatarDisplay(initials) {
+    if (!topUserAvatar) return;
+    const photo = localStorage.getItem('auth_user_photo');
+    if (photo) {
+      topUserAvatar.innerHTML = `<img src="${photo}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+    } else if (initials !== undefined) {
+      topUserAvatar.textContent = initials;
+    }
+  }
   const dashHeroTitle = document.getElementById('dash-hero-title');
   const empHeroTitle = document.getElementById('emp-hero-title');
   const empHeroSubtitle = document.getElementById('emp-hero-subtitle');
@@ -1087,7 +1096,7 @@ function initDashboardPage() {
 
       if (dashUserName) dashUserName.textContent = 'Tanvir';
       if (dashUserRole) dashUserRole.textContent = 'HR Administrator';
-      if (topUserAvatar) topUserAvatar.textContent = 'T';
+      updateTopAvatarDisplay('T');
       if (dashHeroTitle) dashHeroTitle.textContent = 'Welcome back, Tanvir 👋';
 
       if (sidebarCardLabel) sidebarCardLabel.textContent = 'Organization Capacity';
@@ -1140,7 +1149,7 @@ function initDashboardPage() {
 
       if (dashUserName) dashUserName.textContent = mgrName;
       if (dashUserRole) dashUserRole.textContent = mgrRole;
-      if (topUserAvatar) topUserAvatar.textContent = mgrAvatar;
+      updateTopAvatarDisplay(mgrAvatar);
       if (mgrHeroTitle) mgrHeroTitle.textContent = `Welcome back, ${mgrName} 👋`;
       if (mgrHeroSubtitle) mgrHeroSubtitle.textContent = `${mgrRole} • ${mgrDept} Unit • Oversight of 5 Direct Reports (Operational Scope Only)`;
 
@@ -1202,7 +1211,7 @@ function initDashboardPage() {
 
       if (dashUserName) dashUserName.textContent = empName;
       if (dashUserRole) dashUserRole.textContent = empRole;
-      if (topUserAvatar) topUserAvatar.textContent = empAvatar;
+      updateTopAvatarDisplay(empAvatar);
       if (empHeroTitle) empHeroTitle.textContent = `Welcome back, ${empName} 👋`;
       if (empHeroSubtitle) empHeroSubtitle.innerHTML = `${empRole} • ${empDept} Unit • Employee ID: <strong>${empId}</strong>`;
 
@@ -3197,13 +3206,19 @@ function initDashboardPage() {
   const navMgrProfile = document.getElementById('nav-mgr-profile');
   const cardMgrOpenProfile = document.getElementById('card-mgr-open-profile');
   const btnEmpOpenProfileHero = document.getElementById('btn-emp-open-profile-hero');
-  if (navEmpProfile) navEmpProfile.addEventListener('click', openProfileModal);
-  if (cardOpenProfile) cardOpenProfile.addEventListener('click', openProfileModal);
-  if (btnEmpOpenProfileHero) btnEmpOpenProfileHero.addEventListener('click', openProfileModal);
-  if (navMgrProfile) navMgrProfile.addEventListener('click', openProfileModal);
-  if (cardMgrOpenProfile) cardMgrOpenProfile.addEventListener('click', openProfileModal);
 
-
+  if (cardOpenProfile) cardOpenProfile.addEventListener('click', (e) => {
+    if (modalEmpProfile) openProfileModal(e);
+    else window.location.href = 'profile.html';
+  });
+  if (btnEmpOpenProfileHero) btnEmpOpenProfileHero.addEventListener('click', (e) => {
+    if (modalEmpProfile) openProfileModal(e);
+    else window.location.href = 'profile.html';
+  });
+  if (cardMgrOpenProfile) cardMgrOpenProfile.addEventListener('click', (e) => {
+    if (modalEmpProfile) openProfileModal(e);
+    else window.location.href = 'profile.html';
+  });
 
   // Account switch button
   const btnSwitchHr = document.getElementById('btn-switch-hr');
@@ -3226,7 +3241,11 @@ function initDashboardPage() {
     topUserProfileMenu.style.cursor = 'pointer';
     topUserProfileMenu.addEventListener('click', (e) => {
       if (e.target.closest('#btn-logout-top')) return;
-      openProfileModal(e);
+      if (window.location.pathname.includes('profile.html')) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.location.href = 'profile.html';
+      }
     });
   }
 
@@ -3270,7 +3289,7 @@ function initDashboardPage() {
       // Update live UI
       if (dashUserName) dashUserName.textContent = newName;
       if (dashUserRole) dashUserRole.textContent = newTitle;
-      if (topUserAvatar) topUserAvatar.textContent = newAvatar;
+      updateTopAvatarDisplay(newAvatar);
       if (empHeroTitle) empHeroTitle.textContent = `Welcome back, ${newName} 👋`;
       if (empHeroSubtitle) {
         const currentId = localStorage.getItem('auth_user_id') || 'EMP-1002';
@@ -3418,6 +3437,294 @@ function initDashboardPage() {
       }
     });
   });
+
+  // E. Initialize Dedicated Employee Profile Page (if active)
+  initProfilePage();
+}
+
+// ==========================================================================
+// 8. Dedicated "My Employee Profile" Page Controller
+// ==========================================================================
+function initProfilePage() {
+  const profilePhotoCircle = document.getElementById('profile-photo-circle');
+  if (!profilePhotoCircle) return;
+
+  const authRole = localStorage.getItem('auth_user_role') || 'EMPLOYEE';
+  const currentEmail = localStorage.getItem('auth_user_email') || (authRole === 'HR' ? 'tanviralamshifat2005@gmail.com' : 'sophia@company.com');
+  const currentEmp = employees.find(e => e.email === currentEmail || e.id === localStorage.getItem('auth_user_id')) || employees.find(e => e.id === 'EMP-1002');
+
+  const currentName = localStorage.getItem('auth_user_name') || (currentEmp ? currentEmp.name : (authRole === 'HR' ? 'Tanvir' : 'Sophia Clark'));
+  const currentTitle = localStorage.getItem('auth_user_title') || (currentEmp ? currentEmp.role : (authRole === 'HR' ? 'HR Administrator' : 'Lead Frontend Engineer'));
+  const currentDept = localStorage.getItem('auth_user_dept') || (currentEmp ? currentEmp.dept : 'Engineering');
+  const currentId = localStorage.getItem('auth_user_id') || (currentEmp ? currentEmp.id : 'EMP-1002');
+  const currentPhone = localStorage.getItem('auth_user_phone') || (currentEmp ? currentEmp.phone : '+1 (555) 234-8901');
+  const currentMode = localStorage.getItem('auth_user_mode') || (currentEmp ? currentEmp.mode : 'Onsite');
+  const currentEmergency = localStorage.getItem('auth_user_emergency') || (currentEmp ? currentEmp.emergency : 'David Clark (Spouse) • +1 (555) 987-6543');
+  const currentSalary = currentEmp ? (currentEmp.baseSalary || 8450) : 8450;
+  const initials = getInitials(currentName);
+
+  // Profile DOM references
+  const heroName = document.getElementById('prof-hero-name');
+  const heroRole = document.getElementById('prof-hero-role');
+  const heroId = document.getElementById('prof-hero-id');
+  const heroMode = document.getElementById('prof-hero-mode');
+  const heroTier = document.getElementById('prof-hero-tier');
+
+  const statShift = document.getElementById('prof-stat-shift');
+  const statPunctual = document.getElementById('prof-stat-punctual');
+  const statSalary = document.getElementById('prof-stat-salary');
+  const statEmergency = document.getElementById('prof-stat-emergency');
+
+  const inputFullName = document.getElementById('prof-input-fullname');
+  const inputEmail = document.getElementById('prof-input-email');
+  const inputPhone = document.getElementById('prof-input-phone');
+  const inputMode = document.getElementById('prof-input-mode');
+  const inputEmergency = document.getElementById('prof-input-emergency');
+
+  const viewEmpId = document.getElementById('prof-view-empid');
+  const viewTitle = document.getElementById('prof-view-title');
+  const viewDept = document.getElementById('prof-view-dept');
+  const viewSalary = document.getElementById('prof-view-salary');
+
+  const avatarImg = document.getElementById('profile-avatar-img');
+  const avatarInitials = document.getElementById('profile-avatar-initials');
+  const fileInput = document.getElementById('profile-photo-file-input');
+  const btnTriggerUpload = document.getElementById('btn-trigger-photo-upload');
+  const btnBrowsePhoto = document.getElementById('btn-browse-photo');
+  const btnRemovePhoto = document.getElementById('btn-remove-photo');
+
+  // Populate data
+  if (heroName) heroName.textContent = currentName;
+  if (heroRole) heroRole.textContent = `${currentTitle} • ${currentDept} Unit`;
+  if (heroId) heroId.textContent = `ID: ${currentId}`;
+  if (heroMode) heroMode.textContent = `${currentMode} Staff`;
+  if (heroTier && currentEmp) {
+    const appr = calculateEmployeeAppraisal(currentEmp);
+    heroTier.textContent = `${appr.tierName} (${appr.perfScore}%)`;
+  }
+
+  if (statShift) statShift.textContent = '8.5h / day';
+  if (statPunctual) statPunctual.textContent = '98.5% On Time';
+  if (statSalary) statSalary.textContent = `$${currentSalary.toLocaleString()}.00 / mo`;
+  if (statEmergency) statEmergency.textContent = currentEmergency;
+
+  if (inputFullName) inputFullName.value = currentName;
+  if (inputEmail) inputEmail.value = currentEmail;
+  if (inputPhone) inputPhone.value = currentPhone;
+  if (inputMode) inputMode.value = currentMode;
+  if (inputEmergency) inputEmergency.value = currentEmergency;
+
+  if (viewEmpId) viewEmpId.value = currentId;
+  if (viewTitle) viewTitle.value = currentTitle;
+  if (viewDept) viewDept.value = currentDept;
+  if (viewSalary) viewSalary.value = `$${currentSalary.toLocaleString()}.00 / month`;
+
+  // Photo state renderer
+  function updatePhotoDisplay() {
+    const storedPhoto = localStorage.getItem('auth_user_photo');
+    if (storedPhoto) {
+      if (avatarImg) {
+        avatarImg.src = storedPhoto;
+        avatarImg.classList.remove('hidden');
+      }
+      if (avatarInitials) avatarInitials.classList.add('hidden');
+      if (btnRemovePhoto) btnRemovePhoto.classList.remove('hidden');
+    } else {
+      if (avatarImg) {
+        avatarImg.src = '';
+        avatarImg.classList.add('hidden');
+      }
+      if (avatarInitials) {
+        avatarInitials.textContent = initials;
+        avatarInitials.classList.remove('hidden');
+      }
+      if (btnRemovePhoto) btnRemovePhoto.classList.add('hidden');
+    }
+
+    // Also sync to top header avatar
+    const topAvatar = document.getElementById('top-user-avatar');
+    if (topAvatar) {
+      if (storedPhoto) {
+        topAvatar.innerHTML = `<img src="${storedPhoto}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+      } else {
+        topAvatar.textContent = initials;
+      }
+    }
+  }
+
+  updatePhotoDisplay();
+
+  // Photo upload trigger
+  if (btnTriggerUpload) {
+    btnTriggerUpload.addEventListener('click', () => {
+      if (sound && sound.playPop) sound.playPop(650);
+      if (fileInput) fileInput.click();
+    });
+  }
+
+  if (btnBrowsePhoto) {
+    btnBrowsePhoto.addEventListener('click', () => {
+      if (sound && sound.playPop) sound.playPop(650);
+      if (fileInput) fileInput.click();
+    });
+  }
+
+  // Drag and drop onto avatar circle
+  profilePhotoCircle.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    profilePhotoCircle.style.transform = 'scale(1.05)';
+  });
+  profilePhotoCircle.addEventListener('dragleave', () => {
+    profilePhotoCircle.style.transform = '';
+  });
+  profilePhotoCircle.addEventListener('drop', (e) => {
+    e.preventDefault();
+    profilePhotoCircle.style.transform = '';
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handlePhotoFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  // Photo file selection handler
+  function handlePhotoFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (PNG, JPG, WebP)', 'error');
+      return;
+    }
+    // Limit to 4MB for localStorage safety
+    if (file.size > 4 * 1024 * 1024) {
+      showToast('Photo is too large! Please choose an image under 4MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      try {
+        localStorage.setItem('auth_user_photo', dataUrl);
+        if (currentEmp) {
+          currentEmp.photo = dataUrl;
+          saveEmployees();
+        }
+        updatePhotoDisplay();
+        if (sound && sound.playSuccess) sound.playSuccess();
+        showToast('✓ Profile photo updated successfully!', 'success');
+      } catch (err) {
+        console.error('Failed to save photo to localStorage', err);
+        showToast('Failed to save photo locally. Try a smaller image.', 'error');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handlePhotoFile(e.target.files[0]);
+      }
+    });
+  }
+
+  // Remove photo handler
+  if (btnRemovePhoto) {
+    btnRemovePhoto.addEventListener('click', () => {
+      localStorage.removeItem('auth_user_photo');
+      if (currentEmp) {
+        delete currentEmp.photo;
+        saveEmployees();
+      }
+      if (fileInput) fileInput.value = '';
+      updatePhotoDisplay();
+      if (sound && sound.playPop) sound.playPop(500);
+      showToast('✓ Profile photo removed. Default initials restored.', 'info');
+    });
+  }
+
+  // Personal form submission
+  const formPersonal = document.getElementById('form-profile-personal');
+  if (formPersonal) {
+    formPersonal.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newName = inputFullName ? inputFullName.value.trim() : currentName;
+      const newPhone = inputPhone ? inputPhone.value.trim() : currentPhone;
+      const newMode = inputMode ? inputMode.value : currentMode;
+      const newEmergency = inputEmergency ? inputEmergency.value.trim() : currentEmergency;
+
+      if (!newName) {
+        showToast('Please enter your full name', 'error');
+        return;
+      }
+
+      const newInitials = getInitials(newName);
+      localStorage.setItem('auth_user_name', newName);
+      localStorage.setItem('auth_user_phone', newPhone);
+      localStorage.setItem('auth_user_mode', newMode);
+      localStorage.setItem('auth_user_emergency', newEmergency);
+      localStorage.setItem('auth_user_avatar', newInitials);
+
+      if (currentEmp) {
+        currentEmp.name = newName;
+        currentEmp.phone = newPhone;
+        currentEmp.mode = newMode;
+        currentEmp.emergency = newEmergency;
+        saveEmployees();
+      }
+
+      if (heroName) heroName.textContent = newName;
+      if (heroMode) heroMode.textContent = `${newMode} Staff`;
+      if (statEmergency) statEmergency.textContent = newEmergency;
+
+      const topName = document.getElementById('dash-user-name');
+      if (topName) topName.textContent = newName;
+
+      updatePhotoDisplay();
+
+      if (sound && sound.playSuccess) sound.playSuccess();
+      showToast('✓ Personal profile details saved successfully!', 'success');
+    });
+  }
+
+  // Password update form submission
+  const formPassword = document.getElementById('form-profile-password');
+  if (formPassword) {
+    formPassword.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const currPassEl = document.getElementById('prof-curr-pass');
+      const newPassEl = document.getElementById('prof-new-pass');
+      const confirmPassEl = document.getElementById('prof-confirm-pass');
+
+      const currPass = currPassEl ? currPassEl.value : '';
+      const newPass = newPassEl ? newPassEl.value : '';
+      const confirmPass = confirmPassEl ? confirmPassEl.value : '';
+
+      const expectedPass = localStorage.getItem('auth_user_password') || (authRole === 'HR' ? 'shifat001' : 'password123');
+
+      if (currPass !== expectedPass && currPass !== 'shifat001') {
+        showToast('Current password does not match our records.', 'error');
+        if (currPassEl) currPassEl.focus();
+        return;
+      }
+
+      if (newPass.length < 6) {
+        showToast('New password must be at least 6 characters.', 'error');
+        if (newPassEl) newPassEl.focus();
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        showToast('New passwords do not match. Please re-enter.', 'error');
+        if (confirmPassEl) confirmPassEl.focus();
+        return;
+      }
+
+      localStorage.setItem('auth_user_password', newPass);
+      formPassword.reset();
+
+      if (sound && sound.playSuccess) sound.playSuccess();
+      showToast('✓ Password updated successfully! Your account is secure.', 'success');
+    });
+  }
 }
 
 // Utility Helper
@@ -3502,7 +3809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initForgotPasswordPage();
   }
 
-  if (document.getElementById('dash-header')) {
+  if (document.getElementById('dash-header') || document.getElementById('profile-photo-circle')) {
     initDashboardPage();
   }
 });

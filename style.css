@@ -4045,3 +4045,304 @@ dialog.modal-dialog::backdrop {
   }
 }
 
+/* ==========================================================================
+   18. Dedicated My Employee Profile Page & Photo Upload System
+   ========================================================================== */
+.profile-page-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 960px) {
+  .profile-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-card-sticky {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.profile-summary-card {
+  background: var(--neu-card-bg);
+  border-radius: 26px;
+  padding: 2rem 1.6rem;
+  box-shadow: 8px 8px 18px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+/* Profile Photo Container with Camera Overlay */
+.profile-photo-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1.15rem;
+}
+
+.profile-photo-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0070f3, #7928ca);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  overflow: hidden;
+  position: relative;
+  border: 4px solid var(--neu-card-bg);
+  transition: transform var(--transition-fast);
+}
+
+.profile-photo-circle:hover {
+  transform: scale(1.02);
+}
+
+.profile-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.photo-camera-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--neu-card-bg);
+  color: var(--accent-blue);
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--neu-card-bg);
+  transition: all var(--transition-fast);
+  z-index: 10;
+}
+
+.photo-camera-btn:hover {
+  background: var(--accent-blue);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.photo-quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.btn-photo-action {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 14px;
+  cursor: pointer;
+  border: none;
+  background: var(--neu-card-bg);
+  color: var(--text-subtitle);
+  box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  transition: all var(--transition-fast);
+}
+
+.btn-photo-action:hover {
+  color: var(--accent-blue);
+  transform: translateY(-1px);
+}
+
+.btn-photo-action.danger:hover {
+  color: #ef4444;
+}
+
+.profile-name-main {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-title);
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
+}
+
+.profile-role-sub {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-subtitle);
+  margin-bottom: 0.85rem;
+}
+
+.profile-pills-wrap {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.profile-card-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--neu-inset-dark);
+  opacity: 0.35;
+  margin: 1.25rem 0;
+}
+
+.profile-quick-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.quick-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.quick-stat-item .stat-label {
+  color: var(--text-subtitle);
+}
+
+.quick-stat-item .stat-val {
+  font-weight: 700;
+  color: var(--text-title);
+}
+
+/* Right Column Sections */
+.profile-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-section-card {
+  background: var(--neu-card-bg);
+  border-radius: 26px;
+  padding: 1.75rem 2rem;
+  box-shadow: 8px 8px 18px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
+  position: relative;
+}
+
+.profile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.35rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(0, 112, 243, 0.08);
+}
+
+.profile-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  background: var(--neu-bg);
+  box-shadow: inset 2px 2px 5px var(--neu-inset-dark), inset -2px -2px 5px var(--neu-inset-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.section-icon-badge.green { color: #10b981; }
+.section-icon-badge.purple { color: #8b5cf6; }
+.section-icon-badge.amber { color: #f59e0b; }
+
+.section-title-text {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-title);
+  letter-spacing: -0.01em;
+}
+
+.section-subtitle-text {
+  font-size: 0.78rem;
+  color: var(--text-subtitle);
+  display: block;
+}
+
+.profile-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.15rem 1.4rem;
+}
+
+@media (max-width: 640px) {
+  .profile-fields-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.profile-field-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-subtitle);
+}
+
+.profile-input-box {
+  width: 100%;
+  height: 44px;
+  padding: 0 1rem;
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-title);
+  box-shadow: inset 2px 2px 4px var(--neu-inset-dark), inset -2px -2px 4px var(--neu-inset-light);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.profile-input-box:focus {
+  box-shadow: inset 2px 2px 5px rgba(0, 112, 243, 0.4);
+}
+
+.profile-input-box:disabled,
+.profile-input-box[readonly] {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.profile-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 112, 243, 0.08);
+}
+
+
