@@ -9,6 +9,28 @@
  */
 
 // ==========================================================================
+// Authenticated API Network Layer (Cookie + Bearer + User Header)
+// ==========================================================================
+async function apiFetch(url, options = {}) {
+  const token = localStorage.getItem('nexus_token');
+  const email = localStorage.getItem('auth_user_email');
+  const headers = {
+    ...(options.headers || {})
+  };
+  if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (email) headers['X-User-Email'] = email;
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include'
+  });
+}
+
+// ==========================================================================
 // 1. Audio Synthesizer (Native Web Audio API for Tactile Clicks & Chimes)
 // ==========================================================================
 class TactileAudio {
@@ -519,6 +541,9 @@ function calculateEmployeeAppraisal(emp) {
  */
 function getUserRoleByEmail(email) {
   const normalized = (email || '').trim().toLowerCase();
+  if (normalized === 'admin@nexus.com' || normalized === 'superadmin@nexus.com' || normalized === 'superadmin@company.com' || normalized === 'admin@company.com') {
+    return 'SUPER_ADMIN';
+  }
   if (normalized === 'tanviralamshifat2005@gmail.com' || normalized === 'tanvir@nexus.com' || normalized === 'tanvir@gmai.com' || normalized === 'tanvir@gmail.com' || normalized === 'hr@company.com' || normalized === 'hr@nexus.com') {
     return 'HR';
   }
@@ -558,7 +583,7 @@ function initAuthPage() {
 
   // Submit Handler: View automatically depends on the role associated with the login email
   if (authForm) {
-    authForm.addEventListener('submit', (e) => {
+    authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       sound.playPop(750, 0.08);
 
@@ -569,6 +594,7 @@ function initAuthPage() {
       const role = getUserRoleByEmail(email);
 
       // Validate credentials based on role
+      const isSuperAdmin = (role === 'SUPER_ADMIN') && (password === 'shifat001' || password === 'admin123' || password.length >= 6);
       const isHR = (role === 'HR') && (password === 'shifat001');
       const isManager = (role === 'MANAGER') && (password === 'manager123' || password.length >= 6);
 
@@ -581,7 +607,40 @@ function initAuthPage() {
         (email.endsWith('@nexus.com') && password.length >= 6)
       );
 
-      if (isHR) {
+      // Authenticate with server to establish session token and cookie
+      try {
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.success && loginData.token) {
+          localStorage.setItem('nexus_token', loginData.token);
+          document.cookie = `nexus_auth_token=${loginData.token}; path=/; max-age=86400`;
+        }
+      } catch (err) {
+        console.warn('Backend login notice:', err);
+      }
+      document.cookie = `nexus_user_email=${encodeURIComponent(email)}; path=/; max-age=86400`;
+
+      if (isSuperAdmin) {
+        localStorage.setItem('auth_user_role', 'SUPER_ADMIN');
+        localStorage.setItem('auth_user_name', 'Super Admin');
+        localStorage.setItem('auth_user_email', email);
+        localStorage.setItem('auth_user_title', 'System Super Admin');
+        localStorage.setItem('auth_user_dept', 'Executive Systems');
+        localStorage.setItem('auth_user_avatar', 'SA');
+
+        btnSubmit.style.transform = 'scale(0.97)';
+        setTimeout(() => (btnSubmit.style.transform = ''), 200);
+        sound.playSuccess();
+        showToast('✓ Welcome Super Admin! Loading Root Management Portal...', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 700);
+      } else if (isHR) {
         // Role is HR: system will automatically display ONLY the NexusEMS HR Portal
         localStorage.setItem('auth_user_role', 'HR');
         localStorage.setItem('auth_user_name', 'Tanvir');
@@ -887,6 +946,9 @@ function initForgotPasswordPage() {
 // 5. Role-Based EMS Controller (dashboard.html)
 // ==========================================================================
 function initDashboardPage() {
+  let isClockedIn = localStorage.getItem('nexus_emp_clocked_in') === 'true';
+  let punchClockInterval = null;
+
   // A. Live Clock
   const clockEl = document.getElementById('dash-clock');
   function updateClock() {
@@ -978,7 +1040,7 @@ function initDashboardPage() {
   });
 
   let authRole = localStorage.getItem('auth_user_role');
-  if (!authRole || (authRole !== 'HR' && authRole !== 'EMPLOYEE' && authRole !== 'MANAGER')) {
+  if (!authRole || (authRole !== 'SUPER_ADMIN' && authRole !== 'HR' && authRole !== 'EMPLOYEE' && authRole !== 'MANAGER')) {
     window.location.replace('index.html');
     return;
   }
@@ -1072,9 +1134,9 @@ function initDashboardPage() {
   }
 
   function applyRoleView(role) {
-    if (role === 'HR') {
-      // HR Login: Automatically display ONLY NexusEMS HR Portal
-      document.title = 'NexusEMS HR Portal';
+    if (role === 'HR' || role === 'SUPER_ADMIN') {
+      const isSuperAdmin = (role === 'SUPER_ADMIN');
+      document.title = isSuperAdmin ? 'NexusEMS Super Admin Portal' : 'NexusEMS HR Portal';
 
       if (viewHrPortal) {
         viewHrPortal.classList.remove('hidden');
@@ -1103,17 +1165,21 @@ function initDashboardPage() {
       }
 
       if (portalRoleBadge) {
-        portalRoleBadge.textContent = 'HR PORTAL';
+        portalRoleBadge.textContent = isSuperAdmin ? 'SUPER ADMIN' : 'HR PORTAL';
         portalRoleBadge.className = 'ems-badge';
       }
 
-      if (dashUserName) dashUserName.textContent = 'Tanvir';
-      if (dashUserRole) dashUserRole.textContent = 'HR Administrator';
-      updateTopAvatarDisplay('T');
-      if (dashHeroTitle) dashHeroTitle.textContent = 'Welcome back, Tanvir 👋';
+      const adminName = localStorage.getItem('auth_user_name') || (isSuperAdmin ? 'Super Admin' : 'Tanvir');
+      const adminRole = localStorage.getItem('auth_user_title') || (isSuperAdmin ? 'System Super Admin' : 'HR Administrator');
+      const adminAvatar = localStorage.getItem('auth_user_avatar') || (isSuperAdmin ? 'SA' : 'T');
+
+      if (dashUserName) dashUserName.textContent = adminName;
+      if (dashUserRole) dashUserRole.textContent = adminRole;
+      updateTopAvatarDisplay(adminAvatar);
+      if (dashHeroTitle) dashHeroTitle.textContent = `Welcome back, ${adminName} 👋`;
 
       if (sidebarCardLabel) sidebarCardLabel.textContent = 'Organization Capacity';
-      if (sidebarPlanLabel) sidebarPlanLabel.textContent = 'Nexus Enterprise Active';
+      if (sidebarPlanLabel) sidebarPlanLabel.textContent = isSuperAdmin ? 'Root Access Active' : 'Nexus Enterprise Active';
       if (searchInput) searchInput.placeholder = 'Search staff directory, departments, or leaves... (/)';
     } else if (role === 'MANAGER') {
       // Manager Login: Automatically display ONLY NexusEMS Manager Portal (NO PAYROLL)
@@ -1237,6 +1303,37 @@ function initDashboardPage() {
   // Apply authenticated role view
   applyRoleView(authRole);
 
+  // Synchronize employee attendance state with server ledger
+  if (authRole === 'EMPLOYEE') {
+    apiFetch('/api/attendance/today')
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.success) {
+          if (res.checked_in && !res.checked_out) {
+            isClockedIn = true;
+            localStorage.setItem('nexus_emp_clocked_in', 'true');
+            if (res.record && res.record.check_in_time) {
+              const inDate = new Date(res.record.check_in_time);
+              localStorage.setItem('nexus_emp_clockin_time', inDate.getTime());
+              localStorage.setItem('nexus_emp_intime', inDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            }
+          } else if (res.checked_out) {
+            isClockedIn = false;
+            localStorage.setItem('nexus_emp_clocked_in', 'false');
+            if (res.record && res.record.check_out_time) {
+              const outDate = new Date(res.record.check_out_time);
+              localStorage.setItem('nexus_emp_outtime', outDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            }
+          } else {
+            isClockedIn = false;
+            localStorage.setItem('nexus_emp_clocked_in', 'false');
+          }
+          if (typeof syncPunchClockUI === 'function') syncPunchClockUI();
+        }
+      })
+      .catch(() => {});
+  }
+
   // Temporary Welcome Greeting Banner on Home Page (auto-dismisses after login)
   const empWelcomeBanner = document.getElementById('emp-welcome-banner');
   const btnCloseWelcome = document.getElementById('btn-close-welcome');
@@ -1274,10 +1371,14 @@ function initDashboardPage() {
   }
 
   // Global Logout Handlers (Top bar and sidebar)
-  function handleLogout(e) {
+  async function handleLogout(e) {
     if (e) e.preventDefault();
     sound.playPop(550, 0.08);
     showToast('Signed out of NexusEMS. Returning to login...', 'info');
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch (_) {}
+    localStorage.removeItem('nexus_token');
     localStorage.removeItem('auth_user_role');
     localStorage.removeItem('auth_user_name');
     localStorage.removeItem('auth_user_email');
@@ -1285,6 +1386,11 @@ function initDashboardPage() {
     localStorage.removeItem('auth_user_avatar');
     localStorage.removeItem('auth_user_dept');
     localStorage.removeItem('auth_user_id');
+    localStorage.removeItem('nexus_emp_clocked_in');
+    localStorage.removeItem('nexus_emp_clockin_time');
+    localStorage.removeItem('nexus_emp_intime');
+    localStorage.removeItem('nexus_emp_outtime');
+    document.cookie = 'nexus_auth_token=; Max-Age=0; path=/;';
     sessionStorage.removeItem('emp_welcome_dismissed');
     setTimeout(() => {
       window.location.href = 'index.html';
@@ -1678,7 +1784,7 @@ function initDashboardPage() {
   async function loadHrRemoteRequests() {
     if (!hrRemoteRequestsTableBody) return;
     try {
-      const res = await fetch('/api/remote-work/requests');
+      const res = await apiFetch('/api/remote-work/requests');
       const data = await res.json();
       if (!data.success) return;
 
@@ -1729,7 +1835,7 @@ function initDashboardPage() {
         const btnApprove = tr.querySelector('.btn-approve-remote');
         if (btnApprove) {
           btnApprove.addEventListener('click', async () => {
-            const resp = await fetch(`/api/remote-work/requests/${r.id}/approve`, { method: 'POST' });
+            const resp = await apiFetch(`/api/remote-work/requests/${r.id}/approve`, { method: 'POST' });
             const result = await resp.json();
             if (result.success) {
               showToast(result.message, 'success');
@@ -1745,7 +1851,7 @@ function initDashboardPage() {
         if (btnReject) {
           btnReject.addEventListener('click', async () => {
             const reason = prompt('Rejection reason (optional):') || 'Declined by HR';
-            const resp = await fetch(`/api/remote-work/requests/${r.id}/reject`, {
+            const resp = await apiFetch(`/api/remote-work/requests/${r.id}/reject`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ reason })
@@ -1770,7 +1876,7 @@ function initDashboardPage() {
   async function loadHrCorrections() {
     if (!hrCorrectionsTableBody) return;
     try {
-      const res = await fetch('/api/attendance/correction-requests');
+      const res = await apiFetch('/api/attendance/correction-requests');
       const data = await res.json();
       if (!data.success) return;
 
@@ -1818,7 +1924,7 @@ function initDashboardPage() {
         const btnApprove = tr.querySelector('.btn-approve-corr');
         if (btnApprove) {
           btnApprove.addEventListener('click', async () => {
-            const resp = await fetch(`/api/attendance/correction-requests/${c.id}/approve`, { method: 'POST' });
+            const resp = await apiFetch(`/api/attendance/correction-requests/${c.id}/approve`, { method: 'POST' });
             const result = await resp.json();
             if (result.success) {
               showToast(result.message, 'success');
@@ -1835,7 +1941,7 @@ function initDashboardPage() {
         if (btnReject) {
           btnReject.addEventListener('click', async () => {
             const notes = prompt('Rejection explanation:') || 'Declined by HR';
-            const resp = await fetch(`/api/attendance/correction-requests/${c.id}/reject`, {
+            const resp = await apiFetch(`/api/attendance/correction-requests/${c.id}/reject`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ notes })
@@ -1861,7 +1967,7 @@ function initDashboardPage() {
   async function loadHrAuditLogs() {
     if (!hrAuditLogsTableBody) return;
     try {
-      const res = await fetch('/api/attendance/audit-logs');
+      const res = await apiFetch('/api/attendance/audit-logs');
       const data = await res.json();
       if (!data.success) return;
 
@@ -1926,7 +2032,7 @@ function initDashboardPage() {
       const reason = document.getElementById('hr-direct-reason')?.value;
 
       try {
-        const res = await fetch('/api/remote-work/set-direct', {
+        const res = await apiFetch('/api/remote-work/set-direct', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ employee_id: empId, start_date: startDate, end_date: endDate, reason })
@@ -1957,7 +2063,7 @@ function initDashboardPage() {
   if (btnOpenHrOfficeConfig && modalHrOfficeConfig) {
     btnOpenHrOfficeConfig.addEventListener('click', async () => {
       try {
-        const res = await fetch('/api/config/office-verification');
+        const res = await apiFetch('/api/config/office-verification');
         const data = await res.json();
         if (data.success && data.data) {
           const cfgMode = document.getElementById('cfg-verification-mode');
@@ -1998,7 +2104,7 @@ function initDashboardPage() {
       const cfgQr = document.getElementById('cfg-qr-secret')?.value;
 
       try {
-        const res = await fetch('/api/config/office-verification', {
+        const res = await apiFetch('/api/config/office-verification', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2020,10 +2126,12 @@ function initDashboardPage() {
     });
   }
 
-  // Auto load HR lists
-  loadHrRemoteRequests();
-  loadHrCorrections();
-  loadHrAuditLogs();
+  // Auto load HR lists only when logged in as HR or Super Admin
+  if (authRole === 'HR' || authRole === 'SUPER_ADMIN') {
+    loadHrRemoteRequests();
+    loadHrCorrections();
+    loadHrAuditLogs();
+  }
 
   // ------------------------------------------------------------------------
   // HR PERFORMANCE-BASED BONUS & SALARY INCREMENT APPRAISAL BOARD
@@ -3140,8 +3248,8 @@ function initDashboardPage() {
   const btnEmpPunchClock = document.getElementById('btn-emp-punch-clock');
   const punchBtnLabel = document.getElementById('punch-btn-label');
 
-  let isClockedIn = localStorage.getItem('nexus_emp_clocked_in') === 'true';
-  let punchClockInterval = null;
+  isClockedIn = localStorage.getItem('nexus_emp_clocked_in') === 'true';
+  punchClockInterval = null;
 
   function updatePunchClockTimer() {
     const clockInTimestamp = parseInt(localStorage.getItem('nexus_emp_clockin_time') || Date.now(), 10);
@@ -3224,6 +3332,91 @@ function initDashboardPage() {
     }
   }
 
+  async function loadEmployeeActiveMode() {
+    const badge = document.getElementById('emp-active-mode-badge');
+    const info = document.getElementById('emp-remote-window-info');
+    try {
+      const res = await apiFetch('/api/remote-work/effective-mode');
+      const data = await res.json();
+      if (data.success && data.data) {
+        const mode = data.data.effective_mode;
+        localStorage.setItem('nexus_emp_effective_mode', mode);
+        if (badge) {
+          badge.textContent = `Work Mode: ${mode === 'REMOTE' ? 'Remote (Home / Travel)' : 'Office (On-site)'}`;
+          badge.className = `status-pill ${mode === 'REMOTE' ? 'completed' : 'active'}`;
+        }
+        if (info) {
+          if (data.data.is_temporary_remote && data.data.active_request) {
+            info.textContent = `Approved remote through ${data.data.active_request.end_date}`;
+          } else {
+            info.textContent = mode === 'REMOTE' ? 'Permanent Remote Assignment' : 'Physical Office Attendance Required';
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error fetching effective mode:', e);
+    }
+  }
+
+  async function loadEmployeeMyRequests() {
+    const tableBody = document.getElementById('emp-my-requests-table-body');
+    if (!tableBody) return;
+    try {
+      const [remoteRes, corrRes] = await Promise.all([
+        apiFetch('/api/remote-work/requests'),
+        apiFetch('/api/attendance/correction-requests')
+      ]);
+      const remoteData = await remoteRes.json();
+      const corrData = await corrRes.json();
+
+      const remotes = (remoteData.success && remoteData.data) ? remoteData.data : [];
+      const corrs = (corrData.success && corrData.data) ? corrData.data : [];
+
+      const items = [
+        ...remotes.map(r => ({
+          type: 'Remote Work',
+          date: `${r.start_date} to ${r.end_date}`,
+          reason: r.reason,
+          submitted: r.submitted_at || r.created_at,
+          status: r.status,
+          note: r.review_notes || (r.status === 'APPROVED' ? 'Approved by HR' : (r.status === 'REJECTED' ? 'Rejected by HR' : 'Pending Review'))
+        })),
+        ...corrs.map(c => ({
+          type: 'Attendance Correction',
+          date: c.date,
+          reason: c.reason,
+          submitted: c.requested_at || c.created_at,
+          status: c.status,
+          note: c.review_notes || (c.status === 'APPROVED' ? 'Approved by HR' : (c.status === 'REJECTED' ? 'Rejected by HR' : 'Pending Review'))
+        }))
+      ];
+
+      items.sort((a, b) => new Date(b.submitted || 0) - new Date(a.submitted || 0));
+
+      tableBody.innerHTML = '';
+      if (items.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--neu-text-muted);">No requests submitted yet.</td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const tr = document.createElement('tr');
+        const pillClass = item.status === 'APPROVED' ? 'completed' : (item.status === 'REJECTED' ? 'review' : 'pending');
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(item.type)}</strong></td>
+          <td><span class="emp-id-badge">${escapeHtml(item.date)}</span></td>
+          <td style="max-width: 250px; font-size: 13px;">${escapeHtml(item.reason)}</td>
+          <td style="font-size: 12px; color: var(--neu-text-muted);">${item.submitted ? new Date(item.submitted).toLocaleDateString() : 'Recent'}</td>
+          <td><span class="status-pill ${pillClass}" style="font-size: 11px;">${escapeHtml(item.status)}</span></td>
+          <td style="font-size: 12px; color: var(--neu-text-muted);">${escapeHtml(item.note)}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    } catch (e) {
+      console.warn('Error loading employee requests:', e);
+    }
+  }
+
   async function handleClockIn() {
     if (isClockedIn) {
       showToast('Shift already started today! Active shift timer is running.', 'info');
@@ -3233,7 +3426,7 @@ function initDashboardPage() {
     // Server-Side Verification Gate (Enforces Office Network / Dynamic QR, rejects GPS spoofing)
     try {
       const qrToken = localStorage.getItem('nexus_office_qr') || '';
-      const res = await fetch('/api/attendance/check-in', {
+      const res = await apiFetch('/api/attendance/check-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ office_qr_token: qrToken })
@@ -3248,7 +3441,7 @@ function initDashboardPage() {
       }
       showToast(data.message, 'success');
     } catch (err) {
-      console.warn('Backend check-in fetch error, continuing offline shift fallback:', err);
+      console.warn('Backend check-in fetch notice:', err);
     }
 
     isClockedIn = true;
@@ -3280,13 +3473,13 @@ function initDashboardPage() {
     }
 
     try {
-      const res = await fetch('/api/attendance/check-out', { method: 'POST' });
+      const res = await apiFetch('/api/attendance/check-out', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         showToast(data.message, 'success');
       }
     } catch (err) {
-      console.warn('Backend check-out fetch error, continuing offline fallback:', err);
+      console.warn('Backend check-out fetch notice:', err);
     }
 
     isClockedIn = false;
@@ -3377,7 +3570,7 @@ function initDashboardPage() {
       const reason = document.getElementById('emp-remote-reason')?.value;
 
       try {
-        const res = await fetch('/api/remote-work/request', {
+        const res = await apiFetch('/api/remote-work/request', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ start_date: startDate, end_date: endDate, reason })
@@ -3430,7 +3623,7 @@ function initDashboardPage() {
       const reason = document.getElementById('corr-reason')?.value;
 
       try {
-        const res = await fetch('/api/attendance/correction-request', {
+        const res = await apiFetch('/api/attendance/correction-request', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -3456,8 +3649,11 @@ function initDashboardPage() {
     });
   }
 
-  // Load employee active mode & personal requests
-  loadEmployeeActiveMode();
+  // Load employee active mode & personal requests if employee
+  if (authRole === 'EMPLOYEE') {
+    loadEmployeeActiveMode();
+    loadEmployeeMyRequests();
+  }
 
   // 2. Self-Service Apply For Leave Form
   const formEmpLeave = document.getElementById('form-emp-apply-leave');
