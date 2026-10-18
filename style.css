@@ -4092,7 +4092,7 @@ dialog.modal-dialog::backdrop {
 .profile-summary-card {
   background: var(--neu-card-bg);
   border-radius: 26px;
-  padding: 2rem 1.6rem;
+  padding: 2rem 1.25rem;
   box-shadow: 8px 8px 18px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
   display: flex;
   flex-direction: column;
@@ -4212,11 +4212,12 @@ dialog.modal-dialog::backdrop {
 }
 
 .profile-pills-wrap {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
   margin-bottom: 1.35rem;
 }
 
@@ -4226,16 +4227,17 @@ dialog.modal-dialog::backdrop {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
-  padding: 0 0.85rem;
-  font-size: 0.75rem;
+  height: 26px;
+  padding: 0 0.55rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
   border-radius: var(--radius-pill);
   margin: 0;
   box-sizing: border-box;
   white-space: nowrap;
-  box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+  flex-shrink: 0;
+  box-shadow: 2px 2px 4px var(--neu-shadow-dark), -2px -2px 4px var(--neu-shadow-light);
 }
 
 .profile-pills-wrap .badge-tag {
