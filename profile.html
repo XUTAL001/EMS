@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="My Employee Profile — View and update personal information, work position, and profile photo.">
+  <meta name="description"
+    content="My Employee Profile — View and update personal information, work position, and profile photo.">
   <title>My Employee Profile — NEXUS EMS</title>
-  
+
   <!-- Modern Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="dashboard-body">
 
   <!-- Top Global Header -->
@@ -42,11 +47,13 @@
 
     <!-- Global Search Bar -->
     <div class="dash-search-wrap" id="top-search-container">
-      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+        stroke-width="2">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search tasks, company policies, or leave... (/)">
+      <input type="text" id="employee-search-input" class="dash-search-input"
+        placeholder="Search tasks, company policies, or leave... (/)">
       <span class="search-kbd">/</span>
     </div>
 
@@ -60,7 +67,8 @@
 
       <!-- Theme Switcher -->
       <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
-        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
+          stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="5"></circle>
           <line x1="12" y1="1" x2="12" y2="3"></line>
           <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -71,14 +79,16 @@
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </svg>
-        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none"
+          stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       </button>
 
       <!-- Notifications -->
       <div class="notifications-wrapper">
-        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications"
+          aria-label="Notifications">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -100,7 +110,8 @@
               <div class="notif-icon-circle green">✓</div>
               <div class="notif-body">
                 <div class="notif-body-title">Profile Photo Updated</div>
-                <div class="notif-body-desc">Your personal employee profile picture is verified across all portals.</div>
+                <div class="notif-body-desc">Your personal employee profile picture is verified across all portals.
+                </div>
                 <div class="notif-body-time">Just now</div>
               </div>
             </div>
@@ -119,15 +130,18 @@
       <!-- User Profile (Top Right) -->
       <div class="user-profile-menu" id="top-user-profile-menu">
         <div class="user-avatar-wrap">
-          <div class="tanvir-avatar-badge" id="top-user-avatar" style="background: linear-gradient(135deg, #0070f3, #00c6ff);">SC</div>
+          <div class="tanvir-avatar-badge" id="top-user-avatar"
+            style="background: linear-gradient(135deg, #0070f3, #00c6ff);">SC</div>
           <span class="avatar-online-dot"></span>
         </div>
         <div class="user-info-text">
           <span class="user-name" id="dash-user-name">Sophia Clark</span>
           <span class="user-role" id="dash-user-role">Lead Frontend Engineer</span>
         </div>
-        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account" aria-label="Sign Out">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="index.html" id="btn-logout-top" class="neu-circle-btn logout-btn" title="Sign Out & Switch Account"
+          aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -139,7 +153,7 @@
 
   <!-- Main Layout -->
   <div class="dash-layout">
-    
+
     <!-- Sidebar Navigation -->
     <aside class="dash-sidebar" id="sidebar-nav">
       <!-- HR Menu Items (Shown when HR logs in) -->
@@ -198,7 +212,9 @@
 
         <a href="appraisals.html" class="sidebar-item" id="nav-hr-performance">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+            </polygon>
           </svg>
           <span>Performance</span>
         </a>
@@ -225,7 +241,9 @@
         <a href="javascript:void(0)" class="sidebar-item" id="nav-hr-settings">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
           </svg>
           <span>Company Settings</span>
         </a>
@@ -264,7 +282,9 @@
 
         <a href="appraisals.html" class="sidebar-item" id="nav-emp-performance">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+            </polygon>
           </svg>
           <span>My Performance</span>
           <span class="menu-counter highlight">98%</span>
@@ -334,7 +354,9 @@
 
         <a href="appraisals.html" class="sidebar-item" id="nav-mgr-performance">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+            </polygon>
           </svg>
           <span>Performance Reviews</span>
         </a>
@@ -342,17 +364,17 @@
     </aside>
 
     <!-- Main Workspace Content -->
-    <main class="dash-content profile-page-content">
+    <main class="dash-content">
 
       <a href="dashboard.html" id="btn-back-dashboard" class="hidden" style="display: none;" aria-hidden="true"></a>
 
       <!-- Two-Column Profile Grid -->
       <div class="profile-page-grid">
-        
+
         <!-- Left Column: Sticky Avatar & Quick Summary Card -->
         <aside class="profile-card-sticky">
           <div class="profile-summary-card">
-            
+
             <!-- Photo Upload Container -->
             <div class="profile-photo-wrapper">
               <div class="profile-photo-circle" id="profile-photo-circle">
@@ -362,15 +384,18 @@
               </div>
 
               <!-- Floating Camera Upload Button -->
-              <button type="button" class="photo-camera-btn" id="btn-trigger-photo-upload" title="Upload New Profile Photo" aria-label="Upload Profile Photo">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <button type="button" class="photo-camera-btn" id="btn-trigger-photo-upload"
+                title="Upload New Profile Photo" aria-label="Upload Profile Photo">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                   <circle cx="12" cy="13" r="4"></circle>
                 </svg>
               </button>
 
               <!-- Hidden Native File Input -->
-              <input type="file" id="profile-photo-file-input" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none;">
+              <input type="file" id="profile-photo-file-input" accept="image/png, image/jpeg, image/jpg, image/webp"
+                style="display:none;">
             </div>
 
             <div class="photo-quick-actions">
@@ -413,7 +438,7 @@
 
         <!-- Right Column: Modular Profile Detail Sections -->
         <div class="profile-content-col">
-          
+
           <!-- 1. Personal & Contact Information -->
           <section class="profile-section-card">
             <div class="profile-section-header">
@@ -426,7 +451,8 @@
                 </div>
                 <div>
                   <h3 class="section-title-text">Personal & Contact Information</h3>
-                  <span class="section-subtitle-text">Keep your primary contact information updated for HR communication</span>
+                  <span class="section-subtitle-text">Keep your primary contact information updated for HR
+                    communication</span>
                 </div>
               </div>
             </div>
@@ -440,7 +466,8 @@
 
                 <div class="profile-field-group">
                   <label for="prof-input-email">Official Company Email</label>
-                  <input type="email" id="prof-input-email" class="profile-input-box" value="sophia@company.com" readonly style="opacity: 0.8; cursor: not-allowed;">
+                  <input type="email" id="prof-input-email" class="profile-input-box" value="sophia@company.com"
+                    readonly style="opacity: 0.8; cursor: not-allowed;">
                 </div>
 
                 <div class="profile-field-group">
@@ -459,7 +486,8 @@
 
                 <div class="profile-field-group" style="grid-column: 1 / -1;">
                   <label for="prof-input-emergency">Emergency Contact (Name, Relation & Phone)</label>
-                  <input type="text" id="prof-input-emergency" class="profile-input-box" value="David Clark (Spouse) • +1 (555) 987-6543" required>
+                  <input type="text" id="prof-input-emergency" class="profile-input-box"
+                    value="David Clark (Spouse) • +1 (555) 987-6543" required>
                 </div>
               </div>
 
@@ -483,7 +511,8 @@
                 </div>
                 <div>
                   <h3 class="section-title-text">Employment & Organization Position</h3>
-                  <span class="section-subtitle-text">Official company organizational records verified by Human Resources</span>
+                  <span class="section-subtitle-text">Official company organizational records verified by Human
+                    Resources</span>
                 </div>
               </div>
             </div>
@@ -496,7 +525,8 @@
 
               <div class="profile-field-group">
                 <label>Designation / Role</label>
-                <input type="text" id="prof-view-title" class="profile-input-box" value="Lead Frontend Engineer" readonly>
+                <input type="text" id="prof-view-title" class="profile-input-box" value="Lead Frontend Engineer"
+                  readonly>
               </div>
 
               <div class="profile-field-group">
@@ -506,17 +536,20 @@
 
               <div class="profile-field-group">
                 <label>Direct Reporting Manager</label>
-                <input type="text" id="prof-view-mgr" class="profile-input-box" value="Alex Rivera (Engineering Lead)" readonly>
+                <input type="text" id="prof-view-mgr" class="profile-input-box" value="Alex Rivera (Engineering Lead)"
+                  readonly>
               </div>
 
               <div class="profile-field-group">
                 <label>Employment Nature</label>
-                <input type="text" id="prof-view-nature" class="profile-input-box" value="Full-Time Permanent (FTE)" readonly>
+                <input type="text" id="prof-view-nature" class="profile-input-box" value="Full-Time Permanent (FTE)"
+                  readonly>
               </div>
 
               <div class="profile-field-group">
                 <label>Joining & Service Date</label>
-                <input type="text" id="prof-view-joined" class="profile-input-box" value="March 1, 2023 (3+ Years)" readonly>
+                <input type="text" id="prof-view-joined" class="profile-input-box" value="March 1, 2023 (3+ Years)"
+                  readonly>
               </div>
             </div>
           </section>
@@ -535,7 +568,8 @@
                 </div>
                 <div>
                   <h3 class="section-title-text">Compensation & Disbursement Account</h3>
-                  <span class="section-subtitle-text">Verified account details for monthly salary deposit and bonus disbursements</span>
+                  <span class="section-subtitle-text">Verified account details for monthly salary deposit and bonus
+                    disbursements</span>
                 </div>
               </div>
             </div>
@@ -543,7 +577,8 @@
             <div class="profile-fields-grid">
               <div class="profile-field-group">
                 <label>Base Gross Salary</label>
-                <input type="text" id="prof-view-salary" class="profile-input-box pay-positive" value="$8,450.00 / month" readonly>
+                <input type="text" id="prof-view-salary" class="profile-input-box pay-positive"
+                  value="$8,450.00 / month" readonly>
               </div>
 
               <div class="profile-field-group">
@@ -575,7 +610,8 @@
                 </div>
                 <div>
                   <h3 class="section-title-text">Work Schedule, Shift & Workspace</h3>
-                  <span class="section-subtitle-text">Operational working hours, assigned shift timings, and official office workspace</span>
+                  <span class="section-subtitle-text">Operational working hours, assigned shift timings, and official
+                    office workspace</span>
                 </div>
               </div>
             </div>
@@ -593,7 +629,8 @@
 
               <div class="profile-field-group">
                 <label>Physical Office Workspace</label>
-                <input type="text" class="profile-input-box" value="Headquarters • Tech Wing Floor 4 • Desk #412" readonly>
+                <input type="text" class="profile-input-box" value="Headquarters • Tech Wing Floor 4 • Desk #412"
+                  readonly>
               </div>
 
               <div class="profile-field-group">
@@ -609,12 +646,15 @@
               <div class="profile-section-title-wrap">
                 <div class="section-icon-badge rose">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                    </polygon>
                   </svg>
                 </div>
                 <div>
                   <h3 class="section-title-text">Professional Skills & Certifications</h3>
-                  <span class="section-subtitle-text">Verified technical competencies, domain specializations, and professional credentials</span>
+                  <span class="section-subtitle-text">Verified technical competencies, domain specializations, and
+                    professional credentials</span>
                 </div>
               </div>
             </div>
@@ -645,12 +685,14 @@
 
               <div class="profile-field-group">
                 <label>Verified Professional Certifications</label>
-                <input type="text" class="profile-input-box" value="AWS Certified Cloud Practitioner • Scrum Master" readonly>
+                <input type="text" class="profile-input-box" value="AWS Certified Cloud Practitioner • Scrum Master"
+                  readonly>
               </div>
 
               <div class="profile-field-group">
                 <label>Annual Performance Review Score</label>
-                <input type="text" class="profile-input-box pay-positive" value="Tier A (98% Performance Score • Top 5% Staff)" readonly>
+                <input type="text" class="profile-input-box pay-positive"
+                  value="Tier A (98% Performance Score • Top 5% Staff)" readonly>
               </div>
             </div>
           </section>
@@ -667,7 +709,8 @@
                 </div>
                 <div>
                   <h3 class="section-title-text">Account Security & Password</h3>
-                  <span class="section-subtitle-text">Change your portal login password to keep your employee account secure</span>
+                  <span class="section-subtitle-text">Change your portal login password to keep your employee account
+                    secure</span>
                 </div>
               </div>
             </div>
@@ -676,17 +719,20 @@
               <div class="profile-fields-grid">
                 <div class="profile-field-group">
                   <label for="prof-curr-pass">Current Password</label>
-                  <input type="password" id="prof-curr-pass" class="profile-input-box" placeholder="Enter current password" required minlength="6">
+                  <input type="password" id="prof-curr-pass" class="profile-input-box"
+                    placeholder="Enter current password" required minlength="6">
                 </div>
 
                 <div class="profile-field-group">
                   <label for="prof-new-pass">New Password</label>
-                  <input type="password" id="prof-new-pass" class="profile-input-box" placeholder="Min 6 characters" required minlength="6">
+                  <input type="password" id="prof-new-pass" class="profile-input-box" placeholder="Min 6 characters"
+                    required minlength="6">
                 </div>
 
                 <div class="profile-field-group" style="grid-column: 1 / -1;">
                   <label for="prof-confirm-pass">Confirm New Password</label>
-                  <input type="password" id="prof-confirm-pass" class="profile-input-box" placeholder="Re-type new password" required minlength="6">
+                  <input type="password" id="prof-confirm-pass" class="profile-input-box"
+                    placeholder="Re-type new password" required minlength="6">
                 </div>
               </div>
 
@@ -709,4 +755,5 @@
   <!-- Core Script -->
   <script src="script.js"></script>
 </body>
+
 </html>
