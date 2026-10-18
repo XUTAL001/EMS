@@ -4106,7 +4106,7 @@ dialog.modal-dialog::backdrop {
   position: relative;
   width: 120px;
   height: 120px;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.85rem;
 }
 
 .profile-photo-circle {
@@ -4141,10 +4141,10 @@ dialog.modal-dialog::backdrop {
 
 .photo-camera-btn {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 38px;
-  height: 38px;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--neu-card-bg);
   color: var(--accent-blue);
@@ -4166,16 +4166,18 @@ dialog.modal-dialog::backdrop {
 
 .photo-quick-actions {
   display: flex;
-  gap: 0.55rem;
-  margin-top: 0.25rem;
-  margin-bottom: 1.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 .btn-photo-action {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  padding: 0.35rem 0.8rem;
-  border-radius: 14px;
+  padding: 0.38rem 0.9rem;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   border: none;
   background: var(--neu-card-bg);
@@ -4197,8 +4199,9 @@ dialog.modal-dialog::backdrop {
   font-size: 1.45rem;
   font-weight: 800;
   color: var(--text-title);
+  margin-top: 0;
   margin-bottom: 0.25rem;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .profile-role-sub {
