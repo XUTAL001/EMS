@@ -3954,9 +3954,14 @@ function initDashboardPage() {
     });
   });
 
-  if (topUserProfileMenu) {
-    topUserProfileMenu.style.cursor = 'pointer';
-    topUserProfileMenu.addEventListener('click', (e) => {
+  // Top-user-profile-menu click -> navigate to profile.html
+  const topProfileMenus = document.querySelectorAll('.user-profile-menu, #top-user-profile-menu');
+  topProfileMenus.forEach(menu => {
+    menu.style.cursor = 'pointer';
+    if (!menu.getAttribute('title')) {
+      menu.setAttribute('title', 'View Profile');
+    }
+    menu.addEventListener('click', (e) => {
       if (e.target.closest('#btn-logout-top')) return;
       if (window.location.pathname.includes('profile.html')) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3964,7 +3969,7 @@ function initDashboardPage() {
         window.location.href = 'profile.html';
       }
     });
-  }
+  });
 
   if (btnCloseProfileModal) btnCloseProfileModal.addEventListener('click', () => modalEmpProfile && modalEmpProfile.close());
   if (btnCancelProfile) btnCancelProfile.addEventListener('click', () => modalEmpProfile && modalEmpProfile.close());

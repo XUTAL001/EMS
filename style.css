@@ -1026,6 +1026,19 @@ body {
   box-shadow: 4px 4px 9px var(--neu-shadow-dark), -4px -4px 9px var(--neu-shadow-light);
   border-radius: var(--radius-pill);
   margin-left: 0.25rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.user-profile-menu:hover {
+  transform: translateY(-1px);
+  box-shadow: 5px 5px 12px var(--neu-shadow-dark), -5px -5px 12px var(--neu-shadow-light);
+}
+
+.user-profile-menu:active {
+  transform: translateY(0);
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
 }
 
 .user-avatar-wrap {
