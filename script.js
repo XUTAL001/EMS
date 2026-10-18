@@ -644,7 +644,7 @@ function initAuthPage() {
           card.classList.add('shake');
         }
 
-        showToast('Invalid credentials. HR: tanvir@gmai.com / shifat001 • Manager: alex@company.com / manager123 • Employee: sophia@company.com / employee123', 'info');
+        showToast('Invalid company credentials. Please check your email and password.', 'error');
         passwordInput.value = '';
         passwordInput.focus();
       }
