@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="dashboard-body">
@@ -25,7 +26,7 @@
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button>
-      <div class="dash-brand">
+      <a href="employee.html" class="dash-brand" id="brand-home-link" title="Dashboard">
         <div class="dash-brand-icon ems-brand-icon" style="background: linear-gradient(135deg, #0070f3, #7928ca);">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -36,7 +37,7 @@
           <span class="dash-brand-name">NEXUS<span>EMS</span></span>
           <span class="ems-badge emp-badge" id="portal-role-badge">EMPLOYEE PORTAL</span>
         </div>
-      </div>
+      </a>
     </div>
 
     <!-- Global Search Bar -->
@@ -215,13 +216,6 @@
           <span>My Payslips</span>
         </a>
 
-        <a href="javascript:void(0)" class="sidebar-item" id="nav-emp-profile">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>My Profile</span>
-        </a>
 
         <a href="javascript:void(0)" class="sidebar-item" id="nav-emp-notifications">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -233,18 +227,6 @@
         </a>
       </nav>
 
-      <!-- Sidebar Status Card -->
-      <div class="sidebar-storage-card">
-        <span class="storage-title" id="sidebar-card-label">My Cloud Allowance</span>
-        <span class="storage-meta" id="sidebar-plan-label">Employee Self-Service</span>
-        <div class="storage-bar">
-          <div class="storage-bar-fill" style="width: 45%;"></div>
-        </div>
-        <div class="storage-info">
-          <span>4.5 GB of 10 GB</span>
-          <span>45% Used</span>
-        </div>
-      </div>
 
       <!-- Quick Role Switcher for Pair-Programming/Testing -->
       <div class="sidebar-role-panel">
@@ -259,21 +241,10 @@
         </div>
       </div>
 
-      <!-- Sidebar Footer / Logout -->
-      <div class="sidebar-footer">
-        <button id="btn-sidebar-logout" class="sidebar-logout-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Sign Out</span>
-        </button>
-      </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="dash-main-content">
+    <main class="dash-content">
 
       <!-- ================================================================== -->
       <!-- DEDICATED EMPLOYEE SELF-SERVICE PORTAL VIEW                         -->
@@ -295,13 +266,14 @@
               </svg>
               <span id="punch-btn-label">Clock Out (Shift Active)</span>
             </button>
-            <button type="button" class="neu-btn dash-action-btn secondary" id="btn-emp-open-profile-hero">
+            <a href="leave-approvals.html" class="neu-btn dash-action-btn secondary" id="btn-emp-apply-leave-hero">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
               </svg>
-              <span>View Profile</span>
-            </button>
+              <span>Apply for Leave &rarr;</span>
+            </a>
           </div>
         </section>
 
@@ -369,262 +341,191 @@
           </div>
         </section>
 
-        <!-- Employee Quick Navigation Cards to Dedicated Modules -->
-        <section class="dash-quick-nav-grid">
-          <!-- 1. My Attendance -->
-          <a href="attendance.html" class="dash-quick-nav-card">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap green">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              </div>
-              <div>
-                <h3 class="dash-quick-nav-title">My Attendance</h3>
-                <span class="dash-quick-nav-subtitle">Punch Clock & Timesheet</span>
-              </div>
-            </div>
-            <p class="dash-quick-nav-desc">Clock in/out, view daily logs, weekly logged hours, and arrival records.</p>
-            <span class="dash-quick-nav-action">Open Attendance &rarr;</span>
-          </a>
 
-          <!-- 2. My Leaves -->
-          <a href="leave-approvals.html" class="dash-quick-nav-card">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap amber">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                </svg>
-              </div>
+        <!-- Employee Analytics & Overview Charts (Work Completion % + Performance Appraisal) -->
+        <section class="dash-charts-grid">
+          <!-- 1. Work & Sprint Completion Progress (Bar Chart) -->
+          <div class="dash-widget attendance-chart-card">
+            <div class="chart-card-header">
               <div>
-                <h3 class="dash-quick-nav-title">My Leaves</h3>
-                <span class="dash-quick-nav-subtitle">Time-Off & Leave Quotas</span>
+                <h2 class="chart-card-title">Work & Sprint Progress</h2>
+                <span class="widget-subtitle">Sprint 42 Deliverables • 38 of 42 tasks completed</span>
+              </div>
+              <div class="chart-legend">
+                <span class="chart-legend-item"><span class="chart-legend-dot present"></span> Work Done (%)</span>
+                <span class="chart-legend-item"><span class="chart-legend-dot leave"></span> Target (80%)</span>
+                <span class="kpi-trend-pill green" style="font-weight:700; margin-left:0.35rem;">88% Completed</span>
               </div>
             </div>
-            <p class="dash-quick-nav-desc">Submit new leave requests and check approved/pending status.</p>
-            <span class="dash-quick-nav-action">Apply for Leave &rarr;</span>
-          </a>
 
-          <!-- 3. My Performance -->
-          <a href="appraisals.html" class="dash-quick-nav-card">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap purple">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-              </div>
-              <div>
-                <h3 class="dash-quick-nav-title">My Performance</h3>
-                <span class="dash-quick-nav-subtitle">Bonus & Increment Rating</span>
-              </div>
-            </div>
-            <p class="dash-quick-nav-desc">Review your 98% Tier A rating, task scorecards, and salary increment.</p>
-            <span class="dash-quick-nav-action">View Performance &rarr;</span>
-          </a>
+            <div class="bar-chart-wrap">
+              <svg class="bar-chart-svg" viewBox="0 0 540 210" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="workBlueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#0070f3" />
+                    <stop offset="100%" stop-color="#0052cc" />
+                  </linearGradient>
+                  <linearGradient id="workGreenGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" />
+                    <stop offset="100%" stop-color="#059669" />
+                  </linearGradient>
+                </defs>
 
-          <!-- 4. My Payslips -->
-          <a href="payroll.html" class="dash-quick-nav-card">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap blue">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                  <line x1="2" y1="10" x2="22" y2="10"></line>
-                  <line x1="6" y1="15" x2="8" y2="15"></line>
-                  <line x1="12" y1="15" x2="16" y2="15"></line>
-                </svg>
-              </div>
-              <div>
-                <h3 class="dash-quick-nav-title">My Payslips</h3>
-                <span class="dash-quick-nav-subtitle">Salary & Compensation</span>
-              </div>
-            </div>
-            <p class="dash-quick-nav-desc">Check your $8,450 net payout, tax breakdowns, and download official slips.</p>
-            <span class="dash-quick-nav-action">Open Payslips &rarr;</span>
-          </a>
+                <!-- Grid Horizontal Lines & Labels -->
+                <g class="chart-grid-lines" stroke="rgba(142, 154, 175, 0.2)" stroke-width="1" stroke-dasharray="3 3">
+                  <line x1="40" y1="25" x2="520" y2="25" />
+                  <line x1="40" y1="62.5" x2="520" y2="62.5" />
+                  <line x1="40" y1="100" x2="520" y2="100" />
+                  <line x1="40" y1="137.5" x2="520" y2="137.5" />
+                  <line x1="40" y1="175" x2="520" y2="175" stroke-dasharray="none" stroke="rgba(142, 154, 175, 0.35)" />
+                </g>
 
-          <!-- 5. My Profile -->
-          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-open-profile">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap" style="background: rgba(0, 112, 243, 0.12); color: var(--accent-blue);">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <div>
-                <h3 class="dash-quick-nav-title">My Profile</h3>
-                <span class="dash-quick-nav-subtitle">Personal Details & Bank Wire</span>
-              </div>
-            </div>
-            <p class="dash-quick-nav-desc">View and manage your employee profile, designation, contacts, and bank info.</p>
-            <span class="dash-quick-nav-action">View & Edit Profile &rarr;</span>
-          </a>
+                <!-- Y-Axis Percentage Labels -->
+                <g class="chart-y-labels" font-size="11" font-weight="600" fill="var(--text-subtitle)" text-anchor="end" font-family="var(--font-family)">
+                  <text x="32" y="29">100%</text>
+                  <text x="32" y="66.5">75%</text>
+                  <text x="32" y="104">50%</text>
+                  <text x="32" y="141.5">25%</text>
+                  <text x="32" y="179">0%</text>
+                </g>
 
-          <!-- 6. Notifications -->
-          <a href="javascript:void(0)" class="dash-quick-nav-card" id="card-open-notifs">
-            <div class="dash-quick-nav-header">
-              <div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
+                <!-- Monday (85% completed vs 80% target) -->
+                <g class="day-group" data-day="Mon">
+                  <rect class="bar-chart-bar" x="72" y="47.5" width="12" height="127.5" rx="6" fill="url(#workBlueGrad)"><title>Mon: 85% Tasks Completed</title></rect>
+                  <rect class="bar-chart-bar" x="88" y="55" width="12" height="120" rx="6" fill="url(#workGreenGrad)"><title>Target: 80%</title></rect>
+                  <text x="86" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Mon</text>
+                </g>
+
+                <!-- Tuesday (92% completed) -->
+                <g class="day-group" data-day="Tue">
+                  <rect class="bar-chart-bar" x="140" y="37" width="12" height="138" rx="6" fill="url(#workBlueGrad)"><title>Tue: 92% Tasks Completed</title></rect>
+                  <rect class="bar-chart-bar" x="156" y="55" width="12" height="120" rx="6" fill="url(#workGreenGrad)"><title>Target: 80%</title></rect>
+                  <text x="154" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Tue</text>
+                </g>
+
+                <!-- Wednesday (96% completed - Milestone delivered) -->
+                <g class="day-group" data-day="Wed">
+                  <rect class="bar-chart-bar" x="208" y="31" width="12" height="144" rx="6" fill="url(#workBlueGrad)"><title>Wed: 96% Milestone Completed</title></rect>
+                  <rect class="bar-chart-bar" x="224" y="55" width="12" height="120" rx="6" fill="url(#workGreenGrad)"><title>Target: 80%</title></rect>
+                  <text x="222" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Wed</text>
+                </g>
+
+                <!-- Thursday (88% completed) -->
+                <g class="day-group" data-day="Thu">
+                  <rect class="bar-chart-bar" x="276" y="43" width="12" height="132" rx="6" fill="url(#workBlueGrad)"><title>Thu: 88% Tasks Completed</title></rect>
+                  <rect class="bar-chart-bar" x="292" y="55" width="12" height="120" rx="6" fill="url(#workGreenGrad)"><title>Target: 80%</title></rect>
+                  <text x="290" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Thu</text>
+                </g>
+
+                <!-- Friday (94% - Active Today) -->
+                <g class="day-group" data-day="Fri">
+                  <rect class="bar-chart-bar" x="344" y="34" width="12" height="141" rx="6" fill="url(#workBlueGrad)"><title>Fri: 94% In Progress (Active)</title></rect>
+                  <rect class="bar-chart-bar" x="360" y="55" width="12" height="120" rx="6" fill="url(#workGreenGrad)"><title>Target: 80%</title></rect>
+                  <text x="358" y="196" font-size="12" font-weight="700" fill="var(--accent-blue)" text-anchor="middle" font-family="var(--font-family)">Fri</text>
+                  <circle cx="358" cy="205" r="3" fill="#10b981" />
+                </g>
+
+                <!-- Saturday (Weekend) -->
+                <g class="day-group" data-day="Sat">
+                  <rect class="bar-chart-bar" x="412" y="169" width="12" height="6" rx="3" fill="rgba(142, 154, 175, 0.3)"><title>Sat: Weekend</title></rect>
+                  <text x="418" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Sat</text>
+                </g>
+
+                <!-- Sunday (Weekend) -->
+                <g class="day-group" data-day="Sun">
+                  <rect class="bar-chart-bar" x="480" y="169" width="12" height="6" rx="3" fill="rgba(142, 154, 175, 0.3)"><title>Sun: Weekend</title></rect>
+                  <text x="486" y="196" font-size="12" font-weight="600" fill="var(--text-subtitle)" text-anchor="middle" font-family="var(--font-family)">Sun</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Bottom Sprint Progress Bar -->
+            <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem; font-size:0.8rem;">
+                <span style="color:var(--text-subtitle); font-weight:500;">Overall Sprint Completion</span>
+                <strong style="color:var(--accent-blue); font-weight:700;">88% (38 / 42 Story Points)</strong>
               </div>
-              <div>
-                <h3 class="dash-quick-nav-title">Notifications</h3>
-                <span class="dash-quick-nav-subtitle">4 Unread Alerts & Notices</span>
+              <div style="width:100%; height:8px; background:rgba(142,154,175,0.18); border-radius:10px; overflow:hidden;">
+                <div style="width:88%; height:100%; background:linear-gradient(90deg, #0070f3, #10b981); border-radius:10px;"></div>
               </div>
             </div>
-            <p class="dash-quick-nav-desc">Stay informed about approved leaves, salary disbursements, and reviews.</p>
-            <span class="dash-quick-nav-action">Open Notifications &rarr;</span>
-          </a>
+          </div>
+
+          <!-- 2. Performance & Appraisal Rating (Donut Chart & Legend) -->
+          <div class="dash-widget dept-chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h2 class="chart-card-title">Performance & Evaluation</h2>
+                <span class="widget-subtitle">Q3 Appraisal Board Rating</span>
+              </div>
+              <span class="kpi-trend-pill green" style="font-weight:700; background:rgba(16,185,129,0.12); color:#10b981;">★ Tier A (96%)</span>
+            </div>
+
+            <div class="dept-donut-grid">
+              <!-- Left: SVG Donut -->
+              <div class="donut-chart-container">
+                <svg class="donut-chart-svg" viewBox="0 0 220 220" width="180" height="180">
+                  <g transform="rotate(-90 110 110)">
+                    <!-- Work Delivery (35%) -->
+                    <circle cx="110" cy="110" r="74" fill="none" stroke="#0070f3" stroke-width="24"
+                            stroke-dasharray="162.74 464.96" stroke-dashoffset="0" />
+                    <!-- Quality of Work (30%) -->
+                    <circle cx="110" cy="110" r="74" fill="none" stroke="#10b981" stroke-width="24"
+                            stroke-dasharray="139.49 464.96" stroke-dashoffset="-162.74" />
+                    <!-- Shift Punctuality (20%) -->
+                    <circle cx="110" cy="110" r="74" fill="none" stroke="#00c2ff" stroke-width="24"
+                            stroke-dasharray="92.99 464.96" stroke-dashoffset="-302.23" />
+                    <!-- Team Collaboration (15%) -->
+                    <circle cx="110" cy="110" r="74" fill="none" stroke="#7928ca" stroke-width="24"
+                            stroke-dasharray="69.74 464.96" stroke-dashoffset="-395.22" />
+                  </g>
+
+                  <!-- Donut Hole Label -->
+                  <text x="110" y="106" text-anchor="middle" font-size="24" font-weight="800" fill="var(--text-title)" font-family="var(--font-family)">96%</text>
+                  <text x="110" y="125" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-subtitle)" font-family="var(--font-family)">Overall Score</text>
+                </svg>
+              </div>
+
+              <!-- Right: Breakdown List -->
+              <div class="dept-legend-list">
+                <div class="dept-legend-row">
+                  <div class="dept-legend-row-left">
+                    <span class="chart-legend-dot" style="background: #0070f3;"></span>
+                    <span>Task Velocity</span>
+                  </div>
+                  <span class="dept-legend-pct" style="color:#0070f3;">96%</span>
+                </div>
+                <div class="dept-legend-row">
+                  <div class="dept-legend-row-left">
+                    <span class="chart-legend-dot" style="background: #10b981;"></span>
+                    <span>Code Quality</span>
+                  </div>
+                  <span class="dept-legend-pct" style="color:#10b981;">98%</span>
+                </div>
+                <div class="dept-legend-row">
+                  <div class="dept-legend-row-left">
+                    <span class="chart-legend-dot" style="background: #00c2ff;"></span>
+                    <span>Punctuality</span>
+                  </div>
+                  <span class="dept-legend-pct" style="color:#00c2ff;">97%</span>
+                </div>
+                <div class="dept-legend-row">
+                  <div class="dept-legend-row-left">
+                    <span class="chart-legend-dot" style="background: #7928ca;"></span>
+                    <span>Collaboration</span>
+                  </div>
+                  <span class="dept-legend-pct" style="color:#7928ca;">94%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Evaluation Recommendation -->
+            <div style="margin-top: 1rem; padding: 0.65rem 0.85rem; background: rgba(0, 112, 243, 0.08); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+              <span style="color: var(--text-subtitle); font-weight: 500;">Appraisal Action:</span>
+              <strong style="color: #10b981; font-weight: 700;">+15% Raise Approved ($1,268/mo)</strong>
+            </div>
+          </div>
         </section>
-
-        <!-- 2 Column: Leave Status Overview & Tasks/Payslips -->
-        <div class="dash-main-grid mt-6">
-          
-          <!-- Left: My Time-Off & Leaves Status -->
-          <div class="dash-col-left" id="emp-leave-section">
-            <div class="dash-widget">
-              <div class="widget-header">
-                <div>
-                  <h2 class="widget-title">My Leave & Time-Off Status</h2>
-                  <span class="widget-subtitle">Track your leave requests and quotas</span>
-                </div>
-                <a href="leave-approvals.html" class="neu-btn dash-action-btn primary">
-                  <span>Manage Leaves &rarr;</span>
-                </a>
-              </div>
-
-              <!-- My Leave History -->
-              <div class="leave-history-list" id="emp-leave-history">
-                <div class="leave-history-item">
-                  <div class="history-info">
-                    <strong>Medical Leave (Dental Procedure)</strong>
-                    <span>Oct 18 - Oct 20 (3 Days)</span>
-                  </div>
-                  <span class="status-pill active">Pending HR Review</span>
-                </div>
-                <div class="leave-history-item">
-                  <div class="history-info">
-                    <strong>Summer Vacation Break</strong>
-                    <span>Aug 12 - Aug 16 (5 Days)</span>
-                  </div>
-                  <span class="status-pill completed">Approved ✓</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Shift & Timesheet Summary -->
-            <div class="dash-widget mt-6">
-              <div class="widget-header">
-                <div>
-                  <h2 class="widget-title">Current Sprint Shift Log</h2>
-                  <span class="widget-subtitle">Track punctuality, shifts, and weekly logged hours</span>
-                </div>
-                <a href="attendance.html" class="neu-btn dash-action-btn secondary">
-                  <span>Open Full Log →</span>
-                </a>
-              </div>
-
-              <div class="table-progress-wrap" style="padding: 0.5rem 0;">
-                <div class="dept-info">
-                  <span>Logged Working Hours (Target 160h)</span>
-                  <strong>168h / 160h (105% On Track)</strong>
-                </div>
-                <div class="table-progress-bar">
-                  <div class="table-fill table-fill-green" style="width: 100%;"></div>
-                </div>
-              </div>
-
-              <div class="meta-field-row" style="margin-top: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color);">
-                <span>Current Shift Punctuality:</span>
-                <strong style="color: #10b981;">98% On-Time Record</strong>
-              </div>
-              <div class="meta-field-row" style="padding: 0.6rem 0;">
-                <span>Shift Mode:</span>
-                <span class="emp-id-badge">Onsite • Silicon Tower Hub</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: My Tasks & Payslips -->
-          <div class="dash-col-right" id="emp-tasks-section">
-            
-            <!-- My Sprint Checklist -->
-            <div class="dash-widget">
-              <div class="widget-header">
-                <div>
-                  <h2 class="widget-title">My Sprint Tasks</h2>
-                  <span class="widget-subtitle">Your personal project milestones</span>
-                </div>
-              </div>
-
-              <ul class="dash-task-list" id="emp-personal-tasks">
-                <li class="dash-task-item done">
-                  <div class="task-left">
-                    <span class="dash-chk"></span>
-                    <span class="dash-task-text">Implement Neumorphic UI buttons</span>
-                  </div>
-                </li>
-                <li class="dash-task-item">
-                  <div class="task-left">
-                    <span class="dash-chk"></span>
-                    <span class="dash-task-text">Audit mobile responsive breakpoints</span>
-                  </div>
-                </li>
-                <li class="dash-task-item">
-                  <div class="task-left">
-                    <span class="dash-chk"></span>
-                    <span class="dash-task-text">Integrate punch clock attendance API</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <!-- My Payslips Widget -->
-            <div class="dash-widget mt-6" id="emp-payslips-section">
-              <div class="widget-header">
-                <div>
-                  <h2 class="widget-title">My Payslips & Compensation</h2>
-                  <span class="widget-subtitle">Verified salary slips & direct deposit statements</span>
-                </div>
-              </div>
-              <div class="payslips-list">
-                <div class="payslip-item">
-                  <div class="payslip-left">
-                    <div class="payslip-icon">📄</div>
-                    <div>
-                      <strong>September 2026 Payslip</strong>
-                      <small>Disbursed on Oct 01, 2026 • Net $8,450.00</small>
-                    </div>
-                  </div>
-                  <button class="neu-circle-btn action-circle-btn download-payslip-btn" title="Download Payslip">↓</button>
-                </div>
-
-                <div class="payslip-item">
-                  <div class="payslip-left">
-                    <div class="payslip-icon">📄</div>
-                    <div>
-                      <strong>August 2026 Payslip</strong>
-                      <small>Disbursed on Sep 01, 2026 • Net $8,450.00</small>
-                    </div>
-                  </div>
-                  <button class="neu-circle-btn action-circle-btn download-payslip-btn" title="Download Payslip">↓</button>
-                </div>
-              </div>
-              <div style="margin-top: 1rem; text-align: center;">
-                <a href="payroll.html" class="neu-btn dash-action-btn secondary btn-full-width" style="display: inline-flex; text-decoration: none; justify-content: center;">
-                  <span>Open Full Payroll & Tax Statements →</span>
-                </a>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
 
       </div>
 

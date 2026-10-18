@@ -792,23 +792,85 @@ function initDashboardPage() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // B. Responsive Sidebar Toggle
+  // B. Responsive Sidebar Toggle (Desktop Collapse & Mobile Drawer)
   const sidebar = document.getElementById('sidebar-nav');
   const sidebarToggle = document.getElementById('sidebar-toggle');
-  if (sidebar && sidebarToggle) {
-    sidebarToggle.addEventListener('click', () => {
-      sound.playPop(600);
-      sidebar.classList.toggle('open');
-    });
+  
+  let sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+  if (!sidebarBackdrop) {
+    sidebarBackdrop = document.createElement('div');
+    sidebarBackdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(sidebarBackdrop);
+  }
 
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024 && sidebar.classList.contains('open')) {
-        if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-          sidebar.classList.remove('open');
-        }
-      }
+  function isMobileScreen() {
+    return window.innerWidth <= 1024;
+  }
+
+  // Restore desktop collapsed state from localStorage
+  if (sidebar && !isMobileScreen() && localStorage.getItem('nexus_sidebar_collapsed') === 'true') {
+    sidebar.classList.add('collapsed');
+    if (sidebarToggle) sidebarToggle.classList.add('active');
+  }
+
+  function toggleSidebar() {
+    if (!sidebar) return;
+    if (sound && sound.playPop) sound.playPop(600);
+
+    if (isMobileScreen()) {
+      const isOpen = sidebar.classList.toggle('open');
+      if (sidebarToggle) sidebarToggle.classList.toggle('active', isOpen);
+      if (sidebarBackdrop) sidebarBackdrop.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    } else {
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+      if (sidebarToggle) sidebarToggle.classList.toggle('active', isCollapsed);
+      localStorage.setItem('nexus_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    }
+  }
+
+  function closeMobileSidebar() {
+    if (sidebar && sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      if (sidebarToggle) sidebarToggle.classList.remove('active');
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSidebar();
     });
   }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+
+  document.addEventListener('click', (e) => {
+    if (isMobileScreen() && sidebar && sidebar.classList.contains('open')) {
+      if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+        closeMobileSidebar();
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (!isMobileScreen()) {
+      closeMobileSidebar();
+      if (localStorage.getItem('nexus_sidebar_collapsed') === 'true') {
+        if (sidebar) sidebar.classList.add('collapsed');
+        if (sidebarToggle) sidebarToggle.classList.add('active');
+      } else {
+        if (sidebar) sidebar.classList.remove('collapsed');
+        if (sidebarToggle) sidebarToggle.classList.remove('active');
+      }
+    } else {
+      if (sidebar) sidebar.classList.remove('collapsed');
+    }
+  });
 
   let authRole = localStorage.getItem('auth_user_role');
   if (!authRole || (authRole !== 'HR' && authRole !== 'EMPLOYEE' && authRole !== 'MANAGER')) {
@@ -1420,16 +1482,30 @@ function initDashboardPage() {
     });
   }
 
-  // Export CSV
+  // Export CSV (Staff Directory)
   const btnExportCsv = document.getElementById('btn-export-csv');
   if (btnExportCsv) {
     btnExportCsv.addEventListener('click', () => {
       sound.playSuccess();
-      let csvContent = 'Employee ID,Full Name,Email,Department,Designation,Work Mode,Status\n';
-      employees.forEach(emp => {
-        csvContent += `"${emp.id}","${emp.name}","${emp.email}","${emp.dept}","${emp.role}","${emp.mode}","${emp.status}"\n`;
+      let csvRows = [];
+      csvRows.push(['SL', 'Employee ID', 'Full Name', 'Work Email', 'Department', 'Designation', 'Work Arrangement', 'Base Monthly Salary ($)', 'Employment Status'].map(h => `"${h}"`).join(','));
+      
+      employees.forEach((emp, idx) => {
+        const row = [
+          idx + 1,
+          emp.id,
+          emp.name,
+          emp.email,
+          emp.dept,
+          emp.role,
+          emp.mode,
+          (emp.baseSalary || 7500).toFixed(2),
+          emp.status
+        ];
+        csvRows.push(row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
       });
 
+      const csvContent = '\uFEFF' + csvRows.join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1438,7 +1514,7 @@ function initDashboardPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Exported employee directory to CSV!', 'success');
+      showToast('✓ Exported clean employee directory to CSV!', 'success');
     });
   }
 
@@ -2195,29 +2271,205 @@ function initDashboardPage() {
     });
   }
 
-  // Bank CSV Export Button
+  // Bank CSV Export Button (Clean, Single-Line, 100% Legible Format for Notepad & Excel)
   const btnExportPayrollCsv = document.getElementById('btn-export-payroll-csv');
   if (btnExportPayrollCsv) {
     btnExportPayrollCsv.addEventListener('click', () => {
       sound.playSuccess();
-      const activeCycle = payrollCycleSelect ? payrollCycleSelect.value : 'Oct 2026';
-      let csvContent = 'Employee ID,Full Name,Department,Role,Bank Wire Account,Base Salary,Bonus,Overtime,HRA,Medical,Gross Earnings,Tax Deduct,PF Deduct,Net Take-Home,Payment Status\n';
+      const activeCycle = payrollCycleSelect ? payrollCycleSelect.value : 'October 2026';
+      
+      const bankDirectory = [
+        { bank: 'Chase Bank', routing: 'CHASUS33' },
+        { bank: 'Bank of America', routing: 'BOFAUS3N' },
+        { bank: 'Citibank', routing: 'CITIUS33' },
+        { bank: 'Wells Fargo', routing: 'WFBIUS6S' },
+        { bank: 'Capital One', routing: 'CAPLUS33' },
+        { bank: 'PNC Bank', routing: 'PNCBUS22' }
+      ];
 
-      employees.forEach(emp => {
+      // Concise 8-column header that never wraps and reads effortlessly
+      let csvLines = [
+        'SL, Employee ID, Employee Name, Department, Bank Name, Account Number, Net Amount ($), Status'
+      ];
+
+      let totalNet = 0;
+
+      employees.forEach((emp, index) => {
         const pay = calculatePayrollForEmployee(emp, activeCycle);
-        const bankAcc = `Wire-${9000 + parseInt(emp.id.replace(/\D/g, '') || 1000, 10)}`;
-        csvContent += `"${emp.id}","${emp.name}","${emp.dept}","${emp.role}","${bankAcc}","${pay.baseSalary}","${pay.bonusAmount}","${pay.overtimePay}","${pay.hraAllowance}","${pay.medicalAllowance}","${pay.grossEarnings}","${pay.taxDeduction}","${pay.pfDeduction}","${pay.netPay}","${pay.paymentStatus}"\n`;
+        const bankMeta = bankDirectory[index % bankDirectory.length];
+        
+        const idDigits = (emp.id.replace(/\D/g, '') || (1000 + index));
+        const rawAccountNum = `4082${String(parseInt(idDigits, 10) * 83).padStart(8, '0').slice(-8)}`;
+        const net = pay.netPay || 0;
+        totalNet += net;
+
+        csvLines.push(`${index + 1}, ${emp.id}, ${emp.name}, ${emp.dept}, ${bankMeta.bank}, ${rawAccountNum}, $${net.toFixed(2)}, ${pay.paymentStatus || 'Processed'}`);
       });
 
+      // Clear Summary Line at Bottom
+      csvLines.push(`TOTAL, ${employees.length} Staff, All Beneficiaries, -, All Banks, -, $${totalNet.toFixed(2)}, All Processed`);
+
+      const csvContent = '\uFEFF' + csvLines.join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `nexus_payroll_disbursement_${activeCycle.replace(/\s+/g, '_')}.csv`);
+      link.setAttribute('download', `nexus_bank_disbursement_${activeCycle.toLowerCase().replace(/\s+/g, '_')}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast(`Exported ${activeCycle} Payroll Ledger to CSV!`, 'success');
+      showToast(`✓ Downloaded clean human-readable Bank CSV!`, 'success');
+    });
+  }
+
+  // Bank Excel Export Button (Formatted Spreadsheet with Gridlines & Styled Headers)
+  const btnExportPayrollExcel = document.getElementById('btn-export-payroll-excel');
+  if (btnExportPayrollExcel) {
+    btnExportPayrollExcel.addEventListener('click', () => {
+      sound.playSuccess();
+      const activeCycle = payrollCycleSelect ? payrollCycleSelect.value : 'October 2026';
+
+      const bankDirectory = [
+        { bank: 'JPMorgan Chase Bank, N.A.', routing: 'CHASUS33' },
+        { bank: 'Bank of America, N.A.', routing: 'BOFAUS3N' },
+        { bank: 'Citibank, N.A.', routing: 'CITIUS33' },
+        { bank: 'Wells Fargo Bank, N.A.', routing: 'WFBIUS6S' },
+        { bank: 'Capital One, N.A.', routing: 'CAPLUS33' },
+        { bank: 'PNC Bank, N.A.', routing: 'PNCBUS22' }
+      ];
+
+      let totalBase = 0;
+      let totalAllowances = 0;
+      let totalBonusOt = 0;
+      let totalGross = 0;
+      let totalTax = 0;
+      let totalPf = 0;
+      let totalNet = 0;
+
+      let tableRows = '';
+      employees.forEach((emp, index) => {
+        const pay = calculatePayrollForEmployee(emp, activeCycle);
+        const bankMeta = bankDirectory[index % bankDirectory.length];
+        const idDigits = (emp.id.replace(/\D/g, '') || (1000 + index));
+        const rawAccountNum = `4082${String(parseInt(idDigits, 10) * 83).padStart(8, '0').slice(-8)}`;
+
+        const base = pay.baseSalary || 0;
+        const allowances = pay.totalAllowances || 0;
+        const bonusOt = (pay.bonusAmount || 0) + (pay.overtimePay || 0);
+        const gross = pay.grossEarnings || 0;
+        const tax = pay.taxDeduction || 0;
+        const pf = pay.pfDeduction || 0;
+        const net = pay.netPay || 0;
+
+        totalBase += base;
+        totalAllowances += allowances;
+        totalBonusOt += bonusOt;
+        totalGross += gross;
+        totalTax += tax;
+        totalPf += pf;
+        totalNet += net;
+
+        tableRows += `
+          <tr>
+            <td style="text-align: center;">${index + 1}</td>
+            <td style="font-weight: bold; color: #0070f3;">${emp.id}</td>
+            <td><strong>${emp.name}</strong></td>
+            <td>${emp.dept}</td>
+            <td>${emp.role}</td>
+            <td>${bankMeta.bank}</td>
+            <td style="font-family: monospace;">${rawAccountNum}</td>
+            <td style="font-family: monospace;">${bankMeta.routing}</td>
+            <td style="text-align: right;">$${base.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right;">$${allowances.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right;">$${bonusOt.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right; font-weight: bold;">$${gross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right; color: #ef4444;">-$${tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right; color: #ef4444;">-$${pf.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right; font-weight: bold; color: #059669; font-size: 13px;">$${net.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: center; color: #059669; font-weight: bold;">${pay.paymentStatus || 'Processed'}</td>
+          </tr>`;
+      });
+
+      const excelHtml = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<!--[if gte mso 9]>
+<xml>
+  <x:ExcelWorkbook>
+    <x:ExcelWorksheets>
+      <x:ExcelWorksheet>
+        <x:Name>Payroll Disbursement</x:Name>
+        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+      </x:ExcelWorksheet>
+    </x:ExcelWorksheets>
+  </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; padding: 20px; }
+  h2 { color: #0070f3; margin: 0 0 4px 0; }
+  .meta { color: #64748b; font-size: 13px; margin-bottom: 16px; }
+  table { border-collapse: collapse; width: 100%; }
+  th { background: #0070f3; color: #ffffff; padding: 10px 8px; font-size: 12px; border: 1px solid #0050b3; text-align: left; }
+  td { padding: 8px 10px; font-size: 12px; border: 1px solid #cbd5e1; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .total-row td { background: #e0f2fe; font-weight: bold; color: #0369a1; border-top: 2px solid #0070f3; font-size: 13px; }
+</style>
+</head>
+<body>
+  <h2>NEXUS TECHNOLOGIES CORP — CORPORATE BANK SALARY DISBURSEMENT SCHEDULE</h2>
+  <div class="meta">Payroll Period: <strong>${activeCycle}</strong> &nbsp;|&nbsp; Total Beneficiaries: <strong>${employees.length} Staff</strong> &nbsp;|&nbsp; Currency: <strong>USD ($)</strong> &nbsp;|&nbsp; Generated on: <strong>${new Date().toLocaleDateString()}</strong></div>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align: center;">SL</th>
+        <th>Employee ID</th>
+        <th>Beneficiary Name</th>
+        <th>Department</th>
+        <th>Designation</th>
+        <th>Bank Name</th>
+        <th>Account Number</th>
+        <th>Routing Code</th>
+        <th style="text-align: right;">Base Salary</th>
+        <th style="text-align: right;">Allowances</th>
+        <th style="text-align: right;">Bonus &amp; OT</th>
+        <th style="text-align: right;">Gross Earnings</th>
+        <th style="text-align: right;">Tax Deduct</th>
+        <th style="text-align: right;">PF Deduct</th>
+        <th style="text-align: right;">Net Take-Home</th>
+        <th style="text-align: center;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+      <tr class="total-row">
+        <td style="text-align: center;">TOTAL</td>
+        <td colspan="4" style="text-align: left;">ALL ${employees.length} BENEFICIARIES PROCESSED</td>
+        <td colspan="3" style="text-align: center;">CORPORATE WIRE DISBURSEMENT</td>
+        <td style="text-align: right;">$${totalBase.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right;">$${totalAllowances.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right;">$${totalBonusOt.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right;">$${totalGross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right; color: #ef4444;">-$${totalTax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right; color: #ef4444;">-$${totalPf.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: right; color: #059669; font-size: 14px;">$${totalNet.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        <td style="text-align: center; color: #059669;">100% DISBURSED</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+      const blob = new Blob(['\uFEFF' + excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `nexus_bank_payroll_schedule_${activeCycle.toLowerCase().replace(/\s+/g, '_')}.xls`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`✓ Downloaded formatted Excel Payroll Schedule (.xls)!`, 'success');
     });
   }
 
@@ -3063,6 +3315,32 @@ function initTheme() {
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+
+  // Brand / Logo click navigation and tactile response (Role-Aware 1000 IQ Smart Router)
+  document.querySelectorAll('.dash-brand, #brand-home-link').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (typeof sound !== 'undefined' && sound.playPop) {
+        sound.playPop(720);
+      }
+      const role = localStorage.getItem('auth_user_role');
+      let homePage = 'dashboard.html';
+      if (role === 'EMPLOYEE') {
+        homePage = 'employee-dashboard.html';
+      } else if (!role) {
+        homePage = 'index.html';
+      }
+
+      const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+
+      if (currentPath === homePage || (currentPath === 'employee.html' && homePage === 'employee-dashboard.html')) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        e.preventDefault();
+        window.location.href = homePage;
+      }
+    });
+  });
 
   if (document.getElementById('auth-card')) {
     initAuthPage();

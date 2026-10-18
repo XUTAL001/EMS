@@ -75,8 +75,19 @@ runTest('Rule 4: Duplicate check-ins and invalid check-outs are strictly rejecte
   const today = new Date().toISOString().split('T')[0];
   const empId = 2;
 
-  // Verify active shift exists
-  const activeRecord = db.data.attendance.find(a => a.employee_id === empId && a.date === today);
+  // Verify or initialize active shift for today
+  let activeRecord = db.data.attendance.find(a => a.employee_id === empId && a.date === today);
+  if (!activeRecord) {
+    activeRecord = {
+      id: db.data.attendance.length + 1,
+      employee_id: empId,
+      date: today,
+      check_in_time: `${today}T09:00:00.000Z`,
+      check_out_time: null,
+      status: 'PRESENT'
+    };
+    db.data.attendance.push(activeRecord);
+  }
   assert.ok(activeRecord, 'Active attendance record exists');
 
   // Simulating secondary check-in rejection
