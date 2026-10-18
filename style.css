@@ -449,8 +449,9 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   10. Company Demo Credential Box (HR vs Employee Portal Hints)
+   10. System Formula & Hint Box (HR & Employee Engine Guidance)
    -------------------------------------------------------------------------- */
+.system-hint-box,
 .demo-credential-box {
   margin-top: 1rem;
   padding: 0.85rem 1.15rem;
@@ -462,6 +463,7 @@ body {
   gap: 0.45rem;
 }
 
+.system-hint-text,
 .demo-credential-hint {
   font-size: 0.73rem;
   color: var(--text-subtitle);
@@ -472,11 +474,13 @@ body {
   gap: 0.35rem;
 }
 
+.system-hint-text strong,
 .demo-credential-hint strong {
   color: var(--text-title);
   font-weight: 600;
 }
 
+.system-hint-text .badge-tag,
 .demo-credential-hint .badge-tag {
   font-size: 0.65rem;
   font-weight: 700;
@@ -488,6 +492,7 @@ body {
   box-shadow: 1px 1px 3px var(--neu-shadow-dark), -1px -1px 3px var(--neu-shadow-light);
 }
 
+.system-hint-text .badge-tag.emp,
 .demo-credential-hint .badge-tag.emp {
   background: rgba(16, 185, 129, 0.12);
   color: #10b981;
@@ -2206,6 +2211,7 @@ body {
   animation: card-shake 0.38s ease;
 }
 
+.system-hint-text,
 .demo-credential-hint {
   text-align: center;
   font-size: 0.74rem;
@@ -2213,6 +2219,7 @@ body {
   margin-top: 0.85rem;
 }
 
+.system-hint-text strong,
 .demo-credential-hint strong {
   color: var(--accent-blue);
   font-weight: 600;

@@ -650,19 +650,6 @@ function initAuthPage() {
       }
     });
   }
-
-  // Social / SSO Buttons
-  document.querySelectorAll('.social-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      sound.playPop(900, 0.05);
-      showToast('Connecting via Enterprise SSO...', 'info');
-      localStorage.setItem('auth_user_role', 'EMPLOYEE');
-      localStorage.setItem('auth_user_name', 'Sophia Clark');
-      setTimeout(() => {
-        window.location.href = 'employee-dashboard.html';
-      }, 1000);
-    });
-  });
 }
 
 // ==========================================================================
@@ -874,18 +861,8 @@ function initDashboardPage() {
 
   let authRole = localStorage.getItem('auth_user_role');
   if (!authRole || (authRole !== 'HR' && authRole !== 'EMPLOYEE' && authRole !== 'MANAGER')) {
-    if (window.location.pathname.includes('employee') || window.location.href.includes('employee')) {
-      authRole = 'EMPLOYEE';
-      localStorage.setItem('auth_user_role', 'EMPLOYEE');
-      localStorage.setItem('auth_user_name', 'Sophia Clark');
-      localStorage.setItem('auth_user_title', 'Lead Frontend Engineer');
-      localStorage.setItem('auth_user_id', 'EMP-1002');
-      localStorage.setItem('auth_user_dept', 'Engineering');
-      localStorage.setItem('auth_user_avatar', 'SC');
-    } else {
-      window.location.replace('index.html');
-      return;
-    }
+    window.location.replace('index.html');
+    return;
   }
 
   // Strict Manager Payroll Restriction Guard (No Salary, Payslip, or Payroll Access)
