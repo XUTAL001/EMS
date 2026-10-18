@@ -4287,6 +4287,8 @@ dialog.modal-dialog::backdrop {
 .section-icon-badge.green { color: #10b981; }
 .section-icon-badge.purple { color: #8b5cf6; }
 .section-icon-badge.amber { color: #f59e0b; }
+.section-icon-badge.cyan { color: #06b6d4; }
+.section-icon-badge.rose { color: #ec4899; }
 
 .section-title-text {
   font-size: 1.15rem;
@@ -4358,5 +4360,45 @@ dialog.modal-dialog::backdrop {
   padding-top: 1rem;
   border-top: 1px solid rgba(0, 112, 243, 0.08);
 }
+
+.skills-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.skill-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-title);
+  background: var(--neu-card-bg);
+  border-radius: var(--radius-pill);
+  box-shadow: 3px 3px 7px var(--neu-shadow-dark), -3px -3px 7px var(--neu-shadow-light);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.skill-tag-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 10px var(--neu-shadow-dark), -4px -4px 10px var(--neu-shadow-light);
+}
+
+.skill-tag-pill .skill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+}
+
+.skill-tag-pill.cyan .skill-dot { background: #06b6d4; }
+.skill-tag-pill.green .skill-dot { background: #10b981; }
+.skill-tag-pill.purple .skill-dot { background: #8b5cf6; }
+.skill-tag-pill.amber .skill-dot { background: #f59e0b; }
+.skill-tag-pill.rose .skill-dot { background: #ec4899; }
+
 
 
