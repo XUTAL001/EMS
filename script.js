@@ -421,6 +421,19 @@ function getStoredEmployees() {
   return NEXUS_DEFAULT_EMPLOYEES;
 }
 
+function saveStoredEmployees(list) {
+  if (!Array.isArray(list)) return;
+  localStorage.setItem('nexus_ems_employees', JSON.stringify(list));
+}
+
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return 'SC';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'SC';
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 /**
  * Performance-Based Bonus and Salary Increment Formula
  * Work Hours (40%) + Sprint Tasks Output (40%) + Punctuality/In-Out Times (20%)
@@ -3450,10 +3463,14 @@ function initProfilePage() {
   if (!profilePhotoCircle) return;
 
   const authRole = localStorage.getItem('auth_user_role') || 'EMPLOYEE';
+  const allEmployees = typeof getStoredEmployees === 'function' ? getStoredEmployees() : [];
   const currentEmail = localStorage.getItem('auth_user_email') || (authRole === 'HR' ? 'tanviralamshifat2005@gmail.com' : 'sophia@company.com');
-  const currentEmp = employees.find(e => e.email === currentEmail || e.id === localStorage.getItem('auth_user_id')) || employees.find(e => e.id === 'EMP-1002');
+  const storedName = localStorage.getItem('auth_user_name');
+  const currentEmp = allEmployees.find(e => e.email === currentEmail || e.id === localStorage.getItem('auth_user_id')) || 
+                     allEmployees.find(e => storedName && e.name.toLowerCase() === storedName.toLowerCase()) || 
+                     allEmployees.find(e => e.id === 'EMP-1002');
 
-  const currentName = localStorage.getItem('auth_user_name') || (currentEmp ? currentEmp.name : (authRole === 'HR' ? 'Tanvir' : 'Sophia Clark'));
+  const currentName = storedName || (currentEmp ? currentEmp.name : (authRole === 'HR' ? 'Tanvir' : 'Sophia Clark'));
   const currentTitle = localStorage.getItem('auth_user_title') || (currentEmp ? currentEmp.role : (authRole === 'HR' ? 'HR Administrator' : 'Lead Frontend Engineer'));
   const currentDept = localStorage.getItem('auth_user_dept') || (currentEmp ? currentEmp.dept : 'Engineering');
   const currentId = localStorage.getItem('auth_user_id') || (currentEmp ? currentEmp.id : 'EMP-1002');
@@ -3605,7 +3622,7 @@ function initProfilePage() {
         localStorage.setItem('auth_user_photo', dataUrl);
         if (currentEmp) {
           currentEmp.photo = dataUrl;
-          saveEmployees();
+          saveStoredEmployees(allEmployees);
         }
         updatePhotoDisplay();
         if (sound && sound.playSuccess) sound.playSuccess();
@@ -3632,7 +3649,7 @@ function initProfilePage() {
       localStorage.removeItem('auth_user_photo');
       if (currentEmp) {
         delete currentEmp.photo;
-        saveEmployees();
+        saveStoredEmployees(allEmployees);
       }
       if (fileInput) fileInput.value = '';
       updatePhotoDisplay();
@@ -3668,7 +3685,7 @@ function initProfilePage() {
         currentEmp.phone = newPhone;
         currentEmp.mode = newMode;
         currentEmp.emergency = newEmergency;
-        saveEmployees();
+        saveStoredEmployees(allEmployees);
       }
 
       if (heroName) heroName.textContent = newName;

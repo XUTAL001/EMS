@@ -770,7 +770,8 @@ body {
 /* ==========================================================================
    15. ENTERPRISE DASHBOARD STYLES (dashboard.html)
    ========================================================================== */
-.dashboard-body {
+.dashboard-body,
+.dash-body {
   display: block;
   min-height: 100vh;
   min-height: 100dvh; /* dynamic mobile viewport height */

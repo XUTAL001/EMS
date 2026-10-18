@@ -14,79 +14,88 @@
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="dash-body">
+<body class="dashboard-body">
 
-  <!-- Ambient Mode Switcher -->
-  <div class="top-controls">
-    <button id="theme-toggle" class="neu-circle-btn theme-btn" title="Toggle Dark/Light Soft UI" aria-label="Toggle Theme">
-      <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="12" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-      </svg>
-      <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Header Navigation -->
-  <header class="dash-topbar dash-header" id="dash-header">
-    <div class="header-left">
-      <button id="sidebar-toggle" class="neu-circle-btn" title="Toggle Navigation Sidebar" aria-label="Toggle Navigation">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Top Global Header -->
+  <header class="dash-topbar" id="dash-header">
+    <div class="dash-brand-area">
+      <button id="sidebar-toggle" class="neu-circle-btn menu-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button>
-
-      <a href="employee-dashboard.html" class="dash-logo" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;" title="Go to Dashboard">
-        <div class="dash-logo-icon">
-          <div class="ems-brand-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <polyline points="17 11 19 13 23 9"></polyline>
-            </svg>
-          </div>
+      <a href="employee-dashboard.html" class="dash-brand" id="brand-home-link" title="Dashboard">
+        <div class="dash-brand-icon ems-brand-icon" style="background: linear-gradient(135deg, #0070f3, #7928ca);">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
         </div>
-        <div class="dash-logo-text">
-          <span class="logo-title">NEXUS<span style="color:var(--accent-blue);">EMS</span></span>
-          <span class="logo-subtitle">MY EMPLOYEE PROFILE</span>
+        <div class="brand-title-wrap">
+          <span class="dash-brand-name">NEXUS<span>EMS</span></span>
+          <span class="ems-badge emp-badge" id="portal-role-badge">EMPLOYEE PROFILE</span>
         </div>
       </a>
     </div>
 
-    <!-- Right Controls -->
-    <div class="header-right">
+    <!-- Global Search Bar -->
+    <div class="dash-search-wrap" id="top-search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="employee-search-input" class="dash-search-input" placeholder="Search tasks, company policies, or leave... (/)">
+      <span class="search-kbd">/</span>
+    </div>
+
+    <!-- Right Topbar Controls -->
+    <div class="dash-actions">
+      <!-- Live Clock -->
       <div class="dash-clock-badge">
         <span class="pulse-dot"></span>
-        <span id="dash-clock">--:--</span>
+        <span id="dash-clock">10:42 AM</span>
       </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" class="neu-circle-btn action-icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+        <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="theme-icon-moon" class="theme-icon hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
 
       <!-- Notifications -->
       <div class="notifications-wrapper">
-        <button id="btn-notifications" class="neu-circle-btn" title="View Notifications" aria-label="Notifications">
+        <button id="btn-notifications" class="neu-circle-btn action-icon-btn" title="EMS Notifications" aria-label="Notifications">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
-          <span class="notification-badge" id="header-notif-badge">3</span>
+          <span class="badge-dot" id="top-notif-dot"></span>
         </button>
 
-        <div id="notifications-dropdown" class="notifications-dropdown hidden">
-          <div class="notif-header">
-            <span class="notif-title">Notifications</span>
-            <button class="notif-clear-btn" id="btn-mark-all-read">Mark all read</button>
+        <!-- Interactive Notifications Dropdown -->
+        <div class="notifications-dropdown hidden" id="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="notif-title-wrap">
+              <h4>Notifications</h4>
+              <span class="notif-count-badge" id="dropdown-notif-count">4 New</span>
+            </div>
+            <button class="notif-mark-read-btn" id="btn-mark-all-read">Mark all as read</button>
           </div>
-          <div class="notif-list" id="notif-list-container">
+          <div class="notifications-list" id="notifications-list-container">
             <div class="notif-item unread" data-id="1">
               <div class="notif-icon-circle green">✓</div>
               <div class="notif-body">
@@ -96,11 +105,11 @@
               </div>
             </div>
             <div class="notif-item" data-id="2">
-              <div class="notif-icon-circle blue">💼</div>
+              <div class="notif-icon-circle payroll">💰</div>
               <div class="notif-body">
-                <div class="notif-body-title">Quarterly Performance Bonus</div>
-                <div class="notif-body-desc">Tier A appraisal completed! Bonus credited to your account.</div>
-                <div class="notif-body-time">2 hours ago</div>
+                <div class="notif-body-title">September 2026 Salary Disbursed</div>
+                <div class="notif-body-desc">Net salary has been credited to your verified bank account.</div>
+                <div class="notif-body-time">Today • 09:00 AM</div>
               </div>
             </div>
           </div>
@@ -110,7 +119,7 @@
       <!-- User Profile (Top Right) -->
       <div class="user-profile-menu" id="top-user-profile-menu">
         <div class="user-avatar-wrap">
-          <div class="tanvir-avatar-badge" id="top-user-avatar">SC</div>
+          <div class="tanvir-avatar-badge" id="top-user-avatar" style="background: linear-gradient(135deg, #0070f3, #00c6ff);">SC</div>
           <span class="avatar-online-dot"></span>
         </div>
         <div class="user-info-text">
