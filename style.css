@@ -4106,7 +4106,7 @@ dialog.modal-dialog::backdrop {
   position: relative;
   width: 120px;
   height: 120px;
-  margin-bottom: 1.15rem;
+  margin-bottom: 0.45rem;
 }
 
 .profile-photo-circle {
@@ -4166,14 +4166,15 @@ dialog.modal-dialog::backdrop {
 
 .photo-quick-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.6rem;
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1.15rem;
 }
 
 .btn-photo-action {
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.8rem;
   border-radius: 14px;
   cursor: pointer;
   border: none;
@@ -4196,7 +4197,7 @@ dialog.modal-dialog::backdrop {
   font-size: 1.45rem;
   font-weight: 800;
   color: var(--text-title);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
   line-height: 1.2;
 }
 
