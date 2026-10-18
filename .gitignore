@@ -14,3 +14,5 @@ Thumbs.db
 database/nexus_ems_data.json
 storage/uploads/*
 !storage/uploads/.gitkeep
+storage/outbox/*
+!storage/outbox/.gitkeep

@@ -77,7 +77,35 @@ npm start
 
 ---
 
-## 4. Production MySQL Setup Instructions
+## 4. SMTP Email & Password Reset OTP Configuration
+
+NexusEMS features automated email dispatch for password recovery with 4-digit verification codes (OTP).
+
+### Option A: Gmail SMTP (Recommended for fast setup)
+Set these variables in `.env` or system environment:
+```env
+GMAIL_USER=your_company_email@gmail.com
+GMAIL_APP_PASS=your_16_character_google_app_password
+MAIL_FROM="NEXUS EMS Security" <your_company_email@gmail.com>
+```
+*(Generate an App Password via Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App passwords).*
+
+### Option B: Enterprise Custom SMTP (AWS SES / SendGrid / Postmark / Mailgun)
+```env
+SMTP_HOST=smtp.mailprovider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=apikey_or_username
+SMTP_PASS=secret_api_key
+MAIL_FROM="NEXUS EMS Security" <no-reply@company.com>
+```
+
+> [!NOTE]
+> When SMTP credentials are not configured in local development, NexusEMS securely saves all outgoing OTP emails to `storage/outbox/` and console logs so development and testing can proceed without interruptions.
+
+---
+
+## 5. Production MySQL Setup Instructions
 
 To deploy to a dedicated Linux / Ubuntu production server running MySQL:
 

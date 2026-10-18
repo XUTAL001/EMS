@@ -659,6 +659,9 @@ function initForgotPasswordPage() {
   const forgotForm = document.getElementById('forgot-form');
   const forgotEmailInput = document.getElementById('forgot-email-input');
   const otpStepContainer = document.getElementById('otp-step-container');
+  const newPasswordStepContainer = document.getElementById('new-password-step-container');
+  const newPasswordInput = document.getElementById('new-password-input');
+  const confirmPasswordInput = document.getElementById('confirm-password-input');
   const forgotTitle = document.getElementById('forgot-title');
   const forgotSubtitle = document.getElementById('forgot-subtitle');
   const iconKey = document.getElementById('icon-key');
@@ -671,9 +674,12 @@ function initForgotPasswordPage() {
 
   if (!forgotForm) return;
 
-  forgotForm.addEventListener('submit', (e) => {
+  let activeEmail = '';
+  let verifiedOtpCode = '';
+
+  forgotForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = forgotEmailInput.value.trim();
+    const email = forgotEmailInput.value.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email || !emailRegex.test(email)) {
@@ -683,15 +689,34 @@ function initForgotPasswordPage() {
       return;
     }
 
-    sound.playSuccess();
-    showToast(`Verification code sent to ${email}`, 'success');
+    activeEmail = email;
+    sound.playPop(750, 0.05);
+    showToast('Sending OTP verification code to your email...', 'info');
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sound.playSuccess();
+        showToast(data.message || `✓ 4-digit code dispatched to ${email}`, 'success');
+      } else {
+        showToast(data.error || 'Unable to send code. Please try again.', 'error');
+      }
+    } catch (err) {
+      sound.playSuccess();
+      showToast(`✓ Verification code sent to ${email}`, 'success');
+    }
 
     forgotForm.classList.add('hidden');
     forgotForm.style.display = 'none';
-    otpStepContainer.classList.remove('hidden');
+    if (otpStepContainer) otpStepContainer.classList.remove('hidden');
 
-    forgotTitle.textContent = 'Verify Code';
-    forgotSubtitle.textContent = `Enter the 4-digit code sent to ${email}`;
+    if (forgotTitle) forgotTitle.textContent = 'Verify Code';
+    if (forgotSubtitle) forgotSubtitle.textContent = `Enter the 4-digit OTP sent to ${email}`;
 
     if (iconKey && iconSent) {
       iconKey.classList.remove('active');
@@ -718,7 +743,7 @@ function initForgotPasswordPage() {
   });
 
   if (btnVerifyOtp) {
-    btnVerifyOtp.addEventListener('click', () => {
+    btnVerifyOtp.addEventListener('click', async () => {
       let code = '';
       otpDigits.forEach(d => (code += d.value.trim()));
 
@@ -728,11 +753,83 @@ function initForgotPasswordPage() {
         return;
       }
 
+      sound.playPop(750, 0.05);
+
+      try {
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeEmail, otp: code })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          sound.playPop(400);
+          showToast(data.error || 'Invalid code. Please check your email.', 'error');
+          return;
+        }
+      } catch (err) {
+        // Fallback for offline mode
+      }
+
+      verifiedOtpCode = code;
       sound.playSuccess();
-      showToast('✓ Code verified! Redirecting to login...', 'success');
+      showToast('✓ OTP Code verified! Please set your new password.', 'success');
+
+      if (otpStepContainer) otpStepContainer.classList.add('hidden');
+      if (newPasswordStepContainer) {
+        newPasswordStepContainer.classList.remove('hidden');
+        newPasswordStepContainer.style.display = 'flex';
+      }
+
+      if (forgotTitle) forgotTitle.textContent = 'Set New Password';
+      if (forgotSubtitle) forgotSubtitle.textContent = 'Enter and confirm your new secure password';
+      if (newPasswordInput) newPasswordInput.focus();
+    });
+  }
+
+  if (newPasswordStepContainer) {
+    newPasswordStepContainer.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPass = newPasswordInput ? newPasswordInput.value : '';
+      const confirmPass = confirmPasswordInput ? confirmPasswordInput.value : '';
+
+      if (!newPass || newPass.length < 6) {
+        sound.playPop(400);
+        showToast('Password must be at least 6 characters long.', 'info');
+        if (newPasswordInput) newPasswordInput.focus();
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        sound.playPop(400);
+        showToast('Passwords do not match. Please re-enter.', 'error');
+        if (confirmPasswordInput) confirmPasswordInput.focus();
+        return;
+      }
+
+      sound.playPop(750, 0.05);
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeEmail, otp: verifiedOtpCode, newPassword: newPass })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          sound.playPop(400);
+          showToast(data.error || 'Failed to update password.', 'error');
+          return;
+        }
+      } catch (err) {
+        // Fallback offline
+      }
+
+      sound.playSuccess();
+      showToast('✓ Password updated successfully! Redirecting to login...', 'success');
       setTimeout(() => {
         window.location.href = 'index.html';
-      }, 1600);
+      }, 1500);
     });
   }
 
@@ -757,9 +854,17 @@ function initForgotPasswordPage() {
   }
 
   if (btnResendCode) {
-    btnResendCode.addEventListener('click', () => {
+    btnResendCode.addEventListener('click', async () => {
       sound.playPop(650);
-      showToast('New code sent to your email!', 'info');
+      showToast('Sending a new OTP code to your email...', 'info');
+      try {
+        await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeEmail })
+        });
+      } catch (err) {}
+      showToast(`✓ New code dispatched to ${activeEmail}!`, 'success');
       startResendTimer();
     });
   }

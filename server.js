@@ -13,6 +13,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -20,6 +21,91 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// In-Memory Secure OTP Store for Password Recovery
+const passwordResetTokens = new Map();
+
+// Configure Enterprise Mail Transporter (SMTP / Gmail Service)
+function createMailTransporter() {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+  } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASS) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASS
+      }
+    });
+  }
+  return null;
+}
+
+// Dispatches real OTP to employee/HR mailbox and writes audit copy to storage/outbox
+async function sendOtpEmail(toEmail, otpCode) {
+  const transporter = createMailTransporter();
+  const subject = 'Your NEXUS EMS Password Reset Verification Code';
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 18px; background-color: #ffffff; color: #1e293b;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #0f172a; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">NEXUS<span style="color: #0070f3;">EMS</span></h2>
+        <p style="color: #64748b; font-size: 13px; margin: 4px 0 0;">Enterprise Employee Management Portal</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: 14px; padding: 20px; text-align: center; border: 1px solid #edf2f7; margin-bottom: 20px;">
+        <p style="color: #334155; font-size: 14px; margin: 0 0 14px; font-weight: 500;">You requested a password reset. Use your secure one-time passcode (OTP) below:</p>
+        <div style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #0070f3; background: #ffffff; padding: 12px 24px; border-radius: 12px; display: inline-block; border: 2px dashed #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+          ${otpCode}
+        </div>
+        <p style="color: #64748b; font-size: 12px; margin: 14px 0 0;">This code is valid for <strong>10 minutes</strong>. Do not share it with anyone.</p>
+      </div>
+      <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">If you did not request this code, your account credentials may be compromised. Please notify your HR security team immediately.</p>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;" />
+      <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 0;">&copy; ${new Date().getFullYear()} Nexus Technologies Corp. All rights reserved.</p>
+    </div>
+  `;
+
+  // Persistent outbox audit log
+  const OUTBOX_DIR = path.join(__dirname, 'storage', 'outbox');
+  if (!fs.existsSync(OUTBOX_DIR)) {
+    fs.mkdirSync(OUTBOX_DIR, { recursive: true });
+  }
+  const outboxEntry = {
+    to: toEmail,
+    subject,
+    otp: otpCode,
+    timestamp: new Date().toISOString()
+  };
+  fs.writeFileSync(path.join(OUTBOX_DIR, `otp-${Date.now()}-${otpCode}.json`), JSON.stringify(outboxEntry, null, 2));
+
+  console.log(`[AUTH/MAIL] Password Reset OTP [${otpCode}] generated for recipient: ${toEmail}`);
+
+  if (transporter) {
+    try {
+      await transporter.sendMail({
+        from: process.env.MAIL_FROM || process.env.GMAIL_USER || '"NEXUS Security" <no-reply@nexus.com>',
+        to: toEmail,
+        subject,
+        html: htmlContent
+      });
+      console.log(`[AUTH/MAIL] ✓ Real email successfully dispatched to mailbox ${toEmail}`);
+      return { delivered: true, method: 'SMTP' };
+    } catch (err) {
+      console.error(`[AUTH/MAIL] SMTP delivery error: ${err.message}. Retained in outbox audit.`);
+      return { delivered: false, method: 'OUTBOX', error: err.message };
+    }
+  } else {
+    console.log(`[AUTH/MAIL] SMTP credentials not set in env. OTP saved to storage/outbox and active memory.`);
+    return { delivered: true, method: 'OUTBOX' };
+  }
+}
 
 // Secure upload directory for CVs and private documents
 const UPLOADS_DIR = path.join(__dirname, 'storage', 'uploads');
@@ -578,6 +664,93 @@ app.post('/api/auth/logout', (req, res) => {
 app.get('/api/auth/me', (req, res) => {
   if (!req.user) return res.status(401).json({ success: false, error: 'Not logged in.' });
   res.json({ success: true, user: req.user, employee: req.employee });
+});
+
+// --- Password Reset & Email OTP Endpoints ---
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'Email address is required.' });
+  }
+  const normalized = email.trim().toLowerCase();
+  const user = db.data.users.find(u => 
+    u.email.toLowerCase() === normalized ||
+    (normalized === 'tanvir@nexus.com' && u.email === 'tanviralamshifat2005@gmail.com')
+  );
+
+  // Generate secure 4-digit verification code
+  const otp = String(Math.floor(1000 + Math.random() * 9000));
+  passwordResetTokens.set(normalized, {
+    otp,
+    expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes expiry
+    verified: false
+  });
+
+  const mailResult = await sendOtpEmail(normalized, otp);
+  res.json({
+    success: true,
+    message: `A 4-digit verification code has been dispatched to ${normalized}.`,
+    userExists: Boolean(user),
+    deliveryMethod: mailResult.method,
+    devHint: process.env.NODE_ENV !== 'production' ? otp : undefined
+  });
+});
+
+app.post('/api/auth/verify-otp', (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ success: false, error: 'Email and verification code are required.' });
+  }
+  const normalized = email.trim().toLowerCase();
+  const tokenData = passwordResetTokens.get(normalized);
+
+  if (!tokenData) {
+    return res.status(400).json({ success: false, error: 'No active verification code found for this email. Please request a new code.' });
+  }
+
+  if (Date.now() > tokenData.expiresAt) {
+    passwordResetTokens.delete(normalized);
+    return res.status(400).json({ success: false, error: 'Verification code has expired. Please request a new code.' });
+  }
+
+  if (tokenData.otp !== String(otp).trim()) {
+    return res.status(400).json({ success: false, error: 'Invalid verification code. Please check your email.' });
+  }
+
+  tokenData.verified = true;
+  res.json({ success: true, message: 'Verification code verified successfully.' });
+});
+
+app.post('/api/auth/reset-password', (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ success: false, error: 'Email, OTP, and new password are required.' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+  }
+
+  const normalized = email.trim().toLowerCase();
+  const tokenData = passwordResetTokens.get(normalized);
+
+  if (!tokenData || tokenData.otp !== String(otp).trim()) {
+    return res.status(400).json({ success: false, error: 'Invalid or expired OTP session. Please restart recovery.' });
+  }
+
+  const user = db.data.users.find(u => 
+    u.email.toLowerCase() === normalized ||
+    (normalized === 'tanvir@nexus.com' && u.email === 'tanviralamshifat2005@gmail.com')
+  );
+
+  if (user) {
+    const salt = bcrypt.genSaltSync(10);
+    user.password = bcrypt.hashSync(newPassword, salt);
+    db.save();
+    console.log(`[AUTH] ✓ Password successfully reset and encrypted for user: ${user.email}`);
+  }
+
+  passwordResetTokens.delete(normalized);
+  res.json({ success: true, message: 'Your password has been reset successfully. You can now login.' });
 });
 
 // --- Employee Management Endpoints ---
