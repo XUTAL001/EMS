@@ -2486,8 +2486,21 @@ function initDashboardPage() {
     const appr = calculateEmployeeAppraisal(currentEmp);
 
     // KPI Cards
-    if (empKpiTodayHours) empKpiTodayHours.textContent = currentEmp.shiftDuration || '8h 33m';
-    if (empKpiTodayStatus) empKpiTodayStatus.innerHTML = `<span>In: ${escapeHtml(currentEmp.inTime || '09:12 AM')}</span> • Out: ${escapeHtml(currentEmp.outTime || '05:45 PM')}`;
+    const isClockedInCurrently = localStorage.getItem('nexus_emp_clocked_in') === 'true';
+    const shiftInTimeElem = document.getElementById('shift-in-time');
+    const shiftOutTimeElem = document.getElementById('shift-out-time');
+    if (shiftInTimeElem) {
+      shiftInTimeElem.textContent = currentEmp.inTime || localStorage.getItem('nexus_emp_intime') || '09:12 AM';
+    }
+    if (shiftOutTimeElem) {
+      shiftOutTimeElem.textContent = isClockedInCurrently ? 'Working...' : (currentEmp.outTime || localStorage.getItem('nexus_emp_outtime') || '05:45 PM');
+    }
+    if (!shiftInTimeElem && empKpiTodayStatus) {
+      empKpiTodayStatus.innerHTML = `<span>In: ${escapeHtml(currentEmp.inTime || '09:12 AM')}</span> • Out: ${escapeHtml(currentEmp.outTime || '05:45 PM')}`;
+    }
+    if (empKpiTodayHours && !isClockedInCurrently) {
+      empKpiTodayHours.textContent = currentEmp.shiftDuration || '8h 33m';
+    }
     if (empKpiBonusVal) empKpiBonusVal.textContent = `+$${appr.bonusAmount.toLocaleString()}`;
     if (empKpiTierTag) empKpiTierTag.textContent = `${appr.tierName} (${appr.perfScore}%)`;
     const displayInc = (typeof appr.incPercent === 'number' && appr.incPercent > 0) ? appr.incPercent : 15;
@@ -2624,11 +2637,23 @@ function initDashboardPage() {
 
   renderEmployeePortalData();
 
-  // 2. Daily Punch Clock with Live Shift Duration Counter
+  // 2. Daily Punch Clock & Dashboard Shift Tracker Engine
+  const btnClockIn = document.getElementById('btn-clock-in');
+  const btnClockOut = document.getElementById('btn-clock-out');
+  const shiftLiveBadge = document.getElementById('shift-live-badge');
+  const shiftStatusText = document.getElementById('shift-status-text');
+  const shiftTimerSub = document.getElementById('shift-timer-sub');
+  const shiftInTime = document.getElementById('shift-in-time');
+  const shiftOutTime = document.getElementById('shift-out-time');
+  const cardShiftTracker = document.getElementById('card-shift-tracker');
+
   const btnPunchClock = document.getElementById('btn-punch-clock');
   const punchClockText = document.getElementById('punch-clock-text');
   const punchTimerBadge = document.getElementById('emp-punch-timer-display');
   const empTimerText = document.getElementById('emp-timer-text');
+  const btnEmpPunchClock = document.getElementById('btn-emp-punch-clock');
+  const punchBtnLabel = document.getElementById('punch-btn-label');
+
   let isClockedIn = localStorage.getItem('nexus_emp_clocked_in') === 'true';
   let punchClockInterval = null;
 
@@ -2640,102 +2665,164 @@ function initDashboardPage() {
     const m = Math.floor((diffSec % 3600) / 60);
     const s = diffSec % 60;
     const pad = n => String(n).padStart(2, '0');
+    const timerStr = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
 
     if (empTimerText) {
-      empTimerText.textContent = `Shift Active: ${pad(h)}h ${pad(m)}m ${pad(s)}s (Logging Work)`;
+      empTimerText.textContent = `Shift Active: ${timerStr} (Logging Work)`;
+    }
+    if (empKpiTodayHours) {
+      empKpiTodayHours.textContent = timerStr;
     }
   }
 
   function syncPunchClockUI() {
-    if (!btnPunchClock || !punchClockText) return;
+    isClockedIn = localStorage.getItem('nexus_emp_clocked_in') === 'true';
 
+    // 1. Attendance page punch widget
+    if (btnPunchClock && punchClockText) {
+      if (isClockedIn) {
+        btnPunchClock.classList.add('clocked-in');
+        punchClockText.textContent = 'Clock Out (Finish Shift)';
+        if (punchTimerBadge) punchTimerBadge.classList.add('active');
+      } else {
+        btnPunchClock.classList.remove('clocked-in');
+        punchClockText.textContent = 'Clock In (Start Shift)';
+        if (punchTimerBadge) punchTimerBadge.classList.remove('active');
+        if (empTimerText) empTimerText.textContent = 'Shift: Ready to Clock In';
+      }
+    }
+
+    // 2. Hero action button
+    if (btnEmpPunchClock && punchBtnLabel) {
+      if (isClockedIn) {
+        punchBtnLabel.textContent = 'Clock Out (Shift Active)';
+        btnEmpPunchClock.className = 'neu-btn dash-action-btn primary';
+      } else {
+        punchBtnLabel.textContent = 'Clock In (Start Shift)';
+        btnEmpPunchClock.className = 'neu-btn dash-action-btn secondary';
+      }
+    }
+
+    // 3. Dashboard Shift Tracker Card (In Time, Out Time & Time Count Box)
+    const savedIn = localStorage.getItem('nexus_emp_intime') || (currentEmp ? currentEmp.inTime : '09:12 AM');
+    const savedOut = localStorage.getItem('nexus_emp_outtime') || (currentEmp ? currentEmp.outTime : '05:45 PM');
+
+    if (cardShiftTracker || btnClockIn || btnClockOut) {
+      if (isClockedIn) {
+        if (cardShiftTracker) cardShiftTracker.classList.add('active');
+        if (shiftLiveBadge) shiftLiveBadge.classList.add('active');
+        if (shiftStatusText) shiftStatusText.textContent = 'On Duty';
+        if (shiftTimerSub) shiftTimerSub.textContent = 'Live Working';
+        if (btnClockIn) btnClockIn.disabled = true;
+        if (btnClockOut) btnClockOut.disabled = false;
+        if (shiftInTime) shiftInTime.textContent = savedIn;
+        if (shiftOutTime) shiftOutTime.textContent = 'Working...';
+      } else {
+        if (cardShiftTracker) cardShiftTracker.classList.remove('active');
+        if (shiftLiveBadge) shiftLiveBadge.classList.remove('active');
+        if (shiftStatusText) shiftStatusText.textContent = 'Off Duty';
+        if (shiftTimerSub) shiftTimerSub.textContent = 'Shift Duration';
+        if (btnClockIn) btnClockIn.disabled = false;
+        if (btnClockOut) btnClockOut.disabled = true;
+        if (shiftInTime) shiftInTime.textContent = savedIn;
+        if (shiftOutTime) shiftOutTime.textContent = savedOut;
+        if (empKpiTodayHours) empKpiTodayHours.textContent = currentEmp ? (currentEmp.shiftDuration || '8h 33m') : '8h 33m';
+      }
+    }
+
+    // Timer Interval Management
+    clearInterval(punchClockInterval);
     if (isClockedIn) {
-      btnPunchClock.classList.add('clocked-in');
-      punchClockText.textContent = 'Clock Out (Finish Shift)';
-      if (punchTimerBadge) punchTimerBadge.classList.add('active');
-
-      clearInterval(punchClockInterval);
       updatePunchClockTimer();
       punchClockInterval = setInterval(updatePunchClockTimer, 1000);
-    } else {
-      btnPunchClock.classList.remove('clocked-in');
-      punchClockText.textContent = 'Clock In (Start Shift)';
-      if (punchTimerBadge) punchTimerBadge.classList.remove('active');
-      if (empTimerText) empTimerText.textContent = 'Shift: Ready to Clock In';
-      clearInterval(punchClockInterval);
     }
+  }
+
+  function handleClockIn() {
+    if (isClockedIn) {
+      showToast('Shift already started today! Active shift timer is running.', 'info');
+      return;
+    }
+    isClockedIn = true;
+    localStorage.setItem('nexus_emp_clocked_in', 'true');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    localStorage.setItem('nexus_emp_clockin_time', Date.now());
+    localStorage.setItem('nexus_emp_intime', timeStr);
+    sound.playSuccess();
+
+    const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 30);
+    if (currentEmp) {
+      currentEmp.inTime = timeStr;
+      currentEmp.outTime = 'Working Now...';
+      currentEmp.attendanceStatus = isLate ? 'Late Arrival' : 'On Time';
+    }
+
+    saveEmployees();
+    syncPunchClockUI();
+    renderEmployeePortalData();
+    renderHrAttendanceTable();
+
+    showToast(`✓ In-Time Logged: Clocked in at ${timeStr}. Work shift started!`, 'success');
+  }
+
+  function handleClockOut() {
+    if (!isClockedIn) {
+      showToast('No active shift to check out. Please clock in first.', 'info');
+      return;
+    }
+    isClockedIn = false;
+    localStorage.setItem('nexus_emp_clocked_in', 'false');
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    localStorage.setItem('nexus_emp_outtime', timeStr);
+
+    const clockInTimestamp = parseInt(localStorage.getItem('nexus_emp_clockin_time') || (Date.now() - 8.5 * 3600 * 1000), 10);
+    const elapsedHoursTotal = Math.max(0.5, ((Date.now() - clockInTimestamp) / (1000 * 3600)));
+    const durationFormatted = elapsedHoursTotal >= 1 
+      ? `${Math.floor(elapsedHoursTotal)}h ${Math.round((elapsedHoursTotal % 1) * 60)}m` 
+      : '8h 25m';
+
+    const effectiveHours = elapsedHoursTotal >= 1 ? elapsedHoursTotal : 8.42;
+    const otMinutes = Math.round((effectiveHours - 8.0) * 60);
+    const overtimeLabel = otMinutes > 0 ? `+${otMinutes}m OT` : (otMinutes < 0 ? `${otMinutes}m Deficit` : 'Standard');
+
+    if (currentEmp) {
+      currentEmp.outTime = timeStr;
+      currentEmp.shiftDuration = durationFormatted;
+      currentEmp.overtime = overtimeLabel;
+      currentEmp.monthlyHours = Math.round(((currentEmp.monthlyHours || 160) + (effectiveHours > 0 ? 0.5 : 0)) * 10) / 10;
+
+      if (!currentEmp.attendanceHistory) currentEmp.attendanceHistory = [];
+      currentEmp.attendanceHistory.unshift({
+        date: `Today (${now.toLocaleDateString([], { month: 'short', day: 'numeric' })})`,
+        inTime: currentEmp.inTime || '09:00 AM',
+        outTime: timeStr,
+        duration: durationFormatted,
+        overtime: overtimeLabel,
+        status: currentEmp.attendanceStatus || 'On Time'
+      });
+    }
+
+    saveEmployees();
+    syncPunchClockUI();
+    renderEmployeePortalData();
+    renderHrAttendanceTable();
+    renderHrAppraisalTable();
+    renderHrPayrollTable();
+    renderEmployeePayrollData();
+
+    sound.playPop(520, 0.15);
+    showToast(`✓ Out-Time Logged: Shift ended at ${timeStr} (${durationFormatted} logged). Performance bonus & increment updated!`, 'success');
   }
 
   syncPunchClockUI();
 
-  if (btnPunchClock) {
-    btnPunchClock.addEventListener('click', () => {
-      isClockedIn = !isClockedIn;
-      localStorage.setItem('nexus_emp_clocked_in', isClockedIn ? 'true' : 'false');
-
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      if (isClockedIn) {
-        // CLOCK IN: Record arrival time
-        localStorage.setItem('nexus_emp_clockin_time', Date.now());
-        sound.playSuccess();
-
-        const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 30);
-        currentEmp.inTime = timeStr;
-        currentEmp.outTime = 'Working Now...';
-        currentEmp.attendanceStatus = isLate ? 'Late Arrival' : 'On Time';
-
-        saveEmployees();
-        syncPunchClockUI();
-        renderEmployeePortalData();
-        renderHrAttendanceTable();
-
-        showToast(`✓ Arrival Logged: Clocked in at ${timeStr}. Work shift started!`, 'success');
-      } else {
-        // CLOCK OUT: Record departure, duration, and overtime
-        const clockInTimestamp = parseInt(localStorage.getItem('nexus_emp_clockin_time') || (Date.now() - 8.5 * 3600 * 1000), 10);
-        const elapsedHoursTotal = Math.max(0.5, ((Date.now() - clockInTimestamp) / (1000 * 3600)));
-        // Provide realistic calculation
-        const durationFormatted = elapsedHoursTotal >= 1 
-          ? `${Math.floor(elapsedHoursTotal)}h ${Math.round((elapsedHoursTotal % 1) * 60)}m` 
-          : '8h 25m';
-
-        const effectiveHours = elapsedHoursTotal >= 1 ? elapsedHoursTotal : 8.42;
-        const otMinutes = Math.round((effectiveHours - 8.0) * 60);
-        const overtimeLabel = otMinutes > 0 ? `+${otMinutes}m OT` : (otMinutes < 0 ? `${otMinutes}m Deficit` : 'Standard');
-
-        currentEmp.outTime = timeStr;
-        currentEmp.shiftDuration = durationFormatted;
-        currentEmp.overtime = overtimeLabel;
-
-        // Increase monthly hours
-        currentEmp.monthlyHours = Math.round(((currentEmp.monthlyHours || 160) + (effectiveHours > 0 ? 0.5 : 0)) * 10) / 10;
-
-        // Prepend to attendance history
-        if (!currentEmp.attendanceHistory) currentEmp.attendanceHistory = [];
-        currentEmp.attendanceHistory.unshift({
-          date: `Today (${now.toLocaleDateString([], { month: 'short', day: 'numeric' })})`,
-          inTime: currentEmp.inTime || '09:00 AM',
-          outTime: timeStr,
-          duration: durationFormatted,
-          overtime: overtimeLabel,
-          status: currentEmp.attendanceStatus || 'On Time'
-        });
-
-        saveEmployees();
-        syncPunchClockUI();
-        renderEmployeePortalData();
-        renderHrAttendanceTable();
-        renderHrAppraisalTable();
-        renderHrPayrollTable();
-        renderEmployeePayrollData();
-
-        sound.playPop(520, 0.15);
-        showToast(`✓ Shift Finished: Departure at ${timeStr} (${durationFormatted} logged). Performance bonus & increment updated!`, 'success');
-      }
-    });
-  }
+  if (btnClockIn) btnClockIn.addEventListener('click', handleClockIn);
+  if (btnClockOut) btnClockOut.addEventListener('click', handleClockOut);
+  if (btnPunchClock) btnPunchClock.addEventListener('click', () => isClockedIn ? handleClockOut() : handleClockIn());
+  if (btnEmpPunchClock) btnEmpPunchClock.addEventListener('click', () => isClockedIn ? handleClockOut() : handleClockIn());
 
   // 2. Self-Service Apply For Leave Form
   const formEmpLeave = document.getElementById('form-emp-apply-leave');
@@ -3011,24 +3098,7 @@ function initDashboardPage() {
   if (navMgrProfile) navMgrProfile.addEventListener('click', openProfileModal);
   if (cardMgrOpenProfile) cardMgrOpenProfile.addEventListener('click', openProfileModal);
 
-  // Employee Punch Clock toggle
-  const btnEmpPunchClock = document.getElementById('btn-emp-punch-clock');
-  const punchBtnLabel = document.getElementById('punch-btn-label');
-  if (btnEmpPunchClock) {
-    btnEmpPunchClock.addEventListener('click', () => {
-      sound.playSuccess();
-      const isShiftActive = punchBtnLabel && punchBtnLabel.textContent.includes('Clock Out');
-      if (isShiftActive) {
-        if (punchBtnLabel) punchBtnLabel.textContent = 'Clock In (Shift Ended)';
-        btnEmpPunchClock.className = 'neu-btn dash-action-btn secondary';
-        showToast('✓ Successfully clocked out! Daily shift of 8h 33m saved.', 'info');
-      } else {
-        if (punchBtnLabel) punchBtnLabel.textContent = 'Clock Out (Shift Active)';
-        btnEmpPunchClock.className = 'neu-btn dash-action-btn primary';
-        showToast('✓ Clocked in at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '! Shift timer active.', 'success');
-      }
-    });
-  }
+
 
   // Account switch button
   const btnSwitchHr = document.getElementById('btn-switch-hr');

@@ -2868,6 +2868,200 @@ dialog.modal-dialog::backdrop {
   margin-right: 0.5rem;
 }
 
+/* ==========================================================================
+   Today's Shift Tracker Card (In Time, Out Time & Live Time Count Box)
+   ========================================================================== */
+.shift-tracker-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.shift-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 20px;
+  background: var(--neu-card-bg);
+  box-shadow: inset 2px 2px 4px var(--neu-inset-dark), inset -2px -2px 4px var(--neu-inset-light);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-subtitle);
+  transition: all var(--transition-fast);
+}
+
+.shift-live-badge.active {
+  color: #10b981;
+  box-shadow: 1px 1px 4px var(--neu-shadow-dark), -1px -1px 4px var(--neu-shadow-light);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.shift-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.shift-live-badge.active .shift-status-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-ring 1.8s infinite;
+}
+
+/* Time Count Box (Digital LCD / Inset Style) */
+.shift-timer-box {
+  background: var(--neu-card-bg);
+  box-shadow: inset 3px 3px 6px var(--neu-inset-dark), inset -3px -3px 6px var(--neu-inset-light);
+  border-radius: 16px;
+  padding: 0.55rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(0, 112, 243, 0.06);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.shift-tracker-card.active .shift-timer-box {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: inset 3px 3px 6px var(--neu-inset-dark), inset -3px -3px 6px var(--neu-inset-light), 0 0 14px rgba(16, 185, 129, 0.08);
+}
+
+.shift-timer-digits {
+  font-family: 'Inter', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-title);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  transition: color var(--transition-fast);
+}
+
+.shift-tracker-card.active .shift-timer-digits {
+  color: #10b981;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.shift-timer-sub {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtitle);
+}
+
+/* Timestamps Row */
+.shift-timestamps-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  color: var(--text-subtitle);
+  padding: 0 0.15rem;
+}
+
+.time-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stamp-tag {
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.time-divider {
+  color: var(--text-subtitle);
+  opacity: 0.6;
+}
+
+/* Button Group (In Time vs Out Time) */
+.shift-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.shift-action-btn {
+  flex: 1;
+  height: 36px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0 0.6rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+  user-select: none;
+}
+
+.shift-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.btn-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.dot-red {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+
+/* In Time active state */
+.btn-clock-in {
+  color: #10b981;
+}
+
+.btn-clock-in:not(:disabled):hover {
+  color: #059669;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  transform: translateY(-1px);
+}
+
+.btn-clock-in:not(:disabled):active {
+  box-shadow: inset 2px 2px 5px var(--neu-inset-dark), inset -2px -2px 5px var(--neu-inset-light);
+  transform: translateY(1px);
+}
+
+/* Out Time active state */
+.btn-clock-out {
+  color: #ef4444;
+}
+
+.btn-clock-out:not(:disabled):hover {
+  color: #dc2626;
+  box-shadow: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  transform: translateY(-1px);
+}
+
+.btn-clock-out:not(:disabled):active {
+  box-shadow: inset 2px 2px 5px var(--neu-inset-dark), inset -2px -2px 5px var(--neu-inset-light);
+  transform: translateY(1px);
+}
+
 /* --------------------------------------------------------------------------
    17. Performance Appraisal, Bonus & Salary Increment Styles
    -------------------------------------------------------------------------- */

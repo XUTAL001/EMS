@@ -716,18 +716,40 @@
 
         <!-- 4 Employee Personal Metrics -->
         <section class="kpi-grid">
-          <div class="kpi-card">
+          <!-- 1. Today's Shift Hours with In Time / Out Time & Live Counter -->
+          <div class="kpi-card shift-tracker-card" id="card-shift-tracker">
             <div class="kpi-top">
               <span class="kpi-label">Today's Shift Hours</span>
-              <div class="kpi-icon-wrap green">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
+              <div class="shift-live-badge" id="shift-live-badge">
+                <span class="shift-status-dot" id="shift-status-dot"></span>
+                <span class="shift-status-text" id="shift-status-text">Off Duty</span>
               </div>
             </div>
-            <div class="kpi-value" id="emp-kpi-today-hours">8h 33m</div>
-            <div class="kpi-trend positive" id="emp-kpi-today-status"><span>In: 09:12 AM</span> • Out: 05:45 PM</div>
+
+            <!-- Neumorphic Live Time Count Box -->
+            <div class="shift-timer-box" id="shift-timer-box">
+              <div class="shift-timer-digits" id="emp-kpi-today-hours">00h 00m 00s</div>
+              <span class="shift-timer-sub" id="shift-timer-sub">Shift Duration</span>
+            </div>
+
+            <!-- In / Out Time Stamps -->
+            <div class="shift-timestamps-row" id="emp-kpi-today-status">
+              <span class="time-stamp in"><strong class="stamp-tag">In:</strong> <span id="shift-in-time">09:12 AM</span></span>
+              <span class="time-divider">•</span>
+              <span class="time-stamp out"><strong class="stamp-tag">Out:</strong> <span id="shift-out-time">--:--</span></span>
+            </div>
+
+            <!-- Action Buttons: In Time & Out Time -->
+            <div class="shift-btn-group">
+              <button type="button" class="neu-btn shift-action-btn btn-clock-in" id="btn-clock-in" title="Record Arrival (In Time)">
+                <span class="btn-indicator-dot dot-green"></span>
+                <span>In Time</span>
+              </button>
+              <button type="button" class="neu-btn shift-action-btn btn-clock-out" id="btn-clock-out" title="Record Departure (Out Time)" disabled>
+                <span class="btn-indicator-dot dot-red"></span>
+                <span>Out Time</span>
+              </button>
+            </div>
           </div>
 
           <div class="kpi-card">
