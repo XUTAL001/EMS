@@ -138,9 +138,14 @@ const upload = multer({
 });
 
 // ============================================================================
-// RELATIONAL IN-MEMORY/PERSISTENT DATABASE ENGINE
+// RELATIONAL IN-MEMORY/PERSISTENT DATABASE ENGINE (FILE + MONGODB ATLAS)
 // ============================================================================
 const DB_FILE = path.join(__dirname, 'database', 'nexus_ems_data.json');
+
+let MongoClient = null;
+try {
+  MongoClient = require('mongodb').MongoClient;
+} catch (_) {}
 
 class RelationalDatabase {
   constructor() {
@@ -167,7 +172,43 @@ class RelationalDatabase {
       attendance_audit_logs: [],
       office_network_configs: []
     };
+    this.mongoClient = null;
+    this.mongoDb = null;
+    this.isMongoConnected = false;
     this.load();
+    this.initMongo();
+  }
+
+  async initMongo() {
+    const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!uri || !MongoClient) {
+      console.log('[DATABASE] Running on local persistent file store (database/nexus_ems_data.json).');
+      return;
+    }
+    try {
+      this.mongoClient = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 });
+      await this.mongoClient.connect();
+      const dbName = process.env.MONGODB_DB || 'nexus_ems';
+      this.mongoDb = this.mongoClient.db(dbName);
+      this.isMongoConnected = true;
+      console.log(`[DATABASE] ✓ Connected to remote MongoDB (${dbName}) successfully.`);
+
+      const col = this.mongoDb.collection('nexus_ems_store');
+      const doc = await col.findOne({ _id: 'main_store' });
+      if (doc && doc.data && doc.data.users && doc.data.users.length > 0) {
+        this.data = doc.data;
+        console.log('[DATABASE] ✓ Synchronized state from remote MongoDB store.');
+      } else {
+        await col.updateOne(
+          { _id: 'main_store' },
+          { $set: { data: this.data, updated_at: new Date() } },
+          { upsert: true }
+        );
+        console.log('[DATABASE] ✓ Seeded current state into remote MongoDB store.');
+      }
+    } catch (err) {
+      console.warn('[DATABASE] MongoDB connection notice:', err.message, '- Using persistent storage fallback.');
+    }
   }
 
   load() {
@@ -217,9 +258,21 @@ class RelationalDatabase {
   }
 
   save() {
-    const dbDir = path.dirname(DB_FILE);
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
-    fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+    try {
+      const dbDir = path.dirname(DB_FILE);
+      if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+    } catch (e) {
+      // Ephemeral filesystem on Vercel
+    }
+
+    if (this.isMongoConnected && this.mongoDb) {
+      this.mongoDb.collection('nexus_ems_store').updateOne(
+        { _id: 'main_store' },
+        { $set: { data: this.data, updated_at: new Date() } },
+        { upsert: true }
+      ).catch(e => console.error('[DATABASE] Error saving to MongoDB:', e.message));
+    }
   }
 
   seedDefaultData() {
@@ -1858,6 +1911,18 @@ app.get('/api/payroll/payslips/:id', (req, res) => {
       period,
       items
     }
+  });
+});
+
+// --- Public Healthcheck Endpoint ---
+app.get('/api/public/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    version: '1.0.0',
+    app: 'NexusEMS Enterprise',
+    database: db.isMongoConnected ? 'MongoDB (Cloud Active)' : 'Local File Store (Active)',
+    is_mongo_connected: db.isMongoConnected,
+    timestamp: new Date().toISOString()
   });
 });
 

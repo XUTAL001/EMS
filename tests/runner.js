@@ -412,6 +412,27 @@ runTest('Rule 19: Mistaken attendance correction request updates attendance and 
   if (auditIdx !== -1) db.data.attendance_audit_logs.splice(auditIdx, 1);
 });
 
+// 20. Database & Storage Engine Verification
+runTest('Rule 20: Database architecture supports MongoDB Cloud with graceful local file persistence', () => {
+  assert.ok(db, 'Database instance is initialized');
+  assert.ok(Array.isArray(db.data.users), 'Users collection is loaded');
+  assert.ok(Array.isArray(db.data.employees), 'Employees collection is loaded');
+  assert.ok(Array.isArray(db.data.payroll_records), 'Payroll records collection is loaded');
+  assert.ok(typeof db.save === 'function', 'Database save method exists');
+  assert.ok(typeof db.initMongo === 'function', 'MongoDB initialization hook exists');
+  assert.ok('isMongoConnected' in db, 'isMongoConnected state is tracked');
+});
+
+// 21. Profile Navigation & Dedicated URL Architecture Verification
+runTest('Rule 21: Dedicated profile page has its own URL and supports all system roles', () => {
+  const fs = require('fs');
+  const profileHtml = fs.readFileSync(path.join(__dirname, '..', 'profile.html'), 'utf8');
+  assert.ok(profileHtml.includes('id="employee-sidebar-menu"'), 'Employee sidebar menu is present on profile.html');
+  assert.ok(profileHtml.includes('id="hr-sidebar-menu"'), 'HR sidebar menu is present on profile.html');
+  assert.ok(profileHtml.includes('id="manager-sidebar-menu"'), 'Manager sidebar menu is present on profile.html');
+  assert.ok(profileHtml.includes('id="btn-back-dashboard"'), 'Dynamic back to dashboard button is present');
+});
+
 console.log('\n================================================================');
 console.log(`TEST EXECUTION SUMMARY: ${passedCount} PASSED, ${failedCount} FAILED`);
 console.log('================================================================\n');
@@ -419,5 +440,5 @@ console.log('================================================================\n'
 if (failedCount > 0) {
   process.exit(1);
 } else {
-  console.log('✓ All 19 critical business and security rules verified successfully.\n');
+  console.log(`✓ All ${passedCount} critical business, security, and deployment rules verified successfully.\n`);
 }

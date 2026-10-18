@@ -3925,16 +3925,16 @@ function initDashboardPage() {
   const btnEmpOpenProfileHero = document.getElementById('btn-emp-open-profile-hero');
 
   if (cardOpenProfile) cardOpenProfile.addEventListener('click', (e) => {
-    if (modalEmpProfile) openProfileModal(e);
-    else window.location.href = 'profile.html';
+    e.preventDefault();
+    window.location.href = 'profile.html';
   });
   if (btnEmpOpenProfileHero) btnEmpOpenProfileHero.addEventListener('click', (e) => {
-    if (modalEmpProfile) openProfileModal(e);
-    else window.location.href = 'profile.html';
+    e.preventDefault();
+    window.location.href = 'profile.html';
   });
   if (cardMgrOpenProfile) cardMgrOpenProfile.addEventListener('click', (e) => {
-    if (modalEmpProfile) openProfileModal(e);
-    else window.location.href = 'profile.html';
+    e.preventDefault();
+    window.location.href = 'profile.html';
   });
 
   // Account switch button
@@ -4239,6 +4239,11 @@ function initProfilePage() {
   if (viewTitle) viewTitle.value = currentTitle;
   if (viewDept) viewDept.value = currentDept;
   if (viewSalary) viewSalary.value = `$${currentSalary.toLocaleString()}.00 / month`;
+
+  const btnBackDashboard = document.getElementById('btn-back-dashboard');
+  if (btnBackDashboard) {
+    btnBackDashboard.href = (authRole === 'EMPLOYEE') ? 'employee-dashboard.html' : 'dashboard.html';
+  }
 
   // Photo state renderer
   function updatePhotoDisplay() {
