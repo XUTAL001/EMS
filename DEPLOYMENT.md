@@ -71,7 +71,7 @@ npm start
 
 | Role | Account Name | Email Address | Password |
 | :--- | :--- | :--- | :--- |
-| **HR / Super Admin** | Tanvir | `tanvir@gmai.com` | `shifat001` |
+| **HR / Super Admin** | Tanvir | `tanviralamshifat2005@gmail.com` | `shifat001` |
 | **Team Manager** | Alex Rivera | `alex@company.com` | `manager123` |
 | **Employee** | Sophia Clark | `sophia@company.com` | `employee123` |
 

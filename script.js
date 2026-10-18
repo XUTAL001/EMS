@@ -81,7 +81,7 @@ const NEXUS_DEFAULT_EMPLOYEES = [
   {
     id: 'EMP-1001',
     name: 'Tanvir',
-    email: 'tanvir@gmai.com',
+    email: 'tanviralamshifat2005@gmail.com',
     dept: 'Engineering',
     role: 'Head of Engineering & HR Admin',
     mode: 'Onsite',
@@ -506,7 +506,7 @@ function calculateEmployeeAppraisal(emp) {
  */
 function getUserRoleByEmail(email) {
   const normalized = (email || '').trim().toLowerCase();
-  if (normalized === 'tanvir@gmai.com' || normalized === 'tanvir@gmail.com' || normalized === 'hr@company.com' || normalized === 'hr@nexus.com') {
+  if (normalized === 'tanviralamshifat2005@gmail.com' || normalized === 'tanvir@nexus.com' || normalized === 'tanvir@gmai.com' || normalized === 'tanvir@gmail.com' || normalized === 'hr@company.com' || normalized === 'hr@nexus.com') {
     return 'HR';
   }
   if (normalized === 'alex@company.com' || normalized === 'manager@company.com' || normalized === 'manager@nexus.com') {

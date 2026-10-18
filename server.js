@@ -136,7 +136,7 @@ class RelationalDatabase {
     const empPass = bcrypt.hashSync('employee123', salt);
 
     this.data.users = [
-      { id: 1, name: 'Tanvir', email: 'tanvir@gmai.com', password: hrPass, role: 'HR', status: 'ACTIVE' },
+      { id: 1, name: 'Tanvir', email: 'tanviralamshifat2005@gmail.com', password: hrPass, role: 'HR', status: 'ACTIVE' },
       { id: 2, name: 'Sophia Clark', email: 'sophia@company.com', password: empPass, role: 'EMPLOYEE', status: 'ACTIVE' },
       { id: 13, name: 'Alex Rivera', email: 'alex@company.com', password: mgrPass, role: 'MANAGER', status: 'ACTIVE' }
     ];
@@ -148,7 +148,7 @@ class RelationalDatabase {
         emp_code: 'EMP-1001',
         first_name: 'Tanvir',
         last_name: 'Ahmed',
-        email: 'tanvir@gmai.com',
+        email: 'tanviralamshifat2005@gmail.com',
         phone: '+1 (555) 019-2831',
         department_id: 4,
         designation: 'Head of Engineering & HR Admin',
@@ -539,7 +539,11 @@ app.post('/api/auth/login', (req, res) => {
     return res.status(400).json({ success: false, error: 'Email and password are required.' });
   }
 
-  const user = db.data.users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+  const reqEmail = email.trim().toLowerCase();
+  const user = db.data.users.find(u => 
+    u.email.toLowerCase() === reqEmail ||
+    (reqEmail === 'tanvir@nexus.com' && u.email === 'tanviralamshifat2005@gmail.com')
+  );
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(401).json({ success: false, error: 'Invalid company credentials.' });
   }
